@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+  <head>
+    {% include 'ui/header.html' %}
+    <title></title>
+    <script>
+      $(function(){
+        $('#cancel_button').click(function(){
+          // Call the app removal function in the context of the outer document body
+          // We can do this (talk to the outer context within an inner IFRAME) because
+          // we're in an IFRAME that's served from the same server as the chrome app
+          // (It IS the chrome app too!)
+          window.top.MainController.dispatch('_remove_app', {app_id: '{{app_id}}' });
+        });
+      });
+    </script>
+  </head>
+  <body style="background: #FAFAFA">
+    <div>
+      <form id='authorize_form' method='post' action=''>
+        <h2>Authorize &ldquo;{{name}}&rdquo;?</h2>
+        You are about to authorize &ldquo;{{name}}&rdquo; for
+        <!-- TODO: refactor after upgrade to django 1.2! Don't show if only one record -->
+        <select name='record_id'>
+          {% for record in records %}
+            <option value='{{ record.0 }}'>{{ record.1 }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- TODO: refactor after upgrade to django 1.2! Negative logic is lame! -->
+        <p>{% ifnotequal description None %} {{description}} {% endifnotequal %}</p>
+        {% if autonomous %}
+          <p>&ldquo;{{name}}&rdquo; needs access to your <strong><em>full record</em></strong>
+            both when you are online and when you are offline.</p>
+          <p>This is because:</p>
+          <blockquote><em>{{autonomousReason}}</em></blockquote>
+          <input type='submit' value='Yes, Authorize &ldquo;{{name}}&rdquo; to access my full record at anytime' />
+        {% else %}
+          <p>
+            Would you like to authorize this app to access your record while you are using it?
+          </p>
+          <p>
+             <strong><em>If you don't want a group to know you have added this app
+               <span style="border-bottom: 1px solid black">uncheck</span>
+               the corresponding box below.
+             </em></strong> 
+          </p>
+          <p>
+            If you don't mind a group knowing that you have added this app, but you want to share <strong><em>some
+            but not all</strong></em> of the app's data with the group, keep the corresponding box <strong><em>checked</strong></em>. 
+            You can control what data you share with each group in the app itself.
+          </p>
+          {% if carenets %}
+            <p style="margin: 24px 0; font-size: 18px;">
+              Make this app visible to:
+              <br />
+              {% for carenet in carenets %}
+                <input type="checkbox" checked name="carenet_id" value="{{carenet.id}}" style="height: 18px; width: 18px;"/> {{carenet.name}}<br />
+              {% endfor %}
+            </p>
+          {% endif %}
+          <input type='submit' value='Yes, Authorize &ldquo;{{name}}&rdquo;' />
+        {% endif %}
+        <input type='hidden' name='oauth_token' value='{{request_token}}' />
+      </form>
+      <div style="margin-top: 24px;">
+        <form id='cancel'>
+          <input id="cancel_button" type="button" value="No, DO NOT authorize &ldquo;{{name}}&rdquo; and Return" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

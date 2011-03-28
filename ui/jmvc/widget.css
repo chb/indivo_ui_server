@@ -1,0 +1,61 @@
+/*
+
+* FIXME!!! FIXME!!! FIXME!!! FIXME!!!  REUSE ui server's ui.css!! 
+*
+* Also move me to a better location?
+*
+*
+* This CSS file is supposed to be for _inside_ UI WIDGETS i.e. small elements like "document access"
+* and are included on other pages. Given that Indivo UI uses defaults of font-size: 15px and
+* line-height: 1.6em for a total line height of 24px, we want to be a bit more compressed, but
+* still readable. We want to use "incremental leading". See
+* http://www.markboulton.co.uk/journal/comments/incremental-leading
+*
+* 4 lines of body text with 24px line height = 96px
+* 96 / 5 (lines of widget text) = 19.2px
+* 
+*/
+
+/*** YUI 3 Resets ***/
+/* reset */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}
+/* base */
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;}em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+/* fonts */
+/* see also:
+  http://www.alistapart.com/articles/howtosizetextincss/
+  After experimenting I think the happy medium is: 15px body, 24px line-height (1.6) insead of the default 13px/1.231
+*/
+body{font:15px/1.6 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
+
+/***** Indivo CSS *****/
+/*** General ***/
+body {
+  font-size: 12px; /* likely the absolute minimum for readability */
+  font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
+  color: #464337;
+}
+
+select,input,button,textarea { font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif; }
+pre,code,kbd,samp,tt { font-family:"Andale Mono", Consolas, monospace; }
+
+#header {
+  background: #ddd;
+  color: #444;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 2.6px 5px; /* 2.6 * 2 + 14 = 19.2px */
+}
+
+#maincontent {
+  margin: 0;
+  padding: 2px 5px 0 5px;
+  line-height: 1.3714em; /* 14 * 1.3714 = 19.2 */
+}
+
+a { 
+  text-decoration: none;
+  color: #464337;
+}
+
+a:hover { border-bottom: 1px dotted #464337; }

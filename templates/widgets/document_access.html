@@ -1,0 +1,101 @@
+{% extends "widgets/base.html" %}
+{% block content %}
+
+<div id="header">
+  Sharing and Audit
+</div>
+
+<div id="maincontent">
+  <div id="main_view">
+    <div id="sharing"></div>
+    <br />
+    <div id="audit"></div>
+  </div>
+  <div id="edit_view"></div>
+</div>
+
+<script>
+  function get_carenets(doc_specific, callback) {
+    if (doc_specific) { var url = '/records/{{record_id}}/documents/{{document_id}}/carenets/'; }
+    else { var url = '/records/{{record_id}}/carenets/'; }
+
+    indivo_api_call("GET", url, function(result) {
+      var carenets_xml = $(result).find('Carenets').find('Carenet');
+      var carenets = [];
+      carenets_xml.each(function(i, carenet) {
+        carenets.push({'id': $(carenet).attr('id'), 'name' : $(carenet).attr('name')});
+      });
+      callback(carenets);
+    });
+  }
+
+  function main_view() {
+    get_carenets(true, function(carenets) {
+      var shared_with = "only your guardians";
+      if (carenets.length > 0) {
+        shared_with = "<b>" + $(carenets).map(function(i, c) {return c['name'];}).get().join("</b>, <b>") + "</b>";
+      }
+      $('#sharing').html("Shared with " + shared_with + ". <br />[<a href='javascript:edit_view();'>update</a>]");
+      $('#main_view').show();
+    });
+
+    indivo_api_call("GET", '/records/{{record_id}}/audits/documents/{{document_id}}/', function(result) {
+      var list_of_accessors = [];
+      $(result).find('Entry').each(function(i, entry) {
+        var principal = $(entry).attr('effective_principal');
+        if (list_of_accessors.indexOf(principal) < 0) { list_of_accessors.push(principal); }
+      });
+      
+      $('#audit').html("Recently accessed by <b>" + list_of_accessors.join("</b>, <b>") + "</b>");
+    });
+
+    $('#edit_view').hide();
+  }
+
+  // add is true, remove is false
+  function update_carenet(add_p, carenet_id, callback) {
+    var method = "DELETE";
+    if (add_p) { method = "PUT"; }
+    indivo_api_call(method, "/records/{{record_id}}/documents/{{document_id}}/carenets/" + carenet_id, callback);
+  }
+
+  // the carenet_list is a list of objects, each with a carenet_id and add_p boolean
+  function update_list_of_carenets(carenet_list, callback) {
+    if (carenet_list.length == 0) { return callback(); }
+    var one_carenet = carenet_list.pop();
+    update_carenet(one_carenet.add_p, one_carenet.carenet_id, function() {
+      update_list_of_carenets(carenet_list, callback);
+    });
+  }
+
+  function update_carenets(form) {
+    $('#edit_view').hide();
+    var list_of_carenets = [];
+    $(form).find('input[name=carenet]').each(function(i, checkbox) {
+      list_of_carenets.push({carenet_id: checkbox.value, add_p: checkbox.checked});
+    });
+    update_list_of_carenets(list_of_carenets, function() { main_view(); });
+  }
+
+  function edit_view() {
+    get_carenets(false, function(all_carenets) {
+      get_carenets(true, function(active_carenets) {
+        var active_carenet_ids = $(active_carenets).map(function(i, el) {return el.id;}).get();
+        var html = 'Share with: <br /><form onsubmit="update_carenets(this); return false;">';
+        $(all_carenets).each(function(i, carenet) {
+          var active_p = active_carenet_ids.indexOf(carenet.id) > -1;
+          html += '<input type="checkbox" name="carenet" value="' + carenet.id + '"';
+          if (active_p) { html += " checked"; }
+          html += '> ' + carenet.name + "<br />";
+        });
+        html += '<input type="submit" value="Update" style="margin-top: 5px"> or [<a href="javascript:main_view();">cancel</a>]</form>';
+        $('#edit_view').html(html);
+        $('#main_view').hide();
+        $('#edit_view').show();
+      });
+    });
+  }
+
+  main_view();
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+  {% include 'ui/header.html' %}
+  <title>
+  {% if branding %}
+    {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+  {% else %}
+    Indivo
+  {% endif %}
+  Setup</title>
+  <script>
+    $(document).ready(function(){
+      $('#username').focus();
+
+      // check form values
+      $('#form').submit(function() {
+        if (!$('#username').val()) {
+          alert('Please enter a username.');
+          $('#username').focus();
+          return true;
+        }
+
+        if (!$('#pw1').val() || !$('#pw2').val()) {
+          alert('Please enter non-empty passwords.');
+          $('#pw1').focus();
+          return false;
+        }
+
+        if ($('#pw1').val() != $('#pw2').val()) {
+          alert('Your passwords do not match. Please try again.');
+          $('#pw1').val('');
+          $('#pw2').val('');
+          $('#pw1').focus();
+          return false;
+        }
+        return true;
+      });
+    })
+  </script>
+</head>
+  <body>
+    <div style="margin: 100px auto; width: 70%;">
+    <form id='form' method='post' action="account_initialization_2">
+      <div style="text-align: center;">
+        {% if ERROR %}
+          <div style="border: 2px dashed red; padding: 20px; margin: 10px; font-size: 18px">
+            {{ERROR}}
+          </div>
+        {% endif %}
+
+        <h2>Your account is confirmed.</h2>
+        <br>
+        <h3>Please Enter a Username and Password:</h3>
+      </div>
+      <br>
+      <br>
+      <div style="width: 40%; float: left; text-align: right; padding-right: 20px">
+        <span style="font-size: 24px;">Username <span style="font-size: 14px;">(No spaces please)</span>:</span>
+        <br>
+        <span style="font-size: 24px;">Password:</span>
+        <br>
+        <br>
+        <span style="font-size: 24px;">Confirm Password:</span>
+      </div>
+      <div style="padding-left: 20px;">
+        <input type="text" style="font-size: 24px;" id="username" name="username">
+        <br>
+        <br>
+        <input type="password" style="font-size: 24px;" id="pw1" name="pw1">
+        <br>
+        <br>
+        <input type="password" style="font-size: 24px;" id="pw2" name="pw2">
+      </div>
+      <div style="text-align: center; margin-top: 50px;">
+        <input style="font-size: 18px" type="submit" name="conf_submit" value="Set Username and Password" id="conf_submit">
+      </div>
+    </form>
+    </div>
+    {% if branding %}
+      {% include branding.footer_template %}
+    {% else %}
+      {% include 'ui/footer.html' %}
+    {% endif %}
+  </body>
+</html>

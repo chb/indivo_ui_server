@@ -1,0 +1,33 @@
+
+<h2>Inbox</h2>
+
+<% if (messages.length == 0) { %>
+
+  <em>no messages</em>
+
+<% } else { %>
+
+<table class="light">
+  <thead>
+    <tr>
+      <th width="18%">Date</th>
+      <th width="32%">From</th>
+      <th width="15%">To</th>
+      <th>Subject</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for (var i=0; i<messages.length; i++) { %>
+      <tr class="<%=(i%2)===0?'odd':'even'%>
+                 <%= typeof(messages[i].read_at) === 'undefined' ? 'unread' : '' %>
+        ">
+        <td><%= messages[i].received_at.substring(0,16) %></td>
+        <td><%= messages[i].sender %></td>
+        <td><%= messages[i].record_label %></td>
+        <td><a href="#" id ="<%= messages[i].id %>" class="message_subject"><%= messages[i].subject %></a></td>
+      </tr>
+      <% } %>
+   </tbody>
+</table>
+
+<% } %>

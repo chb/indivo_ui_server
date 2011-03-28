@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Account id="benadida@informedcohort.org">
+    <fullName>Ben Adida222</fullName>
+    <contactEmail>ben@adida.net</contactEmail>
+    <lastLoginAt>2010-09-22T16:09:30Z</lastLoginAt>
+    <totalLoginCount>75</totalLoginCount>
+    <failedLoginCount>0</failedLoginCount>
+    <state>active</state>
+    <lastStateChange>2010-09-22T20:09:30Z</lastStateChange>
+    <authSystem name="password" username="benadida"/>
+</Account>

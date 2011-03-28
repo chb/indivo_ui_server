@@ -1,0 +1,11 @@
+
+<h2><%= pha.data.name %> (background app)</h2>
+<p class="small details"><%= pha.id %></p>
+
+
+<% if (!pha.data.description || (pha.data.description != "None")) { %>
+  <blockquote> <%= pha.data.description %> </blockquote>
+<% } %>
+
+<p><%= pha.data.name %> is a &ldquo;background application&rdquo; which means that there is no user
+  interface for this app. Please Click on another app to continue.</p>

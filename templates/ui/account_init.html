@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+  <head>
+    {% include 'ui/header.html' %}
+    <title>
+    {% if branding %}
+      {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+    {% else %}
+      Indivo
+    {% endif %}
+    Setup</title>
+    
+    <script>$(document).ready(function(){$('#conf1').focus();})</script>
+  </head>
+  <body>
+    <div style="margin: 100px auto; width: 50%; text-align: center">
+    <form id='form' method='post'>
+      <h2>Welcome to 
+      {% if branding %}
+        {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+      {% else %}
+        Indivo
+      {% endif %}
+      </h2>
+
+      {% if ERROR %}
+        <div style="border: 3px dashed red; padding: 20px; margin: 10px; font-size: 18px">
+          {{ERROR}}
+        </div>
+      {% endif %}
+      
+      <h3>Please enter your confirmation code:</h3>
+      <br>
+      <br>
+      <div style="font-size: 24px; font-family: 'Andale Mono', 'Courier', courier, monospace;">
+      <input style="font-size: 24px; width: 50px;" type="text" id="conf1" name="conf1" size="3" maxlength="3">
+      &mdash;
+      <input type="text" style="font-size: 24px; width: 50px;" id="conf2" name="conf2" size="3" maxlength="3">
+      </div>
+      <br>
+      <br>
+      <br>
+      <input style="font-size: 18px" type="submit" name="conf_submit" value="Submit Confirmation Code" id="conf_submit">
+    </form>
+    </div>
+    {% if branding %}
+      {% include branding.footer_template %}
+    {% else %}
+      {% include 'ui/footer.html' %}
+    {% endif %}
+  </body>
+</html>

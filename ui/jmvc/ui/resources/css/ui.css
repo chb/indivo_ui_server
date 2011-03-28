@@ -1,0 +1,529 @@
+@import url("/jmvc/ui/resources/jquery-ui-1.7.2/css/smoothness/jquery-ui-1.7.custom.css");
+
+/********************************
+
+Indivo UI CSS
+--------------
+
+In this file we override the CSS in jquery UI and define our own CSS.
+
+A useful compressor: http://refresh-sf.com/yui/ 
+Validator: http://jigsaw.w3.org/css-validator/validator
+
+Font Testing Code
+-----------------
+
+<div style="font-size: 36px; margin-top: 8px; font-weight: normal; letter-spacing: -0.3px;">This is an H1</div>
+<div style="font-size: 28px; margin: 10px 0px; font-weight: normal;">This is an H2</div>
+<div style="font-size: 20px; margin-top: 4px; font-weight: bold;">This is an H3</div>
+<div>This is body text.</div>
+
+
+Useful Icons from Crystal Project
+----------------------------------
+
+in /apps:
+alert.png
+blockdevice.png (for kids)
+chat.png (speech bubble)
+clock.png
+database.png
+date.png
+gpg.png (lock)
+irc_protocol.png (conversation)
+kdmconfig.png (3 people -- carenet?)
+khelpcenter.png
+knode.png (news)
+knote.png (note)
+kteatime.png (take a break!)
+package_favorite.png
+package_setting.png
+printer.png
+reminders.png
+tutorials.png
+starthere.png
+
+cool looking:
+kllckety.png
+
+patient notifier?: actions/agt_update_recommended.png
+
+in /devices:
+pipe.png (for connection for gpp?)
+mountoverlays.png
+
+in /filesystems:
+connect_to_network.png
+favorites.png
+folder*
+link and lock overlays
+
+in /mimetypes: spreadsheet.png
+
+in /actions:
+
+advanced.png
+connect*
+decrypted.png
+gohome.png
+goto.png
+mail*
+agt_family.png
+
+********************************/
+
+/*** YUI 3 Resets ***/
+
+/* reset */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}
+/* base */
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;}em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+/* see also:
+  http://www.alistapart.com/articles/howtosizetextincss/
+  http://www.markboulton.co.uk/journal/comments/incremental-leading
+
+  After experimenting I think the happy medium is: 15px body, 24px line-height (1.6);
+  insead of the default 13px/1.231
+*/
+body{font:15px/1.6 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
+
+/*** General ***/
+body {
+  font-size: 15px
+  line-height: 1.6em;
+  background: #FEFCF7;
+  color: #464337;
+  font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
+  text-rendering: optimizelegibility;
+  margin: 16px 8px;
+  /* min-width: 1000px */
+}
+
+select,input,button,textarea {
+  font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
+}
+
+pre,code,kbd,samp,tt {
+  font-family:"Andale Mono", Consolas, monospace
+}
+
+/* this allows for bold italic text in <strong><em> */
+strong { font-style: inherit; }
+em { font-weight: inherit; }
+
+/* heading heirarchy */
+h1 {font-size: 36px; margin-top: 8px; font-weight: normal; letter-spacing: -0.3px;}
+h2 {font-size: 28px; margin: 15px 0 5px 0; font-weight: normal; }
+h3 {font-size: 20px; margin-top: 4px; font-weight: bold; }
+h4 {font-size: 16px; margin-top: 8px; font-weight: bold; }
+h5 {font-size: 14px; margin-top: 10px; font-weight: bold; }
+
+th, td { border: 1px solid #eee;}
+
+table.light {
+  width: 100%;
+  margin: 0 auto;
+}
+
+table.light thead th { 
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+table.light tfoot td {
+  border: none;
+  text-align: right;
+  font-weight: normal;
+  color: #999;
+  font-style: italic;
+  font-size: .85em;
+}
+table.light tbody td:first-child { border-left:none; }
+table.light tbody td:last-child { border-right:none; }
+tr.odd { background: #fff; }
+tr.unread { font-weight: bold; }
+
+table.one_message { margin-top: -64px; width: 100%; }
+table.one_message tbody td { border: none; padding: 0.125em .25em;}
+table.one_message tbody td:first-child { width: 5%; text-align: right; color: #aaa;}
+table.one_message tbody td:last-child { width: 95%; }
+
+#one_message_body {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family:"Andale Mono", Consolas, monospace;
+  border-top: 1px dotted #ccc;
+}
+
+a { 
+  text-decoration: none;
+  color: #464337;
+}
+
+a:hover {
+  border-bottom: 1px dotted #464337;
+}
+
+blockquote.content { margin: 1em 0; }
+
+.small { font-size: .85em; }
+.details { font-weight: normal; font-style: italic; color: #777; font-family: Corbel, "Lucida Sans", "Gill Sans", "Helvetica Neue", Helvetica, Tahoma, Verdana, sans-serif; ;}
+
+#front_site_name {
+  font-size:3em;
+  text-align:left;
+  font-family: "Gill Sans", "HelveticaNeue-Light", "Helvetica Neue Light", Corbel, Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.7px;
+}
+
+#front_site_trademark {
+  font-size: .4em;
+  color: #aaa;
+  vertical-align: text-top;
+}
+
+/*** Header ***/
+#header { 
+  height: 80px; /* 16px * 5 */
+  margin-bottom: 16px;
+}
+
+#header_controls {
+  text-transform: uppercase;
+  font-size: .86em;
+  letter-spacing: 0px;
+  padding: 8px 8px 0 0;
+  -moz-box-shadow: 0 0 3px #aaa;
+  -webkit-box-shadow: 0 0 3px #aaa;
+  -moz-border-radius-bottomleft: 5px;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+  float: right;
+  margin: -16px 16px 0px 0px;
+  height: 28px;
+}
+
+#header_logo_and_name {
+  margin-left: 8px;
+  float: left;
+  display: inline;
+  width: 66%;
+}
+#header_logo_div {
+  float: left;
+  width: 48px;
+  text-align: center;
+}
+#header_logo {
+  margin-right: 8px;
+  height: 64px;
+  /* hack for gpp logo which needs re-aspecting */
+  /* width: 96px; */
+  width: 20px;
+}
+#header_site_name {
+  /* center on midline of logo: margin-top + margin-bottom + height must == header_logo height */
+  margin-top: 4px;
+  margin-bottom: 4px;
+  height: 56px;
+  margin-right: 5px;
+  float: left;
+  font-family: "Gill Sans", "HelveticaNeue-Light", "Helvetica Neue Light", Corbel, Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.7px;
+  font-size: 36px;
+}
+
+/*** FIXME: make sure this works cross-browser */
+#header_fullname {
+  /* match baseline of #header_site_name */
+  font-size: 20px
+  float: left;
+  margin-top: 26px;
+  margin-bottom: 0px;
+  height: 36px;
+}
+#header_trademark {
+  vertical-align: super;
+  color: #999;
+  font-size: .40em;
+  cursor: default;
+  margin-right: -5px;
+}
+
+.header_icons {
+  height: 16px;
+  width: 16px;
+  margin-left: 8px;
+  vertical-align: text-top;
+  margin-bottom: -3px;
+  margin-left: 15px;
+}
+
+#footer {
+  font-size: 0.85em;
+/*  letter-spacing:-0.4px;*/
+  text-align: center;
+}
+
+#footer a { color: #666; }
+#footer a img {
+  height: 24px;
+  width: 24px;
+  margin-bottom: -7px;
+  margin-right: 2px;
+}
+#copyright { 
+  color: #999;
+  font-size: .8em;
+}
+
+
+/*** Apps ***/
+
+#app_selector {
+  border-top: 1px solid #ccc;
+  border-right: 1px solid white;
+  border-bottom: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  width: 17%;
+  float: left;
+  margin-top: 48px;
+  -moz-box-shadow: 0 0px 0 #fff;
+  -webkit-box-shadow: 0 0px 0 #fff;
+  border-style: dashed;
+  background: #FEFCF7;
+  -moz-border-radius-topright: 0px !important;
+  -webkit-border-top-right-radius: 0px !important;
+  -moz-border-radius-bottomright: 0px !important;
+  -webkit-border-bottom-right-radius: 0px !important;
+}
+
+/* this hides the jquery ui tabs generated panels */
+#app_selector .ui-tabs-panel { display: none; }
+
+#app_selector li {
+  margin: 10px -3px 10px 0px;
+  padding: 4px 4px 4px 10px;
+}
+
+#app_selector ul {
+  border: none !important;
+  text-transform: none !important;
+  background: #FEFCF7;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+#app_selector li a { padding: 0px 0px 0px 0px;}
+#app_selector li img:hover { border-bottom: none; cursor: pointer; }
+#app_selector li a:hover { border-bottom: none; cursor: pointer; }
+
+#active_app_tabs { 
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+#background_app_tabs { 
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+#active_app_tabs .ui-tabs-selected {
+/*  for active app selector tab*/
+  z-index: 1000;
+  margin-right: -5px;
+
+  border-bottom:1px solid #CCCCCC !important;
+  border-left:1px solid #CCCCCC;
+  border-top:1px solid #CCCCCC;
+  border-right: 1px dotted #e5e5e5;
+  -moz-border-radius-bottomleft: 8px;
+  -webkit-border-bottom-left-radius: 8px;
+  -moz-border-radius-topleft: 8px;
+  -webkit-border-top-left-radius: 8px;
+  -moz-border-radius-topright: 0px;
+  -webkit-border-top-right-radius: 0px;
+  -moz-box-shadow: 0 1px 0 #ddd;
+  -webkit-box-shadow: 0 1px 0 #ddd;
+}
+
+#app_tabs_seperator {
+  display: none;
+  text-align: center;
+  color: #ccc;
+  font-size: 0.85em;
+  margin: -3px 0 -8px;
+}
+
+#get_more_apps_list, #sharing_list, #settings_list {
+  color: inherit !important;
+  margin: 0 0;
+}
+
+#get_more_apps_list li, #sharing_list li, #settings_list li {
+  list-style: none;
+  cursor: pointer;
+}
+
+.app_tab_img { margin: 0 10px -7px 0px; }
+.app_tab_img_small { margin: 0 14px -7px 5px; }
+
+#app_container {
+  background: #FEFCF7;
+ -moz-box-shadow: none;
+ -webkit-box-shadow: none;
+ margin-bottom: 20px;
+ width: 100%;
+ min-width: 992px !important; /* 1024 - 16 (browser chrome) - 8 * 2 (body margin) */
+ overflow: hidden;
+ margin-bottom: 96px;
+}
+
+.app_content_pane {
+  float: left;
+  width: 79%;
+  -moz-box-shadow: 0px 0px 3px #aaa;
+  -webkit-box-shadow: 0px 0px 3px #aaa;
+  padding: 15px;
+  -moz-border-radius: 0px;
+  min-height: 600px;
+  min-width: 768px; /* not including padding, borders or margin. 768 + (15 * 2 (padding)) + (1 * 2) (border) = 800px total width*/
+  background: #fafafa;
+  border: 1px solid #ccc;
+}
+
+/*** record tabs ***/
+
+#record_tabs {
+  float: right;
+  margin-right: 5%;
+  margin-top: -16px;
+  margin-bottom: -1px;
+  margin-left: -5px;
+  -moz-box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
+
+#record_tabs .ui-tabs-selected {
+  border-bottom: 1px dotted #e5e5e5 !important;
+}
+
+#record_tabs_inner {
+  border: none !important;
+  text-transform: none !important;
+}
+
+.record_tab {
+/*1px 0px 1px #aaa !important*/
+  -moz-box-shadow: 2px 0px 0px #ccc !important;
+  -webkit-box-shadow: 2px 0px 0px #ccc !important;
+  border-left: 1px solid #ddd !important;
+  border-top: 1px solid #ddd !important;
+  text-align: center;
+  float: right !important;
+  padding: 5px;
+  margin-left: 8px !important;
+  display: block;
+}
+
+.record_tab li {
+  -moz-box-shadow: 1px 0px 0px #ccc;
+  -webkit-box-shadow: 1px 0px 0px #ccc;
+  text-align: center;
+  float: right !important;
+  padding: 5px;
+  margin-left: 10px;
+  display: block;
+}
+
+#record_tabs_inner li a:hover { border-bottom: none; }
+/* this hides the jquery ui tabs generated panels */
+#record_tabs div { display: none; }
+
+.overlay {
+  display:none;
+  z-index:10000;
+  background-color:#f0f0f0;
+  width:675px;
+  min-height:200px;
+  padding: 35px;
+  -moz-box-shadow:0 0 30px #555;
+  -webkit-box-shadow: 0 0 30px #555;
+}
+
+.overlay .close {
+  position:absolute;
+  right:-15px;
+  top:-15px;
+  cursor:pointer;
+  height:35px;
+  width:35px;
+  background-image:url(/jmvc/ui/resources/images/jquery_tools/close.png);
+}
+
+.wrap {
+  padding: 0px 10px 10px 10px;
+}
+
+/*** PHAs ***/
+.pha {
+  margin-bottom: 10px;
+}
+
+.pha a:hover {
+  cursor: pointer;
+  border-bottom: 1px solid #666251;
+}
+
+/***********  Overrides of jquery UI ***********/
+/*.ui-helper-reset { line-height: 1.75; }*/
+.ui-widget { font-family: inherit; font-size: inherit; }
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: inherit; font-size: 1em; }
+
+.ui-widget-content { border: none; background: #fafafa; color: inherit; -moz-box-shadow: 1px 1px 3px #ccc;  -webkit-box-shadow: 1px 1px 3px #ccc }
+.ui-widget-content a { color: inherit; }
+
+.ui-widget-header { 
+  border: 1px solid #ddd;
+/*  background: #cccccc url(../jquery-ui-1.7.2/css/smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png) 50% 50% repeat-x; */
+  background: none;
+  color: inherit;
+  font-weight: bold;
+  text-transform: uppercase; }
+.ui-widget-header a { color: inherit }
+.ui-corner-bottom {-moz-border-radius-bottomleft:10px; -moz-border-radius-bottomright:10px; }
+.ui-state-active, .ui-widget-content .ui-state-active { background: #fafafa; border: 1px solid #ccc; }
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus { 
+  border: 1px solid #999999;
+/*  background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;*/
+  font-weight: normal;
+  color: #212121;
+  outline: none;
+}
+.ui-state-hover a, .ui-state-hover a:hover {
+/*  background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;*/
+  color: #212121;
+  text-decoration: none;
+  outline: none;
+}
+
+.ui-tabs { padding: 0; zoom: 1; }
+/*.ui-tabs .ui-tabs-nav { list-style: none; position: relative; padding: .2em .2em 0; }*/
+.ui-tabs .ui-tabs-nav li { background: inherit; border: none; position: relative; float: none; border-bottom-width: 0 !important; margin: 0 .2em -1px 0; padding: 0; }
+.ui-tabs .ui-tabs-nav li a { float: none; text-decoration: none; padding: .5em 1em; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected { padding-bottom: 1px; border-bottom-width: 0; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: default; }
+
+/*.ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; } /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
+
+.ui-tabs .ui-tabs-panel { padding: 1em 1.4em; display: block; border-width: 0; background: none; }
+.ui-tabs .ui-tabs-hide { display: none !important; }
+
+

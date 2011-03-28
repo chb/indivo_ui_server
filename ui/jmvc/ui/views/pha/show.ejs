@@ -1,0 +1,53 @@
+
+<h3>App Settings for <%= record_info.label %></h3>
+
+<p> In most cases, an application should be shared with all of
+your carenets. You can limit your carenets' access by choosing
+which data to share with them. Sometimes, you may want to
+restrict an application to only some of your carenets when the
+application itself, i.e. "My Pregnancy Manager," reveals
+information you want to keep private. </p>
+
+<% _(local_phas).each(function(local_pha, i){ %>
+
+<div>
+  <h4><%= local_pha.data.name %></h4>
+
+  <div style="margin-left: 8px;">
+
+    <div style="margin-left: 8px;">
+      Actions
+        <div style="margin-left: 8px">
+          <a id="<%= local_pha.id %>" class="remove_app" href="#">[Remove app from record]</a>
+        </div>
+    </div>
+
+
+    <div style="margin-left: 8px; margin-top: 4px;">
+      <form id="pha_carenets_form">
+        Carenets
+
+        <div style="margin-left: 8px;">
+          <% _(carenets).each(function(carenet, i) {
+             var active_ids = carenet_phas_active_ids[carenet.carenet_id] || []; // dont call _.include() on undefined!
+             var include_p = _(active_ids).include(local_pha.id);
+           %>
+            <input name="carenet"
+                   value="<%= carenet.carenet_id %>"
+                   type="checkbox"
+                   <% if (include_p) { %>checked<% } %>
+             />
+
+            <%= carenet.name %>
+            <br />
+          <% }); %>
+          <br />
+          <input id="update_carenets" type="submit" value="Update Carenets for <%= local_pha.data.name %>" />
+          <input type="hidden" value="<%= local_pha.id %>" id="pha_id">
+        </div>
+      </form>
+    </div>
+
+  </div>
+<% }) %>
+

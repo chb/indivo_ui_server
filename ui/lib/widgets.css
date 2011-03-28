@@ -1,0 +1,129 @@
+/*
+ * FIXME!!! FIXME!!! FIXME!!! FIXME!!!  KEEP in sync with  ui server's ui.css!!
+ *
+ * FIX NAMING. This is not really for widgets, but for the overall app UI!!!
+ * This is confusing with widget.css!!
+ */
+
+
+iframe.indivo {
+  float: right;
+  width: 200px;
+  height: 144px; /* 6 x 24px (body line height) */
+  background: #eee;
+}
+
+/*
+
+See indivo ui server's ui.css 
+
+*/
+
+/* reset */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}
+/* base */
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;}em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+/* see also:
+  http://www.alistapart.com/articles/howtosizetextincss/
+  http://www.markboulton.co.uk/journal/comments/incremental-leading
+
+  After experimenting I think the happy medium is: 15px body, 24px line-height (1.6);
+  insead of the default 13px/1.231
+*/
+body{font:15px/1.6 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
+
+/*** General ***/
+body {
+  font-size: 15px
+  line-height: 1.6em;
+  background: inherit;
+  color: #464337;
+  font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
+  margin: 1px; /* there's a tiny bit of clipping without this on firefox */
+}
+
+select,input,button,textarea {
+  font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
+}
+
+.small { font-size: .85em; }
+.details { font-weight: normal; font-style: italic; color: #777; font-family: Corbel, "Lucida Sans", "Gill Sans", "Helvetica Neue", Helvetica, Tahoma, Verdana, sans-serif; ;}
+
+/* heading heirarchy (define all margins)*/
+h1 {font-size: 36px; margin: 8px 0 0 0; font-weight: normal; letter-spacing: -0.3px;}
+h2 {font-size: 28px; margin: 15px 0 5px 0; font-weight: normal; }
+h3 {font-size: 20px; margin: 4px 0px 0px 0px; font-weight: bold; color: #555;}
+
+
+pre,code,kbd,samp,tt {
+  font-family:"Andale Mono", Consolas, monospace
+}
+
+th, td { border: 1px solid #eee;}
+
+a { 
+  text-decoration: none;
+  color: #464337;
+}
+
+a:hover {
+  border-bottom: 1px dotted #464337;
+}
+
+/*** FIXME ***/
+
+.small {font-size: .9em;}
+
+i { font-style: italic;}
+
+#header {
+    padding: 5px;
+    background: #555;
+    color: #eee;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#maincontent {
+    padding: 3px 5px 3px 5px;
+    margin: 0px;
+}
+
+table.light {
+  width: 99%;
+  margin: 0 auto;
+}
+
+table.light thead th { 
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+table.light tfoot td {
+  border: none;
+  text-align: right;
+  font-weight: normal;
+  color: #999;
+  font-style: italic;
+  font-size: .85em;
+}
+
+table.light tbody tr th {
+  border-left: none;
+  border-right: none;
+  text-align: left;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+table.light tbody td:first-child { border-left:none; }
+table.light tbody td:last-child { border-right:none; }
+
+table.form tbody td:first-child { border-left:none; text-align: right; text-transform: uppercase;}
+
+tr.odd { background: #fff; }
+
