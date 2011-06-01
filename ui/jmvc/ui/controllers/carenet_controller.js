@@ -77,13 +77,18 @@ $.Controller.extend('UI.Controllers.Carenet',
 
      remove_account: function(carenet_id, account_id) {
        var carenet = this.get_carenet(carenet_id);
-       if (confirm('are you sure you want to remove ' + account_id + ' ?')) { carenet.remove_account(account_id); }
+       if (confirm('Are you sure you want to remove ' + account_id + ' ?')) { carenet.remove_account(account_id); }
        return false;
      },
 
      add_account: function(carenet_id, account_id) {
        var carenet = this.get_carenet(carenet_id);
-       if (confirm('are you sure you want to share with ' + account_id + ' ?')) { carenet.add_account(account_id); }
+       if (confirm('Are you sure you want to share with ' + account_id + ' ?')) {
+         var callback = function(data){
+           if ($(data).find('ok').length !== 1) { alert('Could not add the "'+account_id+'" to the carenet, please try again.')}
+         }
+         carenet.add_account(account_id, callback);
+       }
        return false;
      }
 },
