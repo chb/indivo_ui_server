@@ -41,7 +41,11 @@ urlpatterns = patterns(
     # could be
     # "/js/jquery-x.js" -> /jmvc/ui/resources/js/jquery-x.js
 
+    # This servers JMVC view templates, but passes them trough django's template engine.
+    # This allows localization with standart django template tags - trangs, blocktrans
+    (r'^jmvc/(?P<path>.*ejs)$', localize_jmvc_template, {'document_root': settings.SERVER_ROOT_DIR + '/ui/jmvc/'}),
+    (r'^jmvc/(?P<path>ui/controllers/.*js)$', localize_jmvc_template, {'document_root': settings.SERVER_ROOT_DIR + '/ui/jmvc/'}),
+    
     # this just prepends /ui/ to and /jmvc/ path so that we can ignore the django dir structure
     (r'^jmvc/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.SERVER_ROOT_DIR + '/ui/jmvc/'}),
-
 )

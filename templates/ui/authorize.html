@@ -1,6 +1,8 @@
+{% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
   <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>  
     {% include 'ui/header.html' %}
     <title></title>
     <script>
@@ -18,8 +20,8 @@
   <body style="background: #FAFAFA">
     <div>
       <form id='authorize_form' method='post' action=''>
-        <h2>Authorize &ldquo;{{name}}&rdquo;?</h2>
-        You are about to authorize &ldquo;{{name}}&rdquo; for
+        <h2>{% blocktrans %}Authorize &ldquo;{{name}}&rdquo;?{% endblocktrans %}</h2>
+        {% blocktrans %}You are about to authorize &ldquo;{{name}}&rdquo; for{% endblocktrans %}
         <!-- TODO: refactor after upgrade to django 1.2! Don't show if only one record -->
         <select name='record_id'>
           {% for record in records %}
@@ -30,42 +32,48 @@
         <!-- TODO: refactor after upgrade to django 1.2! Negative logic is lame! -->
         <p>{% ifnotequal description None %} {{description}} {% endifnotequal %}</p>
         {% if autonomous %}
+          {% blocktrans %}
           <p>&ldquo;{{name}}&rdquo; needs access to your <strong><em>full record</em></strong>
             both when you are online and when you are offline.</p>
           <p>This is because:</p>
+          {% endblocktrans %}
           <blockquote><em>{{autonomousReason}}</em></blockquote>
-          <input type='submit' value='Yes, Authorize &ldquo;{{name}}&rdquo; to access my full record at anytime' />
+          <input type='submit' value='{% blocktrans %}Yes, Authorize &ldquo;{{name}}&rdquo; to access my full record at anytime{% endblocktrans %}' />
         {% else %}
           <p>
-            Would you like to authorize this app to access your record while you are using it?
+            {% trans "Would you like to authorize this app to access your record while you are using it?" %}
           </p>
           <p>
+          	{% blocktrans %}
              <strong><em>If you don't want a group to know you have added this app
                <span style="border-bottom: 1px solid black">uncheck</span>
                the corresponding box below.
              </em></strong> 
+            {% endblocktrans %}
           </p>
           <p>
+          	{% blocktrans %}
             If you don't mind a group knowing that you have added this app, but you want to share <strong><em>some
             but not all</strong></em> of the app's data with the group, keep the corresponding box <strong><em>checked</strong></em>. 
             You can control what data you share with each group in the app itself.
+            {% endblocktrans %}
           </p>
           {% if carenets %}
             <p style="margin: 24px 0; font-size: 18px;">
-              Make this app visible to:
+              {% trans "Make this app visible to:" %}
               <br />
               {% for carenet in carenets %}
                 <input type="checkbox" checked name="carenet_id" value="{{carenet.id}}" style="height: 18px; width: 18px;"/> {{carenet.name}}<br />
               {% endfor %}
             </p>
           {% endif %}
-          <input type='submit' value='Yes, Authorize &ldquo;{{name}}&rdquo;' />
+          <input type='submit' value='{% blocktrans %}Yes, Authorize &ldquo;{{name}}&rdquo;{% endblocktrans %}' />
         {% endif %}
         <input type='hidden' name='oauth_token' value='{{request_token}}' />
       </form>
       <div style="margin-top: 24px;">
         <form id='cancel'>
-          <input id="cancel_button" type="button" value="No, DO NOT authorize &ldquo;{{name}}&rdquo; and Return" />
+          <input id="cancel_button" type="button" value="{% blocktrans %}No, DO NOT authorize &ldquo;{{name}}&rdquo; and Return{% endblocktrans %}" />
         </form>
       </div>
     </div>

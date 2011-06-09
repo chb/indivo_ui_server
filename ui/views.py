@@ -14,6 +14,9 @@ from django.core import serializers
 from django.db import transaction
 from django.conf import settings
 
+from django.views.static import serve
+from django.template import Template, Context
+
 import xml.etree.ElementTree as ET
 import urllib, re
 
@@ -434,3 +437,17 @@ def _approve_and_redirect(request, request_token, record_id=None, carenet_id=Non
   # strip location= (note: has token and verifer)
   location = urllib.unquote(result.response['prd'][9:])
   return HttpResponseRedirect(location)
+
+def localize_jmvc_template(request, *args, **kwargs):
+    """
+        localize JMVC's .ejs templates using django's template engine
+    """
+    # get static response
+    response = serve(request, *args, **kwargs)
+    
+    # pass it to the template engine
+    response_text = response.content
+    template = Template(response_text)
+    response_localized = template.render(Context({}))
+     
+    return HttpResponse(response_localized)

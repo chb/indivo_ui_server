@@ -1,19 +1,19 @@
-
-<h2>Inbox</h2>
+{% load i18n %}
+<h2>{% trans "Inbox" %}</h2>
 
 <% if (messages.length == 0) { %>
 
-  <em>no messages</em>
+  <em>{% trans "no messages" %}</em>
 
 <% } else { %>
 
 <table class="light">
   <thead>
     <tr>
-      <th width="18%">Date</th>
-      <th width="32%">From</th>
-      <th width="15%">To</th>
-      <th>Subject</th>
+      <th width="18%">{% trans "Date" %}</th>
+      <th width="32%">{% trans "From" %}</th>
+      <th width="15%">{% trans "To" %}</th>
+      <th>{% trans "Subject" %}</th>
     </tr>
   </thead>
   <tbody>

@@ -1,5 +1,7 @@
+{% load i18n %}
 /**
- * @tag controllers, home
+ * 
+@tag controllers, home
  *
  * PHA settings controller. Can remove a pha here and later set preferences, view logs, etc
  *
@@ -59,7 +61,7 @@ $.Controller.extend('UI.Controllers.PHA',
        $('#pha_carenets_form').submit(function(evt) {
          var pha_id = $(this).find('input[type=hidden]').attr('value');
          var local_pha = _(_this.local_phas).detect(function(l){ return l.id === pha_id; });
-         var done = function(){$('#update_carenets').val('Updated!')}
+         var done = function(){$('#update_carenets').val('{% trans "Updated!" %}')}
          
          $(this).find('input[name=carenet]').each(function(i, checkbox) {
            var carenet = _(_this.carenets).detect(function(c){ return c.carenet_id === checkbox.value; })

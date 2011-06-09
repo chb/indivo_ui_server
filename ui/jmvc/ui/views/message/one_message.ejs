@@ -1,28 +1,29 @@
+{% load i18n %}
 
 <div style="height: 48px; text-align: right; font-size: .85em; text-transform: uppercase; margin: 16px;">
-  [<a class="message_list" href="#">Back to message list</a>]
+  [<a class="message_list" href="#">{% trans "Back to message list" %}</a>]
 </div>
 
 <table class="one_message">
   <tbody>
     <tr>
-      <td>from</td><td><%= message.sender %></td>
+      <td>{% trans "from" %}</td><td><%= message.sender %></td>
     <tr>
     <tr>
-      <td>to</td><td><%= message.record_label %></td>
+      <td>{% trans "to" %}</td><td><%= message.record_label %></td>
     <tr>
     <tr>
-      <td>subject</td><td><%= message.subject %></td>
+      <td>{% trans "subject" %}</td><td><%= message.subject %></td>
     <tr>
     <tr>
-      <td>on</td><td><%= message.received_at.substring(0,16) %></td>
+      <td>{% trans "on" %}</td><td><%= message.received_at.substring(0,16) %></td>
     </tr>
     <% if (message.attachments.length > 0) { %>
       <% $(message.attachments).each(function(i, attachment) { %>
         <tr>
           <td>
             <% if (i === 0) { %>
-              attachments
+              {% trans "attachments" %}
             <% } %>
           </td>
           <td style="padding: 0 0.25em;">
@@ -30,7 +31,7 @@
             &middot;
             <%=attachment.type%>
             &middot;
-            [<a class="attachment_accept" id="attachment_<%= attachment.num %>">Accept into Record</a>]
+            [<a class="attachment_accept" id="attachment_<%= attachment.num %>">{% trans "Accept into Record" %}</a>]
           </td>
         </tr>
       <% }); %>

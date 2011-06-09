@@ -1,25 +1,27 @@
+{% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
   <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>  
     {% include 'ui/header.html' %}
     <title>
     {% if branding %}
       {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
     {% else %}
-      Indivo
+      {% trans "Indivo" %}
     {% endif %}
-    Setup</title>
+    {% trans "Setup" %}</title>
     
     <script>$(document).ready(function(){$('#conf1').focus();})</script>
   </head>
   <body>
     <div style="margin: 100px auto; width: 50%; text-align: center">
     <form id='form' method='post'>
-      <h2>Welcome to 
+      <h2>{% trans "Welcome to" %} 
       {% if branding %}
         {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
       {% else %}
-        Indivo
+        {% trans "Indivo" %}
       {% endif %}
       </h2>
 
@@ -29,7 +31,7 @@
         </div>
       {% endif %}
       
-      <h3>Please enter your confirmation code:</h3>
+      <h3>{% trans "Please enter your confirmation code:" %}</h3>
       <br>
       <br>
       <div style="font-size: 24px; font-family: 'Andale Mono', 'Courier', courier, monospace;">
@@ -40,7 +42,7 @@
       <br>
       <br>
       <br>
-      <input style="font-size: 18px" type="submit" name="conf_submit" value="Submit Confirmation Code" id="conf_submit">
+      <input style="font-size: 18px" type="submit" name="conf_submit" value="{% trans "Submit Confirmation Code" %}" id="conf_submit">
     </form>
     </div>
     {% if branding %}

@@ -1,12 +1,14 @@
+{% load i18n %}
+<h3>{% trans "App Settings for" %} <%= record_info.label %></h3>
 
-<h3>App Settings for <%= record_info.label %></h3>
-
-<p> In most cases, an application should be shared with all of
+<p>{% blocktrans %}
+In most cases, an application should be shared with all of
 your carenets. You can limit your carenets' access by choosing
 which data to share with them. Sometimes, you may want to
 restrict an application to only some of your carenets when the
 application itself, i.e. "My Pregnancy Manager," reveals
-information you want to keep private. </p>
+information you want to keep private.
+{% endblocktrans %}</p>
 
 <% _(local_phas).each(function(local_pha, i){ %>
 
@@ -16,16 +18,16 @@ information you want to keep private. </p>
   <div style="margin-left: 8px;">
 
     <div style="margin-left: 8px;">
-      Actions
+      {% trans "Actions" %}
         <div style="margin-left: 8px">
-          <a id="<%= local_pha.id %>" class="remove_app" href="#">[Remove app from record]</a>
+          <a id="<%= local_pha.id %>" class="remove_app" href="#">[{% trans "Remove app from record" %}]</a>
         </div>
     </div>
 
 
     <div style="margin-left: 8px; margin-top: 4px;">
       <form id="pha_carenets_form">
-        Carenets
+        {% trans "Carenets" %}
 
         <div style="margin-left: 8px;">
           <% _(carenets).each(function(carenet, i) {
@@ -42,7 +44,7 @@ information you want to keep private. </p>
             <br />
           <% }); %>
           <br />
-          <input id="update_carenets" type="submit" value="Update Carenets for <%= local_pha.data.name %>" />
+          <input id="update_carenets" type="submit" value="{% trans "Update Carenets for" %} <%= local_pha.data.name %>" />
           <input type="hidden" value="<%= local_pha.id %>" id="pha_id">
         </div>
       </form>
