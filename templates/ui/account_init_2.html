@@ -1,6 +1,8 @@
+{% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
 <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
   {% include 'ui/header.html' %}
   <title>
   {% if branding %}
@@ -8,7 +10,7 @@
   {% else %}
     Indivo
   {% endif %}
-  Setup</title>
+  {% trans "Setup" %}</title>
   <script>
     $(document).ready(function(){
       $('#username').focus();
@@ -16,19 +18,19 @@
       // check form values
       $('#form').submit(function() {
         if (!$('#username').val()) {
-          alert('Please enter a username.');
+          alert('{% trans "Please enter a username." %}');
           $('#username').focus();
           return true;
         }
 
         if (!$('#pw1').val() || !$('#pw2').val()) {
-          alert('Please enter non-empty passwords.');
+          alert('{% trans "Please enter non-empty passwords." %}');
           $('#pw1').focus();
           return false;
         }
 
         if ($('#pw1').val() != $('#pw2').val()) {
-          alert('Your passwords do not match. Please try again.');
+          alert('{% trans "Your passwords do not match. Please try again." %}');
           $('#pw1').val('');
           $('#pw2').val('');
           $('#pw1').focus();
@@ -49,19 +51,19 @@
           </div>
         {% endif %}
 
-        <h2>Your account is confirmed.</h2>
+        <h2>{% trans "Your account is confirmed." %}</h2>
         <br>
-        <h3>Please Enter a Username and Password:</h3>
+        <h3>{% trans "Please Enter a Username and Password:" %}</h3>
       </div>
       <br>
       <br>
       <div style="width: 40%; float: left; text-align: right; padding-right: 20px">
-        <span style="font-size: 24px;">Username <span style="font-size: 14px;">(No spaces please)</span>:</span>
+        <span style="font-size: 24px;">{% trans "Username" %} <span style="font-size: 14px;">({% trans "No spaces please" %})</span>:</span>
         <br>
-        <span style="font-size: 24px;">Password:</span>
+        <span style="font-size: 24px;">{% trans "Password:" %}</span>
         <br>
         <br>
-        <span style="font-size: 24px;">Confirm Password:</span>
+        <span style="font-size: 24px;">{% trans "Confirm Password:" %}</span>
       </div>
       <div style="padding-left: 20px;">
         <input type="text" style="font-size: 24px;" id="username" name="username">
@@ -73,7 +75,7 @@
         <input type="password" style="font-size: 24px;" id="pw2" name="pw2">
       </div>
       <div style="text-align: center; margin-top: 50px;">
-        <input style="font-size: 18px" type="submit" name="conf_submit" value="Set Username and Password" id="conf_submit">
+        <input style="font-size: 18px" type="submit" name="conf_submit" value="{% trans "Set Username and Password" %}" id="conf_submit">
       </div>
     </form>
     </div>

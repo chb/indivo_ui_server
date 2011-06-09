@@ -1,8 +1,8 @@
-
-<h2>Healthfeed</h2>
+{% load i18n %}
+<h2>{% trans "Healthfeed" %}</h2>
 
 <% if (notifications.length === 0) { %>
-  <em>no notifications</em>
+  <em>{% trans "no notifications" %}</em>
 <% } %>
 
 <% for (var i=0; i<notifications.length; i++) {
@@ -18,9 +18,9 @@
 
     <!-- Warning: don't use record_id in the id attr!! Issue with JQuery UI record tab panels!! -->
     <div class="details" style="font-style: italic; font-size: .85em; color: #777; margin: -1em 0 0 1.5em">
-      &nbsp;&ndash; sent by <%= notifications[i].sender %> about
-      <a class="goto_record" href="#"><%= notifications[i].record.label %>&rsquo;s record</a>
-      on
+      &nbsp;&ndash; {% trans "sent by" %} <%= notifications[i].sender %> {% trans "about" %}
+      <a class="goto_record" href="#"><%= notifications[i].record.label %>&rsquo;s {% trans "record" %}</a>
+      {% trans "on" %}
       <span class="created_at">
         <%= notifications[i].received_at.substring(0,16) %>
       </span>

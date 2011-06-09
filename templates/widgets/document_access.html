@@ -1,8 +1,9 @@
 {% extends "widgets/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <div id="header">
-  Sharing and Audit
+  {% trans "Sharing and Audit" %}
 </div>
 
 <div id="maincontent">
@@ -35,7 +36,7 @@
       if (carenets.length > 0) {
         shared_with = "<b>" + $(carenets).map(function(i, c) {return c['name'];}).get().join("</b>, <b>") + "</b>";
       }
-      $('#sharing').html("Shared with " + shared_with + ". <br />[<a href='javascript:edit_view();'>update</a>]");
+      $('#sharing').html("{% trans "Shared with" %} " + shared_with + ". <br />[<a href='javascript:edit_view();'>{% trans "update" %}</a>]");
       $('#main_view').show();
     });
 
@@ -81,14 +82,14 @@
     get_carenets(false, function(all_carenets) {
       get_carenets(true, function(active_carenets) {
         var active_carenet_ids = $(active_carenets).map(function(i, el) {return el.id;}).get();
-        var html = 'Share with: <br /><form onsubmit="update_carenets(this); return false;">';
+        var html = '{% trans "Share with:" %} <br /><form onsubmit="update_carenets(this); return false;">';
         $(all_carenets).each(function(i, carenet) {
           var active_p = active_carenet_ids.indexOf(carenet.id) > -1;
           html += '<input type="checkbox" name="carenet" value="' + carenet.id + '"';
           if (active_p) { html += " checked"; }
           html += '> ' + carenet.name + "<br />";
         });
-        html += '<input type="submit" value="Update" style="margin-top: 5px"> or [<a href="javascript:main_view();">cancel</a>]</form>';
+        html += '<input type="submit" value="{% trans "Update" %}" style="margin-top: 5px"> or [<a href="javascript:main_view();">{% trans "cancel" %}</a>]</form>';
         $('#edit_view').html(html);
         $('#main_view').hide();
         $('#edit_view').show();

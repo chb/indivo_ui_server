@@ -1,6 +1,8 @@
+{% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
   <head>
+  	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <!-- note we don't use the standard header here, so we don't double include stuff -->
     <link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
     <!--[if IE]>
@@ -18,9 +20,9 @@
     <script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script>
 
     {% if branding %}
-      <title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }} for {{FULLNAME}}</title>
+      <title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
     {% else %}
-      <title>Indivohealth for {{FULLNAME}}</title>
+      <title>{% trans "Indivohealth" %} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
     {% endif %}
   </head>
   <body>
@@ -35,19 +37,19 @@
           {% if branding %}
              {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
           {% else %}
-            Indivohealth<span id="header_trademark">&trade;</span>
+            {% trans "Indivohealth" %}<span id="header_trademark">&trade;</span>
           {% endif %}
         </div>
-        <div id="header_fullname">for {{FULLNAME}}</div>
+        <div id="header_fullname">{% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</div>
       </div>
       <div id="header_controls">
         <a href="{% url ui.views.change_password %}">
           <img class="header_icons" alt="settings" src="/jmvc/ui/resources/images/icons_16/package_settings.png" />
-          Settings
+          {% trans "Settings" %}
         </a>
         <a id="logout" href="{% url ui.views.logout %}">
           <img class="header_icons" alt="logout" style="opacity: 0.7;" src="/jmvc/ui/resources/images/icons_16/goto.png" />
-          Logout
+          {% trans "Logout" %}
         </a>
       </div>
     </div>
@@ -61,13 +63,13 @@
             <li id="healthfeed_li">
               <a href="#_healthfeed_tab_panel_hidden">
                 <img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/healthfeed.png" />
-                Healthfeed
+                {% trans "Healthfeed" %}
               </a>
             </li>
             <li id="inbox_li">
               <a href="#_inbox_tab_panel_hidden">
                 <img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/inbox.png" />
-                Inbox
+                {% trans "Inbox" %}
               </a>
             </li>
           </ul>
@@ -88,7 +90,7 @@
                        height="24px"
                        width="24px"
                        src="/jmvc/ui/resources/images/icons_24/groupevent.png" />
-                  Sharing
+                  {% trans "Sharing" %}
                 </a>
               </li>
             </ul>
@@ -101,7 +103,7 @@
                        height="24px"
                        width="24px"
                        src="/jmvc/ui/resources/images/icons_24/edit_add.png" />
-                  Get more apps
+                  {% trans "Get more apps" %}
                 </a>
               </li>
             </ul>
@@ -113,7 +115,7 @@
                      height="24px"
                      width="24px"
                      src="/jmvc/ui/resources/images/icons_24/settings.png" />
-                App Settings
+                {% trans "App Settings" %}
               </a>
             </li>
           </ul>

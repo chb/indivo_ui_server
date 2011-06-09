@@ -1,3 +1,4 @@
+{% load i18n %}
 /**
  * @tag controllers, home
  * 
@@ -57,7 +58,7 @@ $.Controller.extend('UI.Controllers.MainController',
       onBeforeLoad: function(){
         // function to run to get the available app data before the overlay is shown
         var wrap = this.getContent().find("div.wrap");
-        $('.wrap').empty().html('<h2>Available Apps</h2><br/>');
+        $('.wrap').empty().html('<h2>{% trans "Available Apps" %}</h2><br/>');
 
         UI.Models.PHA.get_all(function(phas) {
          UI.Models.PHA.get_by_record(RecordController.RECORD_ID, null, function(record_phas){

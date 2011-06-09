@@ -1,35 +1,37 @@
+{% load i18n %}
+<h2>{% trans "Sharing for" %} <%= label %></h2>
 
-<h2>Sharing for <%= label %></h2>
-
-<p> Your Indivo record contains care networks. A care network is a
+<p>{% blocktrans %}
+Your Indivo record contains care networks. A care network is a
 place for you to share some of your health information with a
 subset of individuals you select. For example, the "Family" care
 network is where you might invite your loved ones to view most of
 your health information, while the "Work" care network will include
 only people you work with and a much smaller subset of your health
-information. </p>
+information.
+{% endblocktrans %}</p>
 
-<h3>Carenets</h3>
+<h3>{% trans "no carenets" %}</h3>
 
 <% if (carenets.length == 0) { %>
-  <p><em>No carenets</em></p>
+  <p><em>{% trans "No carenets" %}</em></p>
 <% } %>
 
 <% $(carenets).each(function(i, carenet) { %>
   <strong><%= carenet.name %></strong>
   <ul>
-    <% if (accounts[carenet.carenet_id].length == 0) { %> <em style="color: #777">no accounts in this carenet</em> <% } %>
+    <% if (accounts[carenet.carenet_id].length == 0) { %> <em style="color: #777">{% trans "no accounts in this carenet" %}</em> <% } %>
     <% $(accounts[carenet.carenet_id]).each(function(i, account) { %>
       <li> <%= account.account_id %> [<a href="#" id="<%= carenet.carenet_id%>|<%= account.account_id %>" class="remove_account">x</a>]</li>
     <% }); %>
   </ul>
 <% }); %>
 
-<h4>Share with a new person</h4>
+<h4>{% trans "Share with a new person" %}</h4>
 <form id="add_carenet_account_form">
   <table border="0" cellpadding="5">
-    <tr><th width="100">Account ID:</th><td><input type="text" name="account_id" /></td></tr>
-    <tr><th width="100">Carenet:</th>
+    <tr><th width="100">{% trans "Account ID:" %}</th><td><input type="text" name="account_id" /></td></tr>
+    <tr><th width="100">{% trans "Carenet:" %}</th>
       <td>
         <select name="carenet_id">
           <% $(carenets).each(function(i, carenet) { %>
@@ -39,5 +41,5 @@ information. </p>
       </td>
     </tr>
   </table>
-  <input type="submit" value="Share" />
+  <input type="submit" value="{% trans "share" %}" />
 </form>

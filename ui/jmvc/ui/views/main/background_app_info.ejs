@@ -1,5 +1,5 @@
-
-<h2><%= pha.data.name %> (background app)</h2>
+{% load i18n %}
+<h2><%= pha.data.name %> {% trans "(background app)" %}</h2>
 <p class="small details"><%= pha.id %></p>
 
 
@@ -7,5 +7,5 @@
   <blockquote> <%= pha.data.description %> </blockquote>
 <% } %>
 
-<p><%= pha.data.name %> is a &ldquo;background application&rdquo; which means that there is no user
-  interface for this app. Please Click on another app to continue.</p>
+<p><%= pha.data.name %>{% trans "is a &ldquo;background application&rdquo; which means that there is no user
+  interface for this app. Please Click on another app to continue." %}</p>
