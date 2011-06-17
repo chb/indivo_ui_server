@@ -1,0 +1,506 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-06-15 17:01+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms:  nplurals=2; plural=(n != 1);\n"
+
+#: templates/ui/account_init.html:11 templates/ui/account_init.html.py:24
+msgid "Indivo"
+msgstr ""
+
+#: templates/ui/account_init.html:13 templates/ui/account_init_2.html:13
+msgid "Setup"
+msgstr ""
+
+#: templates/ui/account_init.html:20 templates/ui/login.html:46
+msgid "Welcome to"
+msgstr ""
+
+#: templates/ui/account_init.html:34
+msgid "Please enter your confirmation code:"
+msgstr ""
+
+#: templates/ui/account_init.html:45
+msgid "Submit Confirmation Code"
+msgstr ""
+
+#: templates/ui/account_init_2.html:21 templates/ui/login.html:22
+msgid "Please enter a username."
+msgstr ""
+
+#: templates/ui/account_init_2.html:27
+msgid "Please enter non-empty passwords."
+msgstr ""
+
+#: templates/ui/account_init_2.html:33
+msgid "Your passwords do not match. Please try again."
+msgstr ""
+
+#: templates/ui/account_init_2.html:54
+msgid "Your account is confirmed."
+msgstr ""
+
+#: templates/ui/account_init_2.html:56
+msgid "Please Enter a Username and Password:"
+msgstr ""
+
+#: templates/ui/account_init_2.html:61
+msgid "Username"
+msgstr ""
+
+#: templates/ui/account_init_2.html:61
+msgid "No spaces please"
+msgstr ""
+
+#: templates/ui/account_init_2.html:63 templates/ui/login.html:63
+msgid "Password:"
+msgstr ""
+
+#: templates/ui/account_init_2.html:66
+msgid "Confirm Password:"
+msgstr ""
+
+#: templates/ui/account_init_2.html:78
+msgid "Set Username and Password"
+msgstr ""
+
+#: templates/ui/authorize.html:23
+#, python-format
+msgid "Authorize &ldquo;%(name)s&rdquo;?"
+msgstr ""
+
+#: templates/ui/authorize.html:24
+#, python-format
+msgid "You are about to authorize &ldquo;%(name)s&rdquo; for"
+msgstr ""
+
+#: templates/ui/authorize.html:35
+#, python-format
+msgid ""
+"\n"
+"          <p>&ldquo;%(name)s&rdquo; needs access to your <strong><em>full "
+"record</em></strong>\n"
+"            both when you are online and when you are offline.</p>\n"
+"          <p>This is because:</p>\n"
+"          "
+msgstr ""
+
+#: templates/ui/authorize.html:41
+#, python-format
+msgid ""
+"Yes, Authorize &ldquo;%(name)s&rdquo; to access my full record at anytime"
+msgstr ""
+
+#: templates/ui/authorize.html:44
+msgid ""
+"Would you like to authorize this app to access your record while you are "
+"using it?"
+msgstr ""
+
+#: templates/ui/authorize.html:47
+msgid ""
+"\n"
+"             <strong><em>If you don't want a group to know you have added "
+"this app\n"
+"               <span style=\"border-bottom: 1px solid black\">uncheck</"
+"span>\n"
+"               the corresponding box below.\n"
+"             </em></strong> \n"
+"            "
+msgstr ""
+
+#: templates/ui/authorize.html:55
+msgid ""
+"\n"
+"            If you don't mind a group knowing that you have added this app, "
+"but you want to share <strong><em>some\n"
+"            but not all</strong></em> of the app's data with the group, keep "
+"the corresponding box <strong><em>checked</strong></em>. \n"
+"            You can control what data you share with each group in the app "
+"itself.\n"
+"            "
+msgstr ""
+
+#: templates/ui/authorize.html:63
+msgid "Make this app visible to:"
+msgstr ""
+
+#: templates/ui/authorize.html:70
+#, python-format
+msgid "Yes, Authorize &ldquo;%(name)s&rdquo;"
+msgstr ""
+
+#: templates/ui/authorize.html:76
+#, python-format
+msgid "No, DO NOT authorize &ldquo;%(name)s&rdquo; and Return"
+msgstr ""
+
+#: templates/ui/change_password.html:12
+msgid "Change Password"
+msgstr ""
+
+#: templates/ui/change_password.html:22 templates/ui/forgot_password_4.html:20
+msgid "Please enter non-empty passwords. Please try again."
+msgstr ""
+
+#: templates/ui/change_password.html:27 templates/ui/forgot_password_4.html:25
+msgid "Your new passwords do not match. Please try again."
+msgstr ""
+
+#: templates/ui/change_password.html:49
+#: templates/ui/change_password_success.html:24
+#: templates/ui/forgot_password.html:40 templates/ui/forgot_password_2.html:25
+#: templates/ui/forgot_password_3.html:23
+#: templates/ui/forgot_password_4.html:48 templates/ui/index.html:25
+#: templates/ui/index.html.py:40 templates/ui/login.html:50
+msgid "Indivohealth"
+msgstr ""
+
+#: templates/ui/change_password.html:63
+msgid "Old Password:"
+msgstr ""
+
+#: templates/ui/change_password.html:66 templates/ui/forgot_password_4.html:66
+msgid "New Password:"
+msgstr ""
+
+#: templates/ui/change_password.html:69 templates/ui/forgot_password_4.html:69
+msgid "Confirm New Password:"
+msgstr ""
+
+#: templates/ui/change_password.html:82 templates/ui/forgot_password_4.html:79
+msgid "Set New Password"
+msgstr ""
+
+#: templates/ui/change_password.html:85 templates/ui/forgot_password.html:56
+#: templates/ui/forgot_password_4.html:82
+msgid "Cancel"
+msgstr ""
+
+#: templates/ui/change_password_success.html:11
+msgid "Password Changed"
+msgstr ""
+
+#: templates/ui/change_password_success.html:28
+msgid "Your password has been changed."
+msgstr ""
+
+#: templates/ui/change_password_success.html:29
+msgid "Click here to return"
+msgstr ""
+
+#: templates/ui/footer.html:5
+msgid "Intelligent Health Lab"
+msgstr ""
+
+#: templates/ui/footer.html:15
+msgid "Children&rsquo;s Hospital Informatics Program"
+msgstr ""
+
+#: templates/ui/footer.html:25 templates/ui/footer_gpp.html:16
+msgid "Harvard Medical School"
+msgstr ""
+
+#: templates/ui/footer_gpp.html:5
+msgid "Children&rsquo;s Hospital Boston"
+msgstr ""
+
+#: templates/ui/footer_gpp.html:20
+msgid ""
+"Contact us at <a href=\"mailto:info@genepartnership.org\" style=\"color: #999"
+"\">info@genepartnership.org</a> or 1-877-208-5151"
+msgstr ""
+
+#: templates/ui/footer_gpp.html:24
+msgid "Powered by the INDIVO Personally Controlled Health Record"
+msgstr ""
+
+#: templates/ui/forgot_password.html:11 templates/ui/forgot_password_2.html:11
+#: templates/ui/forgot_password_3.html:7
+#: templates/ui/forgot_password_4.html:11
+msgid "Forgot Password"
+msgstr ""
+
+#: templates/ui/forgot_password.html:19
+msgid "Please provide a valid email address. Please try again."
+msgstr ""
+
+#: templates/ui/forgot_password.html:49
+msgid "To reset your password, enter your email address below:"
+msgstr ""
+
+#: templates/ui/forgot_password.html:53
+msgid "Send a password reset link by email"
+msgstr ""
+
+#: templates/ui/forgot_password_2.html:37
+msgid "Resetting your password requires two steps:"
+msgstr ""
+
+#: templates/ui/forgot_password_2.html:38
+msgid "1. Check your email and click on the reset link provided"
+msgstr ""
+
+#: templates/ui/forgot_password_2.html:39
+msgid "2. Enter this confirmation code:"
+msgstr ""
+
+#: templates/ui/forgot_password_2.html:43
+msgid "If you are unable to reset your password, please contact support."
+msgstr ""
+
+#: templates/ui/forgot_password_2.html:44
+msgid "Return to Login"
+msgstr ""
+
+#: templates/ui/forgot_password_3.html:34
+#: templates/ui/forgot_password_4.html:59
+msgid "Password Reset"
+msgstr ""
+
+#: templates/ui/forgot_password_3.html:37
+msgid "Please enter your reset code:"
+msgstr ""
+
+#: templates/ui/forgot_password_3.html:48
+msgid "Submit Reset Code"
+msgstr ""
+
+#: templates/ui/forgot_password_4.html:60
+msgid "Almost done! Please enter your new password:"
+msgstr ""
+
+#: templates/ui/index.html:23 templates/ui/index.html.py:25
+#: templates/ui/index.html:43
+#, python-format
+msgid "for %(FULLNAME)s"
+msgstr ""
+
+#: templates/ui/index.html:48
+msgid "Settings"
+msgstr ""
+
+#: templates/ui/index.html:52
+msgid "Logout"
+msgstr ""
+
+#: templates/ui/index.html:66 ui/jmvc/ui/views/healthfeed/show.ejs:2
+msgid "Healthfeed"
+msgstr ""
+
+#: templates/ui/index.html:72 ui/jmvc/ui/views/message/show.ejs:2
+msgid "Inbox"
+msgstr ""
+
+#: templates/ui/index.html:93
+msgid "Sharing"
+msgstr ""
+
+#: templates/ui/index.html:106
+msgid "Get more apps"
+msgstr ""
+
+#: templates/ui/index.html:118
+msgid "App Settings"
+msgstr ""
+
+#: templates/ui/login.html:16
+msgid "IndivoHealth Login"
+msgstr ""
+
+#: templates/ui/login.html:28
+msgid "Please enter a password."
+msgstr ""
+
+#: templates/ui/login.html:61
+msgid "Username:"
+msgstr ""
+
+#: templates/ui/login.html:71
+msgid "Forgot your password?"
+msgstr ""
+
+#: templates/ui/login.html:82
+msgid "Login"
+msgstr ""
+
+#: templates/widgets/document_access.html:6
+msgid "Sharing and Audit"
+msgstr ""
+
+#: templates/widgets/document_access.html:39
+msgid "Shared with"
+msgstr ""
+
+#: templates/widgets/document_access.html:39
+msgid "update"
+msgstr ""
+
+#: templates/widgets/document_access.html:85
+msgid "Share with:"
+msgstr ""
+
+#: templates/widgets/document_access.html:92
+msgid "Update"
+msgstr ""
+
+#: templates/widgets/document_access.html:92
+msgid "cancel"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:2
+msgid "Sharing for"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:4
+msgid ""
+"\n"
+"Your Indivo record contains care networks. A care network is a\n"
+"place for you to share some of your health information with a\n"
+"subset of individuals you select. For example, the \"Family\" care\n"
+"network is where you might invite your loved ones to view most of\n"
+"your health information, while the \"Work\" care network will include\n"
+"only people you work with and a much smaller subset of your health\n"
+"information.\n"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:14
+msgid "no carenets"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:17
+msgid "No carenets"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:23
+msgid "no accounts in this carenet"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:30
+msgid "Share with a new person"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:33
+msgid "Account ID:"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:34
+msgid "Carenet:"
+msgstr ""
+
+#: ui/jmvc/ui/views/carenet/show.ejs:44
+msgid "share"
+msgstr ""
+
+#: ui/jmvc/ui/views/healthfeed/show.ejs:5
+msgid "no notifications"
+msgstr ""
+
+#: ui/jmvc/ui/views/healthfeed/show.ejs:21
+msgid "sent by"
+msgstr ""
+
+#: ui/jmvc/ui/views/healthfeed/show.ejs:21
+msgid "about"
+msgstr ""
+
+#: ui/jmvc/ui/views/healthfeed/show.ejs:22
+msgid "record"
+msgstr ""
+
+#: ui/jmvc/ui/views/healthfeed/show.ejs:23
+#: ui/jmvc/ui/views/message/one_message.ejs:19
+msgid "on"
+msgstr ""
+
+#: ui/jmvc/ui/views/main/background_app_info.ejs:2
+msgid "(background app)"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/one_message.ejs:4
+msgid "Back to message list"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/one_message.ejs:10
+msgid "from"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/one_message.ejs:13
+msgid "to"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/one_message.ejs:16
+msgid "subject"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/one_message.ejs:26
+msgid "attachments"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/one_message.ejs:34
+msgid "Accept into Record"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/show.ejs:6
+msgid "no messages"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/show.ejs:13
+msgid "Date"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/show.ejs:14
+msgid "From"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/show.ejs:15
+msgid "To"
+msgstr ""
+
+#: ui/jmvc/ui/views/message/show.ejs:16
+msgid "Subject"
+msgstr ""
+
+#: ui/jmvc/ui/views/pha/show.ejs:2
+msgid "App Settings for"
+msgstr ""
+
+#: ui/jmvc/ui/views/pha/show.ejs:4
+msgid ""
+"\n"
+"In most cases, an application should be shared with all of\n"
+"your carenets. You can limit your carenets' access by choosing\n"
+"which data to share with them. Sometimes, you may want to\n"
+"restrict an application to only some of your carenets when the\n"
+"application itself, i.e. \"My Pregnancy Manager,\" reveals\n"
+"information you want to keep private.\n"
+msgstr ""
+
+#: ui/jmvc/ui/views/pha/show.ejs:21
+msgid "Actions"
+msgstr ""
+
+#: ui/jmvc/ui/views/pha/show.ejs:23
+msgid "Remove app from record"
+msgstr ""
+
+#: ui/jmvc/ui/views/pha/show.ejs:30
+msgid "Carenets"
+msgstr ""
+
+#: ui/jmvc/ui/views/pha/show.ejs:47
+msgid "Update Carenets for"
+msgstr ""
