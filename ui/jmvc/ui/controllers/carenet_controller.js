@@ -50,6 +50,12 @@ $.Controller.extend('UI.Controllers.Carenet',
                UI.Controllers.Carenet.show();
              });
 
+             $('.remove_carenet').click(function(e) {
+               var id_and_name = this.id.split('|');
+               UI.Controllers.Carenet.remove_carenet(id_and_name[0], id_and_name[1]);
+               UI.Controllers.Carenet.show();
+             });
+
              $('#add_carenet_account_form').submit(function(e) {
                var carenet_id = $(this).find('[name=carenet_id]').val();
                var account_id = $(this).find('[name=account_id]').val();
@@ -57,6 +63,22 @@ $.Controller.extend('UI.Controllers.Carenet',
                UI.Controllers.Carenet.show();
                return false;
              });
+
+             $('#new_carenet_form').submit(function(e) {
+               var carenet_name = $(this).find('[name=new_carenet_name]').val();
+               UI.Controllers.Carenet.create_carenet(carenet_name);
+               UI.Controllers.Carenet.show();
+               return false;
+             });
+
+             $('#rename_carenet_form').submit(function(e) {
+               var id = $('#rename_carenet_form select').first().val();
+               var carenet_name = $(this).find('[name=new_name]').val();
+               UI.Controllers.Carenet.rename_carenet(id, carenet_name);
+               UI.Controllers.Carenet.show();
+               return false;
+             });
+
            } else {
              _.delay(check_and_go, 200); // re-queue self
            }
@@ -67,30 +89,53 @@ $.Controller.extend('UI.Controllers.Carenet',
      });
    },
 
-     get_carenet: function(carenet_id) {
-       return new UI.Models.Carenet({
-         'record_id': RecordController.RECORD_ID,
-         'carenet_id': carenet_id,
-         'name': null
+   get_carenet: function(carenet_id) {
+     return new UI.Models.Carenet({
+       'record_id': RecordController.RECORD_ID,
+       'carenet_id': carenet_id,
+       'name': null
+     })
+   },
+
+  create_carenet: function(name) {
+    UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
+      record.create_carenet(name);
+    })
+    return false;
+  },
+
+   remove_carenet: function(carenet_id, carenet_name) {
+     if (confirm('Are you sure you want to remove the ' + carenet_name + ' carenet?')) {
+       UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
+         record.remove_carenet(carenet_id);
        })
-     },
-
-     remove_account: function(carenet_id, account_id) {
-       var carenet = this.get_carenet(carenet_id);
-       if (confirm('Are you sure you want to remove ' + account_id + ' ?')) { carenet.remove_account(account_id); }
-       return false;
-     },
-
-     add_account: function(carenet_id, account_id) {
-       var carenet = this.get_carenet(carenet_id);
-       if (confirm('Are you sure you want to share with ' + account_id + ' ?')) {
-         var callback = function(data){
-           if ($(data).find('ok').length !== 1) { alert('Could not add the "'+account_id+'" to the carenet, please try again.')}
-         }
-         carenet.add_account(account_id, callback);
-       }
-       return false;
      }
+     return false;
+   },
+
+   rename_carenet: function(carenet_id, name) {
+     UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
+       record.rename_carenet(carenet_id, name);
+     })
+     return false;
+   },
+
+   remove_account: function(carenet_id, account_id) {
+     var carenet = this.get_carenet(carenet_id);
+     if (confirm('Are you sure you want to remove ' + account_id + ' ?')) { carenet.remove_account(account_id); }
+     return false;
+   },
+
+   add_account: function(carenet_id, account_id) {
+     var carenet = this.get_carenet(carenet_id);
+     if (confirm('Are you sure you want to share with ' + account_id + ' ?')) {
+       var callback = function(data){
+         if ($(data).find('ok').length !== 1) { alert('Could not add the "'+account_id+'" to the carenet, please try again.')}
+       }
+       carenet.add_account(account_id, callback);
+     }
+     return false;
+   }
 },
 /* @Prototype */
 {

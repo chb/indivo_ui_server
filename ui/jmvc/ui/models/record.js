@@ -64,5 +64,17 @@ $.Model.extend('UI.Models.Record',
                 return UI.Models.Carenet.from_xml_node(_this.record_id, carenet_xml_node);
             }));
         });
+    },
+
+    create_carenet: function(name, callback) {
+        indivo_api_call('POST', this.base_url + '/carenets/', {'name' : name}, callback);
+    },
+
+    remove_carenet: function(carenet_id, callback) {
+        indivo_api_call('DELETE', '/carenets/'+carenet_id, {}, callback);
+    },
+
+    rename_carenet: function(carenet_id, name, callback) {
+        indivo_api_call('POST', '/carenets/'+carenet_id+'/rename', {'name': name}, callback);
     }
 })
