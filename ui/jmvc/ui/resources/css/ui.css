@@ -187,6 +187,24 @@ blockquote.content { margin: 1em 0; }
   vertical-align: text-top;
 }
 
+#error {
+    width: 500px;
+    margin: 10% auto 0;
+    padding: 2em;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 0.7em;
+    background-color: rgb(228,226,221); background-color: rgba(0,0,0,0.1);
+    -webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+#error .error_status {
+    font-size: 4em;
+}
+#error .details {
+    font-size: 1.8em;
+}
+
 /*** Header ***/
 #header { 
   height: 80px; /* 16px * 5 */

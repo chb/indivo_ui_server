@@ -24,7 +24,7 @@ import utils
 HTTP_METHOD_GET = 'GET'
 HTTP_METHOD_POST = 'POST'
 LOGIN_PAGE = 'ui/login'
-DEBUG = True
+DEBUG = False
 
 # init the IndivoClient python object
 from indivo_client_py.lib.client import IndivoClient
@@ -71,16 +71,24 @@ def index(request):
     # get the realname here. we already have it in the js account model
     api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
     account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
-    ret = api.account_info(account_id = account_id)
-    e = ET.fromstring(ret.response['response_data'])
-    fullname = e.findtext('fullName')
-    return utils.render_template('ui/index',
-      { 'ACCOUNT_ID': account_id,
-        'FULLNAME': fullname,
-        'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
-        'HIDE_SHARING': settings.HIDE_SHARING })
-  else:
-    return HttpResponseRedirect(reverse(login))
+    res = api.account_info(account_id = account_id)
+    if res and res.response:
+      
+      # success
+      if 200 == res.response.get('response_status', 0):
+        e = ET.fromstring(res.response.get('response_data', '<xml/>'))
+        fullname = e.findtext('fullName')
+        return utils.render_template('ui/index',
+                                      { 'ACCOUNT_ID': account_id,
+                                        'FULLNAME': fullname,
+                                        'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
+                                        'HIDE_SHARING': settings.HIDE_SHARING })
+      # error
+      return utils.render_template('ui/error',
+                                      { 'ERROR_STATUS':  res.response.get('response_status', 500),
+                                        'ERROR_MESSAGE': res.response.get('response_data', 'Unknown Error') })
+      
+  return HttpResponseRedirect(reverse(login))
     
 def login(request, info=""):
   """
@@ -332,8 +340,12 @@ def authorize(request):
   
   # process GETs (initial adding and a normal call for this app)
   if request.method == HTTP_METHOD_GET and request.GET.has_key('oauth_token'):
+    
     # claim request token and check return value
-    if api.claim_request_token(request_token=REQUEST_TOKEN).response['response_status'] != 200:
+    res = api.claim_request_token(request_token=REQUEST_TOKEN)
+    if not res or not res.response:
+      return HttpResponse('no response to claim_request_token')
+    if res.response.get('response_status', 0) != 200:
       return HttpResponse('bad response to claim_request_token')
     
     app_info = api.get_request_token_info(request_token=REQUEST_TOKEN).response['response_data']

@@ -6,3 +6,4 @@ settings.py
 *.log
 ui/jmvc/ui/docs*
 *#
+*.DS_Store
