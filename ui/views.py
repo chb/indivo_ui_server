@@ -80,8 +80,8 @@ def index(request):
                                                    'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
                                                          'HIDE_SHARING': settings.HIDE_SHARING })
             # error
-            return utils.render_template('ui/error', { 'ERROR_STATUS': res.response.get('response_status', 500),
-                                                      'ERROR_MESSAGE': res.response.get('response_data', 'Unknown Error') })
+            err_msg = '%i: %s' % (res.response.get('response_status', 500), res.response.get('response_data', 'Unknown Error'))
+            return utils.render_template(LOGIN_PAGE, {'error': err_msg, 'return_url': '/'})
             
     return HttpResponseRedirect(reverse(login))
         
@@ -94,9 +94,12 @@ def login(request, info=""):
     request.session.flush()
     
     # set up the template
-    errors = {'missing': 'Either the username or password is missing. Please try again',
-           'incorrect' : 'Incorrect username or password.  Please try again.',
-            'disabled' : 'This account has been disabled/locked.'}
+    errors = {
+                                'missing': '{% trans "Either the username or password is missing. Please try again." %}',
+                              'incorrect': '{% trans "Incorrect username or password. Please try again." %}',
+                               'disabled': '{% trans "This account has been disabled/locked." %}',
+       'Socket Error: Connection refused': '{% trans "The server is currently unavailable. Please try again in a few minutes." %}'
+    }
     
     FORM_USERNAME = 'username'
     FORM_PASSWORD = 'password'
@@ -128,8 +131,8 @@ def login(request, info=""):
         if 400 == e.errno:
             return utils.render_template(LOGIN_PAGE, {'error': errors['missing'], FORM_RETURN_URL: return_url})     # checked before, so highly unlikely to ever arrive here
         
-        return utils.render_template('ui/error', {'ERROR_STATUS': e.errno,
-                                                 'ERROR_MESSAGE': e.strerror})
+        err_str = errors.get(e.strerror, '%i: %s' % (e.errno, e.strerror))
+        return utils.render_template(LOGIN_PAGE, {'error': err_str, FORM_RETURN_URL: return_url})
     
     return HttpResponseRedirect(return_url)
 
@@ -142,7 +145,9 @@ def account_initialization(request):
     """
     http://localhost/indivoapi/accounts/foo@bar.com/initialize/icmloNHxQrnCQKNn
     """
-    errors = {'generic': 'There was a problem setting up your account. Please try again.'}
+    errors = {
+        'generic': '{% trans "There was a problem setting up your account. Please try again." %}'
+    }
     api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
     
     if request.method == HTTP_METHOD_GET:
@@ -166,23 +171,28 @@ def account_initialization_2(request):
         username = request.POST['username'].lower().strip()
         password = request.POST['pw1']
         errors = {
-            'generic': 'There was a problem updating your data. Please try again. If you are unable to change your password please contact support.',
-            'collision': 'That username is already taken. Please enter different one.'
+                                     'generic': '{% trans "There was a problem updating your data. Please try again. If you are unable to change your password please contact support." %}',
+                                   'collision': '{% trans "That username is already taken. Please enter different one." %}',
+            'Socket Error: Connection refused': '{% trans "The server is currently unavailable. Please try again in a few minutes." %}'
         }
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         ret = api.add_auth_system(
             account_id = account_id,
-            data = {'system':'password',
-                  'username': username,
-                  'password': password})
+            data = {
+                  'system': 'password',
+                'username': username,
+                'password': password
+            })
         
         if ret.response['response_status'] == 200:
             # everything's OK, log this person in, hard redirect to change location
             try:
                 tokens_get_from_server(request, username, password)
             except IOError as e:
-                return utils.render_template('ui/error', {'ERROR_STATUS': e.errno,
-                                                         'ERROR_MESSAGE': e.strerror})
+                err_msg = errors.get(e.strerror, '%i: %s' % (e.errno, e.strerror))
+                return_url = request.POST.get('return_url', '/')
+                return utils.render_template(LOGIN_PAGE, {'error': err_msg, 'return_url': return_url})
+            
             return HttpResponseRedirect('/')
         elif ret.response['response_status'] == 400:
              return utils.render_template('ui/account_init_2', {'ERROR': errors['collision']})
@@ -196,7 +206,9 @@ def change_password(request):
         account_id = request.POST['account_id']
         old_password = request.POST['oldpw']
         password = request.POST['pw1']
-        errors = {'generic': 'There was a problem updating your password. Please try again. If you are unable to set up your account please contact support.'}
+        errors = {
+            'generic': '{% trans "There was a problem updating your password. Please try again. If you are unable to set up your account please contact support." %}'
+        }
         api = get_api(request)
         ret = api.account_change_password(account_id = account_id, data={'old':old_password, 'new':password})
         if ret.response['response_status'] == 200:
@@ -213,8 +225,10 @@ def forgot_password(request):
     
     if request.method == HTTP_METHOD_POST:
         email = request.POST['email']
-        errors = {      'generic': 'There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support.',
-              'multiple_accounts': 'There was a problem resetting your password. Please contact support.'}
+        errors = {
+                      'generic': '{% trans "There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support." %}',
+            'multiple_accounts': '{% trans "There was a problem resetting your password. Please contact support." %}'
+        }
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         # get account id from email (which we are assuming is contact email)
         ret = api.account_forgot_password(parameters={'contact_email':email})
@@ -237,7 +251,9 @@ def forgot_password_2(request):
         return utils.render_template('ui/forgot_password_3', {})
     if request.method == HTTP_METHOD_POST:
         secondary_secret = request.POST['conf1'] + request.POST['conf2']
-        errors = {'generic': 'There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support.'}
+        errors = {
+            'generic': '{% trans "There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support." %}'
+        }
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         # check the validity of the primary and secondary secrets
         # http://192.168.1.101/forgot_password_2/jenandfred@verizon.net/GZrggAOLxScQuNAY
@@ -251,7 +267,10 @@ def forgot_password_2(request):
             return utils.render_template('ui/forgot_password_3', {'ERROR': errors['generic']})
 
 def forgot_password_3(request):
-    errors = {'generic': 'There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support.'}
+    errors = {
+                                 'generic': '{% trans "There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support." %}',
+        'Socket Error: Connection refused': '{% trans "The server is currently unavailable. Please try again in a few minutes." %}'
+    }
     account_id = request.POST['account_id']
     password = request.POST['pw1']
     api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
@@ -264,8 +283,9 @@ def forgot_password_3(request):
         try:
             tokens_get_from_server(request, username, password)
         except IOError as e:
-            return utils.render_template('ui/error', {'ERROR_STATUS': e.errno,
-                                                     'ERROR_MESSAGE': e.strerror})
+            err_msg = errors.get(e.strerror, '%i: %s' % (e.errno, e.strerror))
+            return utils.render_template('ui/forgot_password_3', {'ERROR': err_msg})
+        
         return HttpResponseRedirect(reverse(index))
     else:
         return utils.render_template('ui/forgot_password_3', {'ERROR': errors['generic']})
