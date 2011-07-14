@@ -47,7 +47,7 @@ def tokens_p(request):
 
 def tokens_get_from_server(request, username, password):
     """
-    This method will not catch exceptions raised by create_session, be sure to catch it!
+    This method will not catch exceptions raised by create_session, be sure to catch them!
     """
     # hack! re-initing IndivoClient here
     api = get_api()
@@ -373,9 +373,13 @@ def authorize(request):
         # claim request token and check return value
         res = api.claim_request_token(request_token=REQUEST_TOKEN)
         if not res or not res.response:
-            return HttpResponse('no response to claim_request_token')
-        if res.response.get('response_status', 0) != 200:
-            return HttpResponse('bad response to claim_request_token')
+            return utils.render_template('ui/error', {'error_message': 'no response to claim_request_token'})
+        
+        response_status = res.response.get('response_status', 500)
+        if response_status != 200:
+            response_message = res.response.get('response_data', 'bad response to claim_request_token')
+            err_msg = response_message  #ERRORS.get(response_message, 'bad response to claim_request_token')
+            return utils.render_template('ui/error', {'error_status': response_status, 'error_message': err_msg})
         
         app_info = api.get_request_token_info(request_token=REQUEST_TOKEN).response['response_data']
         e = ET.fromstring(app_info)
@@ -422,6 +426,7 @@ def authorize(request):
             # in this case we will have record_id in the app_info
             return _approve_and_redirect(request, REQUEST_TOKEN, record_id, carenet_id)
         else:
+            return utils.render_template('ui/error', {'error_message': 'bad value for kind parameter'})
             return HttpResponse('bad value for kind parameter')
     
     # process POST

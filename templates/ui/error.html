@@ -1,18 +1,18 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-  <head>
-  	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <!-- note we don't use the standard header here, so we don't double include stuff -->
-    <link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
-    <!--[if IE]>
-      <style>
-      </style>
-    <![endif]-->
-  </head>
-  <body>
-   <div id="error">
-        <div class="error_status">{{ ERROR_STATUS }}</div>
-        <div class="details">{{ ERROR_MESSAGE }}</div>
-    </div>
-  </body>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<!-- note we don't use the standard header here, so we don't double include stuff -->
+		<link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
+		<!--[if IE]>
+			<style>
+			</style>
+		<![endif]-->
+	</head>
+	<body style="background-color: inherit;">
+	 <div id="error">
+				<div class="error_status">{{ error_status }}</div>
+				<div class="details">{{ error_message }}</div>
+		</div>
+	</body>
 </html>
