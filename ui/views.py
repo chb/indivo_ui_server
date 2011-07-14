@@ -46,13 +46,12 @@ def tokens_p(request):
         return False
 
 def tokens_get_from_server(request, username, password):
+    """
+    This method will not catch exceptions raised by create_session, be sure to catch it!
+    """
     # hack! re-initing IndivoClient here
     api = get_api()
     tmp = api.create_session({'username' : username, 'user_pass' : password})
-    
-    if not tmp and DEBUG:
-        utils.log('error: likely a bad username/password, or incorrect tokens from UI server to backend server.')
-        return False
     
     request.session['username'] = username
     request.session['oauth_token_set'] = tmp
@@ -96,8 +95,8 @@ def login(request, info=""):
     
     # set up the template
     errors = {'missing': 'Either the username or password is missing. Please try again',
-                        'incorrect' : 'Incorrect username or password.  Please try again.',
-                        'disabled' : 'This account has been disabled/locked.'}
+           'incorrect' : 'Incorrect username or password.  Please try again.',
+            'disabled' : 'This account has been disabled/locked.'}
     
     FORM_USERNAME = 'username'
     FORM_PASSWORD = 'password'
@@ -121,9 +120,16 @@ def login(request, info=""):
         return HttpResponseRedirect('/')
     
     # get tokens from the backend server and save in this user's django session
-    ret = tokens_get_from_server(request, username, password)
-    if not ret:
-        return utils.render_template(LOGIN_PAGE, {'error': errors['incorrect'], FORM_RETURN_URL: return_url})
+    try:
+        res = tokens_get_from_server(request, username, password)
+    except IOError as e:
+        if 403 == e.errno:
+            return utils.render_template(LOGIN_PAGE, {'error': errors['incorrect'], FORM_RETURN_URL: return_url})
+        if 400 == e.errno:
+            return utils.render_template(LOGIN_PAGE, {'error': errors['missing'], FORM_RETURN_URL: return_url})     # checked before, so highly unlikely to ever arrive here
+        
+        return utils.render_template('ui/error', {'ERROR_STATUS': e.errno,
+                                                 'ERROR_MESSAGE': e.strerror})
     
     return HttpResponseRedirect(return_url)
 
@@ -172,7 +178,11 @@ def account_initialization_2(request):
         
         if ret.response['response_status'] == 200:
             # everything's OK, log this person in, hard redirect to change location
-            tokens_get_from_server(request, username, password)
+            try:
+                tokens_get_from_server(request, username, password)
+            except IOError as e:
+                return utils.render_template('ui/error', {'ERROR_STATUS': e.errno,
+                                                         'ERROR_MESSAGE': e.strerror})
             return HttpResponseRedirect('/')
         elif ret.response['response_status'] == 400:
              return utils.render_template('ui/account_init_2', {'ERROR': errors['collision']})
@@ -251,7 +261,11 @@ def forgot_password_3(request):
     ret = api.account_set_password(account_id = account_id, data={'password':password})
     
     if ret.response['response_status'] == 200:
-        tokens_get_from_server(request, username, password)
+        try:
+            tokens_get_from_server(request, username, password)
+        except IOError as e:
+            return utils.render_template('ui/error', {'ERROR_STATUS': e.errno,
+                                                     'ERROR_MESSAGE': e.strerror})
         return HttpResponseRedirect(reverse(index))
     else:
         return utils.render_template('ui/forgot_password_3', {'ERROR': errors['generic']})
