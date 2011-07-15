@@ -1,14 +1,13 @@
 """
 Human understandable error strings for Indivo UI
 
-Upon initalization, pass the string key as first argument and a custom message as an optional second argument.
-If the error for the error key is not found, the custom message is returned, if it is set, otherwise the key itself.
+Upon initalization, pass the error key as first argument
+If the error description for the error key is not found, the key itself is returned
 """
 
 
 class ErrorStr:
     error_key = None
-    error_message = None
     errors = {
                       'missing_name_pass': '{% trans "Either the username or password is missing. Please try again." %}',
                   'incorrect_credentials': '{% trans "Incorrect username or password. Please try again." %}',
@@ -23,18 +22,12 @@ class ErrorStr:
     }
     
     
-    def __init__(self, error_key, error_message=None):
+    def __init__(self, error_key):
         self.error_key = error_key
-        if error_message:
-            self.error_message = error_message
     
     
     def __str__(self):
-        reserve_message = self.error_message if self.error_message is not None else self.error_key
-        err = self.errors.get(self.error_key, None)
-        if err is not None:
-            return err
-        return reserve_message
+        return self.errors.get(self.error_key, self.error_key)
     
     def __repr__(self):
         return self.__str__()
