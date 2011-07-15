@@ -31,5 +31,8 @@ class ErrorStr:
     
     def __repr__(self):
         return self.__str__()
+    
+    def str(self):
+        return self.__str__()
 
 

@@ -126,7 +126,7 @@ def login(request, info=""):
         if 400 == e.errno:
             return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('missing_name_pass'), FORM_RETURN_URL: return_url})     # checked before; highly unlikely to ever arrive here
         
-        err_str = ErrorStr(e.strerror, '%i: %s' % (e.errno, e.strerror))
+        err_str = ErrorStr(e.strerror)
         return utils.render_template(LOGIN_PAGE, {'error': err_str, FORM_RETURN_URL: return_url})
     
     return HttpResponseRedirect(return_url)
@@ -178,7 +178,7 @@ def account_initialization_2(request):
             try:
                 tokens_get_from_server(request, username, password)
             except IOError as e:
-                err_msg = ErrorStr(e.strerror, '%i: %s' % (e.errno, e.strerror))
+                err_msg = ErrorStr(e.strerror)
                 return_url = request.POST.get('return_url', '/')
                 return utils.render_template(LOGIN_PAGE, {'error': err_msg, 'return_url': return_url})
             
@@ -262,7 +262,7 @@ def forgot_password_3(request):
         try:
             tokens_get_from_server(request, username, password)
         except IOError as e:
-            err_msg = ErrorStr(e.strerror, '%i: %s' % (e.errno, e.strerror))
+            err_msg = ErrorStr(e.strerror)
             return utils.render_template('ui/forgot_password_3', {'ERROR': err_msg})
         
         return HttpResponseRedirect(reverse(index))
