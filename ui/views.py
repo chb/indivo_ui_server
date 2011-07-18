@@ -82,8 +82,8 @@ def index(request):
                                                    'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
                                                          'HIDE_SHARING': settings.HIDE_SHARING })
             # error
-            err_msg = '%i: %s' % (res.response.get('response_status', 500), res.response.get('response_data', 'Unknown Error'))
-            return utils.render_template(LOGIN_PAGE, {'error': err_msg, 'return_url': '/'})
+            err_msg = res.response.get('response_data', '500: Unknown Error')
+            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr(err_msg), 'return_url': '/'})
             
     return HttpResponseRedirect(reverse(login))
         
