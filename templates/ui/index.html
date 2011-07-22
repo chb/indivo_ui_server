@@ -82,9 +82,9 @@
         </div>
 
         <div id="record_owned_options">
+        	<ul>
           {% if not HIDE_SHARING %}
-            <ul id="sharing_list">
-              <li>
+              <li id="sharing_list">
                 <a id="carenet" rel="#overlay">
                   <img class="app_tab_img_small"
                        height="24px"
@@ -93,11 +93,9 @@
                   {% trans "Sharing" %}
                 </a>
               </li>
-            </ul>
           {% endif %}
           {% if not HIDE_GET_MORE_APPS %}
-            <ul id="get_more_apps_list">
-              <li>
+              <li id="get_more_apps_list">
                 <a id="get_more_apps" rel="#overlay">
                   <img class="app_tab_img_small"
                        height="24px"
@@ -106,10 +104,8 @@
                   {% trans "Get more apps" %}
                 </a>
               </li>
-            </ul>
           {% endif %}
-          <ul id="settings_list">
-            <li>
+            <li id="settings_list">
               <a id="pha">
                 <img class="app_tab_img_small"
                      height="24px"

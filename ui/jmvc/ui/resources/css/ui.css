@@ -380,12 +380,12 @@ blockquote.content { margin: 1em 0; }
   margin: -3px 0 -8px;
 }
 
-#get_more_apps_list, #sharing_list, #settings_list {
+#record_owned_options ul {
   color: inherit !important;
   margin: 0 0;
 }
 
-#get_more_apps_list li, #sharing_list li, #settings_list li {
+#record_owned_options li {
   list-style: none;
   cursor: pointer;
 }
