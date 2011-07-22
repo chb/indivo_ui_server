@@ -26,107 +26,125 @@ $.Controller.extend('UI.Controllers.PHA',
 /* @Static */
 {
 	onDocument: true,
-	
-	/**
-	* Show and manipulate phas for this record. Refactor!
-	*/
-	show: function() {
-		this.record_info = RecordController.RECORDS[RecordController.RECORD_ID]; // get the record info from the globals (FIXME later)
-		this.carenet_phas_active_ids = {};
-		var _this = this;
-		var record = null;
-		var all_phas = null;
-		var local_phas = null;
-		var carenets = null;
-		
-		_show_template = function(){
-			var params = {
-				'local_phas': _this.local_phas,
-				'record_info': _this.record_info,
-				'carenets': _this.carenets,
-				'carenet_phas_active_ids': _this.carenet_phas_active_ids
-			};
-			$('#app_content').html($.View('//ui/views/pha/show.ejs', params));
-			$('#app_content_iframe').hide();
-			$('#app_content').show();
-		};
-		
-		_add_handlers = function(){
-			$('.remove_app').click(function(evt) {
-				UI.Models.PHA.delete_pha(_this.record_info.id, evt.target.id, function(){
-					UI.Controllers.PHA.show(); // reload view
-					UI.Controllers.MainController._remove_app(evt.target.id); // remove app from selector
-				})
-			});
-			
-			$('#pha_carenets_form').submit(function(evt) {
-				var pha_id = $(this).find('input[type=hidden]').attr('value');
-				var local_pha = _(_this.local_phas).detect(function(l){ return l.id === pha_id; });
-				var done = function(){$('#update_carenets').val('{% trans "Updated!" %}')}
-				
-				$(this).find('input[name=carenet]').each(function(i, checkbox) {
-					var carenet = _(_this.carenets).detect(function(c){ return c.carenet_id === checkbox.value; })
-					if (checkbox.checked) { carenet.add_pha(local_pha, done); }
-					else { carenet.remove_pha(local_pha, done); }
-				});
-				_.delay(function(){UI.Controllers.PHA.show()}, 1000); // reload view
-				return false;
-			});
-		};
-		
-		var record_load_callback = function(record) {
-			// get all the phas
-			UI.Models.PHA.get_all(function(all_phas) {
-				_this.all_phas = all_phas;
-				
-				var after_pha_callback = function(local_phas) {
-					// local_phas are the phas for this record
-					_this.local_phas = local_phas;
-					
-					// get the carenets for the current record
-					_this.record.get_carenets(null, function(carenets) {
-						_this.carenets = carenets;
-						
-						// get the apps for each carenet
-						$(carenets).each(function(i, carenet) {
-								UI.Models.PHA.get_by_carenet(carenet.carenet_id, null, function(carenet_phas) {
-									
-									var _set_active_ids = function(callback){
-										_(carenet_phas).each(function(c_pha){
-											// if this _carenet_ pha is also in local_phas, append it to a item carenet_phas_active_ids object (keyed by carenet_id)
-											if (_(_this.local_phas).detect(function(p){ return p.id === c_pha.id; })) {
-												if (!_this.carenet_phas_active_ids[carenet.carenet_id]) { _this.carenet_phas_active_ids[carenet.carenet_id] = [c_pha.id]; }
-												else { _this.carenet_phas_active_ids[carenet.carenet_id].push(c_pha.id); }
-											}
-										})
-										
-										callback();
-									} // _set_active_ids
-									
-									_set_active_ids(_show_template);
-									_add_handlers();
-							
-							}); // get_by_carenet
-						}); // each carenet
-					}); // get carenets
-				}; // end after_pha_callback
-				
-				// is this a carenet or a record? depending on which get the associated apps
-				if (_this.record_info.carenet_id) { UI.Models.PHA.get_by_carenet(_this.record_info.carenet_id, null, after_pha_callback); }
-				else { UI.Models.PHA.get_by_record(record.record_id, null, after_pha_callback) }
-			});
-		}; // end record_load_callback
-		
-		// load the record from the model and call the callback
-		UI.Models.Record.get(RecordController.RECORD_ID, _this.record_info.carenet_id, function(record) {
-			_this.record = record;
-			record_load_callback(record);
-		});
-	}
 },
 /* @Prototype */
 {
-    "click": function() { UI.Controllers.PHA.show() }
+	record_info: {},
+	record: {},
+	all_apps: [],
+	my_apps: [],
+	carenets: [],
+	
+    ready: function() {
+    	
+    },
+    
+    
+	/**
+	 * Click on our tab item
+	 */
+    'click': function() {
+    	this.load()
+    },
+    
+    
+    /**
+	 * Chainload record info and information about the apps
+	 */
+	load: function() {
+		if (RecordController) {
+			this.record_info = RecordController.RECORDS[RecordController.RECORD_ID]; // get the record info from the globals (FIXME later)
+			UI.Models.Record.get(RecordController.RECORD_ID, this.record_info.carenet_id, this.callback('didLoad'));
+		}
+	},
+	
+	didLoad: function(record) {					// loaded info, get all apps
+		this.record = record;
+		UI.Models.PHA.get_all(this.callback('didGetAllApps'));
+	},
+	
+	didGetAllApps: function(all_apps) {			// got all apps, get my apps
+		this.all_apps = all_apps;
+		
+		// is this a carenet or a record? depending on which get the associated apps
+		if (this.record_info.carenet_id) {
+			UI.Models.PHA.get_by_carenet(this.record_info.carenet_id, null, this.callback('didGetMyApps'));
+		}
+		else {
+			UI.Models.PHA.get_by_record(this.record.record_id, null, this.callback('didGetMyApps'));
+		}
+	},
+	
+	didGetMyApps: function(my_apps) {			// got my apps, get carenets we are in
+		this.my_apps = my_apps;
+		this.record.get_carenets(null, this.callback('didGetCarenets'));
+	},
+	
+	didGetCarenets: function(carenets) {		// got our carenets, now get the apps per carenet
+		this.carenets = carenets;
+		
+		self = this;
+		var waiting_for = carenets.length;
+		$(carenets).each(function(i, carenet) {
+			carenet.app_ids = [];
+			UI.Models.PHA.get_by_carenet(carenet.carenet_id, null, function(carenet_apps) {
+				_(carenet_apps).each(function(c_app) {
+					// if this _carenet_ pha is also in my_apps, remember it
+					if (_(self.my_apps).detect(function(p) { return p.id === c_app.id; })) {
+						carenet.app_ids.push(c_app.id);
+					}
+				});
+				
+				waiting_for--;
+				if (waiting_for < 1) {
+					self.show();
+				}
+			}); // get_by_carenet
+		}); // each carenet
+	},
+	
+	
+	/**
+	 * Display
+	 */
+	show: function() {
+		var params = {
+			'my_apps': this.my_apps,
+			'record_info': this.record_info,
+			'carenets': this.carenets,
+		};
+		$('#app_content').html(this.view('show', params));
+		$('#app_content_iframe').hide();
+		$('#app_content').show();
+	},
+	
+	// old handlers:
+	/*
+	$('.remove_app').click(function(evt) {
+		UI.Models.PHA.delete_pha(_this.record_info.id, evt.target.id, function(){
+			self.show(); // reload view
+			UI.Controllers.MainController._remove_app(evt.target.id); // remove app from selector
+		})
+	});
+		
+	$('#pha_carenets_form').submit(function(evt) {
+		var pha_id = $(this).find('input[type=hidden]').attr('value');
+		var local_pha = _(_this.my_apps).detect(function(l){ return l.id === pha_id; });
+		var done = function(){$('#update_carenets').val('{% trans "Updated!" %}')}
+		
+		$(this).find('input[name=carenet]').each(function(i, checkbox) {
+			var carenet = _(_this.carenets).detect(function(c){ return c.carenet_id === checkbox.value; })
+			if (checkbox.checked) { carenet.add_pha(local_pha, done); }
+			else { carenet.remove_pha(local_pha, done); }
+		});
+		_.delay(function(){self.show()}, 1000); // reload view
+		return false;
+	});	*/
+		
+	
+    '.carenet_outer click': function(event) {
+    	alert(1);
+    }
 });
 
 

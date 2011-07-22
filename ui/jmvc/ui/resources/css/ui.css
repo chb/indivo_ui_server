@@ -500,6 +500,54 @@ blockquote.content { margin: 1em 0; }
   border-bottom: 1px solid #666251;
 }
 
+
+/*** Sharing Settings ***/
+#known_accounts {
+	position: relative;
+}
+
+#carenets {
+	position: relative;
+}
+.carenet {
+	position: relative; float: left;
+	width: 128px; height: 128px; margin: 32px;
+}
+.carenet_outer {
+	width: 126px; height: 126px;
+	border-radius: 64px; border: 1px solid rgb(160,160,160);
+	background-color: rgb(220,220,220);
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), to(rgb(220,220,220)));
+    background:-moz-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
+}
+.carenet_inner {
+	position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px;
+	color: white;
+	border-radius: 50px; border: 1px solid rgb(120,120,120);
+	background-color: rgb(102,204,255);
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(102,204,255)));
+    background:-moz-linear-gradient(top, rgb(58,180,255), rgb(102,204,255));
+	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+.carenet_inner p {
+	position: absolute; left: 8px; top: 30px; right: 8px; margin: 0;
+	text-align: center; line-height: 1.3;
+}
+.carenet_inner a {
+	display: block; cursor: pointer;
+	text-decoration: none; color: rgb(75,75,75);
+	border: none;
+} 
+.carenet_inner a:hover {
+	text-decoration: underline; color: black;
+	border: none;
+}
+.carenet_inner b {
+	display: block;
+	text-align: center; font-size: 1.4em; color: rgb(100,100,100);
+}
+
+
 /***********  Overrides of jquery UI ***********/
 /*.ui-helper-reset { line-height: 1.75; }*/
 .ui-widget { font-family: inherit; font-size: inherit; }
