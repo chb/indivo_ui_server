@@ -22,18 +22,20 @@ $.Controller.extend('UI.Controllers.Carenet',
 		
 		UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
 			_this.label = record.label;
+			_this.accounts = [];
 			
 			record.get_carenets(null, function(carenets) {
 				$(carenets).each(function(i, carenet) {
 						carenet.get_people(function(account_objects_list) {
-							_this.accounts[carenet.carenet_id] = account_objects_list;
+							carenet.accounts = account_objects_list;
+							_this.accounts.concat(account_objects_list);
 						});
 				});
 				
 				var check_and_go = function() {
-					// console.log('1: ', carenets.length == 0)
-					// console.log('2: ', _.all(_.map(carenets, function(i, c) {return accounts[c.carenet_id] != null;})))
-					if (carenets.length == 0 || _.all(_.map(carenets, function(carenet, i) {return _this.accounts[carenet.carenet_id] != null;}))) {
+					//console.log('1: ', carenets.length == 0)
+					//console.log('2: ', _.all(_.map(carenets, function(i, c) {return _this.accounts[c.carenet_id] != null;})))
+					if (carenets.length == 0 || _.all(_.map(carenets, function(carenet, i) {return carenet.accounts != null;}))) {
 						_this.carenets = carenets;
 						$('#app_content').html(
 							$.View('//ui/views/carenet/show.ejs',

@@ -10,18 +10,11 @@ application itself, i.e. "My Pregnancy Manager," reveals
 information you want to keep private.
 {% endblocktrans %}</p>
 
-<div id="carenets">
-<% _(carenets).each(function(carenet, i) { %>
-	<div class="carenet" <%= carenet %>>
-		<div class="carenet_outer">
-			<div class="carenet_inner">
-				<p>
-					<a class="carenet_name"><%= carenet.name %></a>
-					<b><%= carenet.app_ids.length %></b>
-				</p>
-			</div>
-		</div>
-	</div>
-<% }) %>
+<div id="apps">
+	<h4><img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" />Loading apps</h4>
+</div>
+
+<div id="carenets" style="display: none;">
+	<h4><img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" />Loading carenets</h4>
 </div>
 

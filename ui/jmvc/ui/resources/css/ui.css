@@ -506,6 +506,18 @@ blockquote.content { margin: 1em 0; }
 	position: relative;
 }
 
+#apps {
+	position: relative;
+}
+.app {
+	float: left; position: relative; z-index: 2;
+    height: 120px; width: 100px;
+    font-size: 0.8em; text-align: center;
+}
+.app img {
+	
+}
+
 #carenets {
 	position: relative;
 }
@@ -513,13 +525,52 @@ blockquote.content { margin: 1em 0; }
 	position: relative; float: left;
 	width: 128px; height: 128px; margin: 32px;
 }
-.carenet_outer {
-	width: 126px; height: 126px;
+.carenet_border {
+	width: 126px; height: 126px; margin: 0;
 	border-radius: 64px; border: 1px solid rgb(160,160,160);
 	background-color: rgb(220,220,220);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), to(rgb(220,220,220)));
     background:-moz-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
+   	-webkit-transition-property: width, height, margin, border-radius;
+	-moz-transition-property: width, height, margin, border-radius;
+	-o-transition-property: width, height, margin, border-radius;
+	transition-property: width, height, margin, border-radius;
+	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
+.carenet:hover .carenet_border {
+	width: 190px; height: 190px; margin: -32px; border-radius: 96px;
+	-webkit-transition-property: width, height, margin, border-radius;
+	-moz-transition-property: width, height, margin, border-radius;
+	-o-transition-property: width, height, margin, border-radius;
+	transition-property: width, height, margin, border-radius;
+	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
+}
+.carenet_content { display: block; opacity: 0; }
+.carenet:hover .carenet_content, .app_hovers .carenet_content {
+	display: block; opacity: 1;
+	-webkit-transition-property: opacity;
+	-moz-transition-property: opacity;
+	-o-transition-property: opacity;
+	transition-property: opacity;
+	-webkit-transition-duration: 0.4s; -o-transition-duration: 0.4s; -moz-transition-duration: 0.4s; transition-duration: 0.4s;
+}
+.carenet_app {
+	position: absolute; top: 0; left: 0; width: 40px; height: 40px;
+	border-radius: 20px;
+	background-color: rgb(210,210,210); background-color: rgba(0,0,0,0.15);
+}
+.carenet_app img { width: 32px; height: 32px; margin: 4px; }
+.carenet_app_info {
+	display: none; z-index: 3;
+	position: absolute; top: 0; left: 50px; width: 180px;
+	padding: 10px; line-height: 1.4; font-size: 0.8em;
+	background-color: white; background-color: rgba(255,255,255,0.8);
+	-webkit-box-shadow: 0 4px 10px rgba(0,0,0,0.5); -moz-box-shadow: 0 4px 10px rgba(0,0,0,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.carenet_app:hover .carenet_app_info { display: block; }
+.carenet_app_info b { font-size: 1.2em; }
+.carenet_app_info span { font-size: 0.8em; }
+
 .carenet_inner {
 	position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px;
 	color: white;
@@ -529,6 +580,7 @@ blockquote.content { margin: 1em 0; }
     background:-moz-linear-gradient(top, rgb(58,180,255), rgb(102,204,255));
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
+.carenet:hover .carenet_inner {  }
 .carenet_inner p {
 	position: absolute; left: 8px; top: 30px; right: 8px; margin: 0;
 	text-align: center; line-height: 1.3;
@@ -546,6 +598,15 @@ blockquote.content { margin: 1em 0; }
 	display: block;
 	text-align: center; font-size: 1.4em; color: rgb(100,100,100);
 }
+
+.app_hovers .carenet_border {
+	width: 190px; height: 190px; margin: -32px;
+	border-radius: 96px;
+	background-color: rgb(102,204,255);
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(102,204,255)));
+    background:-moz-linear-gradient(top, rgb(195,255,134), rgb(171,255,86));
+}
+#apps h4 img, #carenets h4 img { vertical-align: -5%; margin-right: 0.75em; }
 
 
 /***********  Overrides of jquery UI ***********/

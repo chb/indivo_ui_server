@@ -318,7 +318,7 @@ def indivo_api_call_delete_record_app(request):
 def authorize(request):
     """
     app_info (the response_data from the get_request_token_info call) looks something like:
-
+    
     <RequestToken token="LNrHRM1OA6ExcSyq22O0">
         <record id="cface90b-6ca0-4368-827a-2ccd5979ffb7"/>
         <carenet />

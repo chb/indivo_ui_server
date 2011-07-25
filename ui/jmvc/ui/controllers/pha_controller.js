@@ -53,18 +53,25 @@ $.Controller.extend('UI.Controllers.PHA',
 	 */
 	load: function() {
 		if (RecordController) {
-			this.record_info = RecordController.RECORDS[RecordController.RECORD_ID]; // get the record info from the globals (FIXME later)
-			UI.Models.Record.get(RecordController.RECORD_ID, this.record_info.carenet_id, this.callback('didLoad'));
+			this.record_info = RecordController.RECORDS[RecordController.RECORD_ID]; 		// get the record info from the globals (FIXME later)
+			UI.Models.Record.get(RecordController.RECORD_ID, this.record_info.carenet_id, this.callback('didLoadInfo'));
 		}
 	},
 	
-	didLoad: function(record) {					// loaded info, get all apps
+	didLoadInfo: function(record) {				// loaded info, get all apps
 		this.record = record;
+		$('#app_content').html(this.view('show'));
+		$('#app_content_iframe').hide();
+		$('#app_content').show();
+		
 		UI.Models.PHA.get_all(this.callback('didGetAllApps'));
 	},
 	
 	didGetAllApps: function(all_apps) {			// got all apps, get my apps
 		this.all_apps = all_apps;
+		var params = {'all_apps': this.all_apps};
+		$('#apps').empty().html(this.view('apps', params)).find('.app').draggable({revert: true, helper: 'clone'});
+		$('#carenets').show();
 		
 		// is this a carenet or a record? depending on which get the associated apps
 		if (this.record_info.carenet_id) {
@@ -86,36 +93,47 @@ $.Controller.extend('UI.Controllers.PHA',
 		self = this;
 		var waiting_for = carenets.length;
 		$(carenets).each(function(i, carenet) {
-			carenet.app_ids = [];
+			carenet.apps = [];
 			UI.Models.PHA.get_by_carenet(carenet.carenet_id, null, function(carenet_apps) {
 				_(carenet_apps).each(function(c_app) {
 					// if this _carenet_ pha is also in my_apps, remember it
 					if (_(self.my_apps).detect(function(p) { return p.id === c_app.id; })) {
-						carenet.app_ids.push(c_app.id);
+						carenet.apps.push(c_app);
 					}
 				});
 				
 				waiting_for--;
 				if (waiting_for < 1) {
-					self.show();
+					self.didLoadCarenets();
 				}
 			}); // get_by_carenet
 		}); // each carenet
 	},
 	
-	
-	/**
-	 * Display
-	 */
-	show: function() {
+	didLoadCarenets: function() {
+		var nets = $('#carenets');
+		
 		var params = {
+			'all_apps': this.all_apps,
 			'my_apps': this.my_apps,
 			'record_info': this.record_info,
 			'carenets': this.carenets,
 		};
-		$('#app_content').html(this.view('show', params));
-		$('#app_content_iframe').hide();
-		$('#app_content').show();
+		nets.empty().html(this.view('carenets', params));
+		
+		// setup droppable
+		nets.find('.carenet').droppable({
+			accept: function(draggable) {
+				var app_arr = $(this).model().apps;
+				return ! _(app_arr).detect(function(a) { return a.id === draggable.model().id; });
+			},
+			hoverClass: 'app_hovers',
+			drop: function(event, ui) {
+				// original element: ui.draggable
+				ui.helper.fadeOut('fast', function() { $(this).remove(); });
+				$(this).find("a").html("Dropped " + ui.draggable.model().data.name);
+			}
+		});
 	},
 	
 	// old handlers:
@@ -142,7 +160,7 @@ $.Controller.extend('UI.Controllers.PHA',
 	});	*/
 		
 	
-    '.carenet_outer click': function(event) {
+    '.carenet_border click': function(event) {
     	alert(1);
     }
 });
