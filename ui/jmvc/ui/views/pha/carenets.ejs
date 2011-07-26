@@ -2,17 +2,10 @@
 	<div class="carenet" <%= carenet %>>
 		<div class="carenet_border">
 			<div class="carenet_content">
-			<% var radius = 72;
-			var startDeg = -75;
-			var increment = 40;
-			var deg2rad = function(deg) { return deg * 0.017453; };
-			_(carenet.apps).each(function(app, i) {
-				var myDeg = startDeg + (i * increment);
-				var a = Math.sin(deg2rad(myDeg)) * radius;
-				var b = Math.cos(deg2rad(myDeg)) * radius;
-				var top = 63 + a - 16;
-				var left = 63 + b - 16; %>
-				<div class="carenet_app" style="top: <%= top %>px; left: <%= left %>px;" <%= app %>>
+			<% _(carenet.apps).each(function(app, i) {
+				app.temporarily_added = false;
+				var coords = controller.coordinatesForAppIndex(i); %>
+				<div class="carenet_app" style="top: <%= coords.top %>px; left: <%= coords.left %>px;" <%= app %>>
 					<% var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
 					<img src="/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png" alt="" />
 					<div class="carenet_app_info">
@@ -27,7 +20,7 @@
 		<div class="carenet_inner">
 			<p>
 				<a class="carenet_name"><%= carenet.name %></a>
-				<b><%= carenet.apps.length %></b>
+				<b class="carenet_num_apps"><%= carenet.apps.length %></b>
 			</p>
 		</div>
 	</div>

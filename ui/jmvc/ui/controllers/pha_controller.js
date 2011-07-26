@@ -60,6 +60,7 @@ $.Controller.extend('UI.Controllers.PHA',
 	
 	didLoadInfo: function(record) {				// loaded info, get all apps
 		this.record = record;
+		//alert($('#app_content').find(':droppable').length);
 		$('#app_content').html(this.view('show'));
 		$('#app_content_iframe').hide();
 		$('#app_content').show();
@@ -69,9 +70,6 @@ $.Controller.extend('UI.Controllers.PHA',
 	
 	didGetAllApps: function(all_apps) {			// got all apps, get my apps
 		this.all_apps = all_apps;
-		var params = {'all_apps': this.all_apps};
-		$('#apps').empty().html(this.view('apps', params)).find('.app').draggable({revert: true, helper: 'clone'});
-		$('#carenets').show();
 		
 		// is this a carenet or a record? depending on which get the associated apps
 		if (this.record_info.carenet_id) {
@@ -84,6 +82,50 @@ $.Controller.extend('UI.Controllers.PHA',
 	
 	didGetMyApps: function(my_apps) {			// got my apps, get carenets we are in
 		this.my_apps = my_apps;
+		var self = this;
+		
+		var app_div = $('#apps');
+		var params = {'all_apps': this.my_apps};
+		app_div.empty().html(this.view('apps', params));
+		$('#carenets').show();
+		
+		// setup app hovering (so we see in which carenets the app already is)
+		app_div.find('.app').bind({
+			'mouseover': function(event) {
+				var app_id = $(this).model().id;
+				$('#carenets').find('.carenet').each(function(i, elem) {
+					var app_arr = $(elem).model().apps;
+					if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
+						$(elem).find('.carenet_border').addClass('has_app');
+					}
+				});
+			},
+			'mouseout': function(event) {
+				$('#carenets').find('.carenet_border').removeClass('has_app');
+			}
+		})
+		
+		// setup app dragging
+		.draggable({
+			revert: true,
+			helper: function(event) {
+				var img_name = $(this).model().data.name.toLowerCase().replace(/ +/, '_')
+				return $('<img class="dragged_app" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />');
+			},
+			start: function(event) {
+				var app_id = $(this).model().id;
+				$('#carenets').find('.carenet').each(function(i, elem) {
+					var app_arr = $(elem).model().apps;
+					if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
+						$(elem).css('opacity', 0.5);
+					}
+				});
+			},
+			stop: function(event) {				// this may be called AFTER another 'start' if the user very quickly drags another app. We could use 'drag' instead of 'start'
+				$('#carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
+			}
+		});
+		
 		this.record.get_carenets(null, this.callback('didGetCarenets'));
 	},
 	
@@ -111,9 +153,12 @@ $.Controller.extend('UI.Controllers.PHA',
 	},
 	
 	didLoadCarenets: function() {
-		var nets = $('#carenets');
+		$('#carenet_drag_apps').fadeIn('fast');
 		
+		// show carenets and their apps
+		var nets = $('#carenets');
 		var params = {
+			'controller': this,
 			'all_apps': this.all_apps,
 			'my_apps': this.my_apps,
 			'record_info': this.record_info,
@@ -121,20 +166,130 @@ $.Controller.extend('UI.Controllers.PHA',
 		};
 		nets.empty().html(this.view('carenets', params));
 		
+		// setup apps (do this in the EJS?)
+		nets.find('.carenet_app').click(function(event) {
+			var app_view = $(this);
+			var carenet_view = app_view.parentsUntil('.carenet').parent();
+			carenet_view.addClass('expanded');
+			var carenet = carenet_view.model();
+			var app = app_view.model();
+			carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', app_view, carenet_view));
+		});
+		
 		// setup droppable
+		var self = this;
 		nets.find('.carenet').droppable({
 			accept: function(draggable) {
-				var app_arr = $(this).model().apps;
-				return ! _(app_arr).detect(function(a) { return a.id === draggable.model().id; });
+				var mod = $(this).model();
+				if (!mod) {		// after leaving and re-visiting settings it seems there are droppable zombies still around somewhere
+					$(this).remove();
+					return false;
+				}
+				
+				return ! _(mod.apps).detect(function(a) { return a.id === draggable.model().id; });
 			},
 			hoverClass: 'app_hovers',
 			drop: function(event, ui) {
-				// original element: ui.draggable
-				ui.helper.fadeOut('fast', function() { $(this).remove(); });
-				$(this).find("a").html("Dropped " + ui.draggable.model().data.name);
+				var app = ui.draggable.model();			// original element: ui.draggable
+				var cnet = $(this);
+				
+				// add app
+				self.addAppToCarenet(app, cnet);
+				ui.helper.remove();
 			}
 		});
 	},
+	
+	
+	/**
+	 * Event handlers
+	 */
+	addAppToCarenet: function(app, carenet_view) {
+		var self = this;
+		var carenet = carenet_view.model();
+		
+		// create the view
+		app.temporarily_added = true;
+		var coords = self.coordinatesForAppIndex(carenet.apps.length);
+		var new_app_view = $(this.view('carenet_app', {'app': app, 'coords': coords}));
+		new_app_view.click(function(event) {
+			var app_view = $(this);
+			app_view.css('opacity', 0.5);
+			var carenet_view = app_view.parentsUntil('.carenet').parent();
+			carenet_view.addClass('expanded');
+			carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', app_view, carenet_view));
+		});
+		
+		// add the view
+		carenet_view.find('.carenet_content').append(new_app_view);
+		carenet_view.find('.carenet_num_apps').first().text('~');
+		carenet_view.addClass('expanded');
+		
+		// add to array and tell the server
+		carenet.apps.push(app);
+		carenet.add_pha(app, this.callback('didAddAppToCarenet', new_app_view, carenet_view));
+	},
+	didAddAppToCarenet: function(app_view, carenet_view, data, textStatus, xhr) {
+		app_view.css('opacity', 1);
+		app_view.model().temporarily_added = false;
+		carenet_view.find('.carenet_num_apps').first().text(carenet_view.model().apps.length);
+		carenet_view.delay(1000).removeClass('expanded');
+	},
+	
+	
+	didRemoveAppFromCarenet: function(app_view, carenet_view, data, textStatus, xhr) {
+		
+		// remove app from carenet app array
+		var carenet = carenet_view.model();
+		var app_id = app_view.model().id;
+		if (carenet && carenet.apps && carenet.apps.length > 0) {
+			for (var i = 0; i < carenet.apps.length; i++) {
+				var app = carenet.apps[i];
+				if (app.id == app_id) {
+					carenet.apps.splice(i, 1);
+					break;
+				}
+			}
+		}
+		
+		// update view
+		app_view.detach();		// can't fade out here as we need this to be gone when updating the other apps positions
+		this.updateAppPositionsInCarenet(carenet_view);
+		carenet_view.find('.carenet_num_apps').first().text(carenet.apps.length);
+		carenet_view.delay(1000).removeClass('expanded');
+	},
+	
+	
+	/**
+	 * Utilities
+	 */
+	updateAppPositionsInCarenet: function(carenet_view) {
+		if (carenet_view) {
+			var self = this;
+			carenet_view.find('.carenet_app').each(function(i) {
+				var coords = self.coordinatesForAppIndex(i);
+				$(this).css('top', coords.top + 'px').css('left', coords.left + 'px');
+			});
+		}
+	},
+	
+	coordinatesForAppIndex: function(i) {
+		var radius = 72;
+		var startDeg = -70;
+		var increment = 40;
+		
+		var myDeg = startDeg + (i * increment);
+		var a = Math.sin(this.deg2rad(myDeg)) * radius;
+		var b = Math.cos(this.deg2rad(myDeg)) * radius;
+		var top = 64 + a - 20;
+		var left = 64 + b - 20;
+		
+		return {'top': top, 'left': left};
+	},
+	deg2rad: function(deg) {
+		return deg * 0.017453;
+	},
+	
 	
 	// old handlers:
 	/*
@@ -158,93 +313,5 @@ $.Controller.extend('UI.Controllers.PHA',
 		_.delay(function(){self.show()}, 1000); // reload view
 		return false;
 	});	*/
-		
-	
-    '.carenet_border click': function(event) {
-    	alert(1);
-    }
 });
 
-
-// OLD: includes carenet stuff and view
-
-// PHAController= MVC.Controller.extend('pha', {
-//		index: function(params) {
-//		var _this = this;
-//		
-//		_this.phas = {};
-//		_this.active_carenets = [];
-//		
-//		var record_id = params.record_id;
-//		var pha_id = params.pha_id;
-//		
-//		// get the record
-//		Record.get(record_id, null, function(record) {
-//				_this.record = record;
-//				
-//				// get the carenets for the current record
-//				record.get_carenets(null, function(carenets) {
-//				_this.carenets = carenets;
-//				
-//				// get the apps for each carenet
-//				$(carenets).each(function(i, carenet) {
-//						PHA.get_by_carenet(carenet.carenet_id, null, function(p) {
-//						_this.phas[carenet.carenet_id] = p;
-//						
-//						// check if the current PHA is in here
-//						if (_.detect(p, function(one_pha) {
-//								return one_pha.id == pha_id;
-//						})) {
-//								_this.active_carenets.push(carenet.carenet_id);
-//						}
-//						});
-//				});
-//				});
-//		});
-//		
-//		// get the app description
-//		PHA.get(record_id, pha_id, function(pha) {
-//				_this.pha = pha;
-//		});
-//		
-//		// display the page
-//		when_ready(function() {
-//				return (_this.pha && _this.record && _this.carenets && _.map(_this.carenets, function(i, c) {return _this.phas[c.carenet_id] != null;}));
-//		}, function() {
-//				$('#app_content_iframe').fadeOut(function(){
-//				$('#app_content').fadeIn(function(){
-//						_this.render({to: 'app_content'});
-//				});
-//				});
-// 
-//				$('#pha_carenets_form').submit(function() {
-//				$(this).find('input[name=carenet]').each(function(i, checkbox) {
-//						var the_carenet = _.select(_this.carenets, function(i) {return _this.carenets[i].carenet_id == checkbox.value;})[0];
-//						if (checkbox.checked) {
-//						// add the pha to the carenet
-//						the_carenet.add_pha(_this.pha);
-//						} else {
-//						// remove the pha from the carenet
-//						the_carenet.remove_pha(_this.pha);
-//						}
-//				});
-//				setTimeout("HealthfeedController.dispatch('index')", 0);
-//				return false;
-//				});
-//		});
-//		},
-// });
-
-// 
-// <h3>Preferences for "<%= pha.data.name %>"</h3>
-// 
-// <p>
-// In most cases, an application should be shared with all of your carenets. You can limit your carenets' access by choosing which data to share with them. Sometimes, you may want to restrict an application to only some of your carenets when the application itself, i.e. "My Pregnancy Manager," reveals information you want to keep private.
-// </p>
-// 
-// <form id="pha_carenets_form">
-// <% $(carenets).each(function(i, carenet) { %>
-// <input name="carenet" value="<%= carenet.carenet_id %>" type="checkbox" <% if (active_carenets.indexOf(carenet.carenet_id) > -1) { %>checked<% } %> /> <%= carenet.name %><br />
-// <% }); %>
-// <input type="submit" value="update" />
-// </form>
