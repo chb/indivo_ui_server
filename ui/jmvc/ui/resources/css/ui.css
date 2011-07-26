@@ -490,16 +490,6 @@ blockquote.content { margin: 1em 0; }
   padding: 0px 10px 10px 10px;
 }
 
-/*** PHAs ***/
-.pha {
-  margin-bottom: 10px;
-}
-
-.pha a:hover {
-  cursor: pointer;
-  border-bottom: 1px solid #666251;
-}
-
 
 /*** Sharing Settings ***/
 #known_accounts {
@@ -507,12 +497,16 @@ blockquote.content { margin: 1em 0; }
 }
 
 #apps {
-	position: relative;
+	position: relative; margin: 1em 0 32px;
 }
 .app {
 	float: left; position: relative; z-index: 2; cursor: pointer;
-    height: 120px; width: 100px;
+    height: 60px; width: 80px; margin: 10px 10px 0 0; padding: 10px;
     font-size: 0.8em; text-align: center;
+    border-radius: 8px;
+}
+.app:hover {
+	background-color: rgba(0,0,0,0.1);
 }
 .app img {
 	
@@ -523,7 +517,7 @@ blockquote.content { margin: 1em 0; }
 }
 .carenet {
 	position: relative; float: left; opacity: 1;
-	width: 128px; height: 128px; margin: 32px;
+	width: 128px; height: 128px; margin: 32px 32px 128px 32px;
 	-webkit-transition-property: opacity;
 	-moz-transition-property: opacity;
 	-o-transition-property: opacity;
@@ -532,7 +526,7 @@ blockquote.content { margin: 1em 0; }
 }
 .carenet_border {
 	width: 126px; height: 126px; margin: 0;
-	border-radius: 64px; border: 1px solid rgb(160,160,160);
+	border-radius: 64px; border: 1px solid rgb(178,178,178); border-color: rgba(0,0,0,0.3);
 	background-color: rgb(220,220,220);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), to(rgb(220,220,220)));
     background:-moz-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
@@ -559,6 +553,12 @@ blockquote.content { margin: 1em 0; }
 	transition-property: opacity;
 	-webkit-transition-duration: 0.4s; -o-transition-duration: 0.4s; -moz-transition-duration: 0.4s; transition-duration: 0.4s;
 }
+.carenet_hint {
+	display: none; position: absolute; top: 160px; width: 156px; left: -22px; padding: 5px;
+	font-size: 0.8em; text-align: center;
+}
+.carenet:hover .carenet_hint { display: block; }
+
 .carenet_app {
 	position: absolute; top: 0; left: 0; width: 40px; height: 40px; cursor: pointer;
 	border-radius: 20px;
@@ -566,10 +566,10 @@ blockquote.content { margin: 1em 0; }
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
 .carenet_app img { width: 32px; height: 32px; margin: 4px; }
-.dragged_app { margin: 0 34px; z-index: 5; }
+.dragged_app { margin: 10px 34px; z-index: 5; }
 .app_info, .carenet_app_info {
 	display: none; z-index: 3;
-	position: absolute; top: 0; left: 50px; width: 180px; padding: 6px 10px;
+	position: absolute; top: -16px; left: 50px; width: 180px; padding: 6px 10px;
 	text-align: left; line-height: 1.4;
 	border-radius: 4px; background-color: white; background-color: rgba(255,255,255,0.9);
 	-webkit-box-shadow: 0 4px 10px rgba(0,0,0,0.5); -moz-box-shadow: 0 4px 10px rgba(0,0,0,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -585,7 +585,7 @@ blockquote.content { margin: 1em 0; }
 	color: white;
 	border-radius: 50px; border: 1px solid rgb(120,120,120);
 	background-color: rgb(102,204,255);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(102,204,255)));
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(148,220,255)));
     background:-moz-linear-gradient(top, rgb(58,180,255), rgb(148,220,255));
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
@@ -612,17 +612,18 @@ blockquote.content { margin: 1em 0; }
 	width: 190px; height: 190px; margin: -32px;
 	border-radius: 96px;
 	background-color: rgb(102,204,255);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(102,204,255)));
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(195,255,134)), to(rgb(171,255,86)));
     background:-moz-linear-gradient(top, rgb(195,255,134), rgb(171,255,86));
 }
 .has_app {
 	background-color: rgb(102,204,255);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(102,204,255)));
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(195,255,134)), to(rgb(171,255,86)));
     background:-moz-linear-gradient(top, rgb(195,255,134), rgb(171,255,86));
 }
 
 #apps h4 img, #carenets h4 img { vertical-align: -5%; margin-right: 0.75em; }
-.drag_instructions { margin: 1em 0; }
+.drag_instructions { margin: 1em 2em; text-align: center; }
+.drag_instructions img { vertical-align: middle; margin-right: 0.75em; }
 
 
 /***********  Overrides of jquery UI ***********/

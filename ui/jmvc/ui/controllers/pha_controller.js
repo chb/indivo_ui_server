@@ -108,10 +108,8 @@ $.Controller.extend('UI.Controllers.PHA',
 		// setup app dragging
 		.draggable({
 			revert: true,
-			helper: function(event) {
-				var img_name = $(this).model().data.name.toLowerCase().replace(/ +/, '_')
-				return $('<img class="dragged_app" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />');
-			},
+			helper: 'clone',
+			containment: '#app_content',
 			start: function(event) {
 				var app_id = $(this).model().id;
 				$('#carenets').find('.carenet').each(function(i, elem) {
