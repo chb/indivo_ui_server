@@ -26,6 +26,48 @@ $.Controller.extend('UI.Controllers.PHA',
 /* @Static */
 {
 	onDocument: true,
+	viewAnimationState: {},
+	animateViewPositionTo: function(view, x, y) {
+		var now = (new Date()).getTime();
+		UI.Controllers.PHA.viewAnimationState = {
+		       'view': view,
+		     'startX': parseInt(view.css('left')) || 0,
+		     'startY': parseInt(view.css('top')) || 0,
+		          'x': x,
+		          'y': y,
+		      'start': now,
+		   'duration': 300,
+		        'end': now + 300,
+		   'interval': null};
+		
+		UI.Controllers.PHA.viewAnimationState.interval = setInterval(UI.Controllers.PHA._animateViewPosition, 20);
+	},
+	
+	_animateViewPosition: function() {
+		var s = UI.Controllers.PHA.viewAnimationState;
+		if (!s) {
+			return;
+		}
+		
+		// animating
+		var now = (new Date()).getTime();
+		if (now < s.end) {
+			var delta = (now - s.start) / s.duration;
+			var factor = ((delta * delta) * 3.0) - ((delta * delta * delta) * 2.0);
+			var thisX = s.startX + (factor * (s.x - s.startX));
+			var thisY = s.startY + (factor * (s.y - s.startY));
+			
+			s.view.css('left', thisX + 'px').css('top', thisY + 'px');
+			return;
+		}
+		
+		// finished
+		s.view.css('left', s.x + 'px').css('top', s.y + 'px');
+		
+		clearInterval(s.interval);
+		s.interval = null;
+		UI.Controllers.PHA.viewAnimationState = {};
+	}
 },
 /* @Prototype */
 {
@@ -205,10 +247,10 @@ $.Controller.extend('UI.Controllers.PHA',
 			
 			// add app on drop
 			drop: function(event, ui) {
-				var app = ui.draggable.model();			// original element: ui.draggable
-				var carenet = $(this);
+				var app = ui.draggable.model();
+				var carenet_view = $(this);
 				
-				self.addAppToCarenet(app, carenet);
+				self.addAppToCarenet(app, ui.helper, carenet_view);
 			}
 		});
 	},
@@ -217,20 +259,25 @@ $.Controller.extend('UI.Controllers.PHA',
 	/**
 	 * Event handlers
 	 */
-	addAppToCarenet: function(app, carenet_view) {
-		var self = this;
+	addAppToCarenet: function(app, dragged_view, carenet_view) {
 		var carenet = carenet_view.model();
-		
-		// create the view
+		carenet_view.addClass('expanded');
 		app.temporarily_added = true;
-		var coords = self.coordinatesForAppIndex(carenet.apps.length);
-		var new_app_view = $(this.view('carenet_app', {'app': app, 'coords': coords}));
+		
+		// create the view at drop position
+		var carenet_content = carenet_view.find('.carenet_content').first();
+		var pos_parent = carenet_content.offset();
+		var pos_app = dragged_view.offset();
+		var cur_coords = {'top': pos_app.top - pos_parent.top + 7, 'left': pos_app.left - pos_parent.left + 30};		// manual correction because the dragged and new app view are of different size
+		
+		var new_app_view = $(this.view('carenet_app', {'app': app, 'coords': cur_coords}));
 		this.setupCarenetApp(new_app_view);
 		
-		// add the view
-		carenet_view.find('.carenet_content').append(new_app_view);
+		// add the view and animate to final position
+		carenet_content.append(new_app_view);
+		var coords = this.coordinatesForAppIndex(carenet.apps.length);
+		UI.Controllers.PHA.animateViewPositionTo(new_app_view, coords.left, coords.top);
 		carenet_view.find('.carenet_num_apps').first().text('~');
-		carenet_view.addClass('expanded');
 		
 		// add to array and tell the server
 		carenet.apps.push(app);
@@ -321,9 +368,8 @@ $.Controller.extend('UI.Controllers.PHA',
 								if ('app_content' == v.getAttribute('id')) {
 									break;
 								}
-								console.log(v);
-								pos.top += v.offsetTop;
-								pos.left += v.offsetLeft;
+								pos.top += v.offsetTop + (window.getComputedStyle ? parseInt(window.getComputedStyle(v, null).borderTopWidth) : 0);
+								pos.left += v.offsetLeft + (window.getComputedStyle ? parseInt(window.getComputedStyle(v, null).borderLeftWidth) : 0);
 								
 								v = v.offsetParent;
 							}

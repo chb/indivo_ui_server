@@ -533,10 +533,10 @@ blockquote.content { margin: 1em 0; }
 	-webkit-border-radius: 20px; -moz-border-radius: 20px; border-radius: 20px;
 	background: url() center center no-repeat rgb(210,210,210); background-color: rgba(0,0,0,0.15);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
-	-webkit-transition-property: border-radius, margin, padding;
-	-moz-transition-property: border-radius, margin, padding;
-	-o-transition-property: border-radius, margin, padding;
-	transition-property: border-radius, margin, padding;
+	-webkit-transition-property: margin, padding, border-radius;
+	-moz-transition-property: margin, padding, border-radius;
+	-o-transition-property: margin, padding, border-radius;
+	transition-property: margin, padding, border-radius;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .carenet_app:hover {
@@ -591,20 +591,17 @@ blockquote.content { margin: 1em 0; }
 }
 .carenet:hover .carenet_border, .expanded .carenet_border {
 	width: 190px; height: 190px; margin: -32px; border-radius: 96px;
-	-webkit-transition-property: width, height, margin, border-radius;
-	-moz-transition-property: width, height, margin, border-radius;
-	-o-transition-property: width, height, margin, border-radius;
-	transition-property: width, height, margin, border-radius;
-	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
-.carenet_content { display: block; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; }
-.carenet:hover .carenet_content, .app_hovers .carenet_content, .expanded .carenet_content {
-	display: block; opacity: 1;
+.carenet_content {
+	display: block; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0;
 	-webkit-transition-property: opacity;
 	-moz-transition-property: opacity;
 	-o-transition-property: opacity;
 	transition-property: opacity;
 	-webkit-transition-duration: 0.4s; -o-transition-duration: 0.4s; -moz-transition-duration: 0.4s; transition-duration: 0.4s;
+}
+.carenet:hover .carenet_content, .app_hovers .carenet_content, .expanded .carenet_content {
+	display: block; opacity: 1;
 }
 
 

@@ -1,5 +1,11 @@
 <% _(carenets).each(function(carenet, i) { %>
 	<div class="carenet" <%= carenet %>>
+		<div class="carenet_inner">
+			<p>
+				<a class="carenet_name"><%= carenet.name %></a>
+				<b class="carenet_num_apps"><%= carenet.apps.length %></b>
+			</p>
+		</div>
 		<div class="carenet_border">
 			<div class="carenet_content">
 			<% _(carenet.apps).each(function(app, i) {
@@ -9,12 +15,6 @@
 				<div class="carenet_app" style="top: <%= coords.top %>px; left: <%= coords.left %>px; background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png')" <%= app %>></div>
 			<% }) %>
 			</div>
-		</div>
-		<div class="carenet_inner">
-			<p>
-				<a class="carenet_name"><%= carenet.name %></a>
-				<b class="carenet_num_apps"><%= carenet.apps.length %></b>
-			</p>
 		</div>
 	</div>
 <% }) %>
