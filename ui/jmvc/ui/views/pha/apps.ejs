@@ -1,8 +1,7 @@
 <% _(all_apps).each(function(app, i) {
-	if ('True' != app.data.autonomous) { %>
-	<div class="app" <%= app %>>
-		<% var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
-		<img src="/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png" alt="" /><br />
+	if ('True' != app.data.autonomous) {
+		var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
+	<div class="app" style="background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png');" <%= app %>>
 		<%= app.data.name %>
 		<div class="app_info">
 			<b><%= app.data.name %></b><br />

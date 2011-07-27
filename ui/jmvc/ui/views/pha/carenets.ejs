@@ -4,11 +4,9 @@
 			<div class="carenet_content">
 			<% _(carenet.apps).each(function(app, i) {
 				app.temporarily_added = false;
-				var coords = controller.coordinatesForAppIndex(i); %>
-				<div class="carenet_app" style="top: <%= coords.top %>px; left: <%= coords.left %>px;" <%= app %>>
-					<% var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
-					<img src="/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png" alt="" />
-				</div>
+				var coords = controller.coordinatesForAppIndex(i);
+				var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
+				<div class="carenet_app" style="top: <%= coords.top %>px; left: <%= coords.left %>px; background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png')" <%= app %>></div>
 			<% }) %>
 			</div>
 		</div>

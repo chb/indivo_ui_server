@@ -501,8 +501,9 @@ blockquote.content { margin: 1em 0; }
 }
 .app {
 	float: left; position: relative; z-index: 2; cursor: pointer;
-    height: 60px; width: 80px; margin: 10px 10px 0 0; padding: 10px;
+    height: 20px; width: 100px; margin: 10px 10px 0 0; padding: 50px 0 10px;
     font-size: 0.8em; text-align: center;
+    background: url() 34px 10px no-repeat;
     -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
     -webkit-transition-property: border-radius, margin, padding;
 	-moz-transition-property: border-radius, margin, padding;
@@ -530,7 +531,7 @@ blockquote.content { margin: 1em 0; }
 .carenet_app {
 	position: absolute; top: 0; left: 0; width: 40px; height: 40px; cursor: pointer;
 	-webkit-border-radius: 20px; -moz-border-radius: 20px; border-radius: 20px;
-	background-color: rgb(210,210,210); background-color: rgba(0,0,0,0.15);
+	background: url() center center no-repeat rgb(210,210,210); background-color: rgba(0,0,0,0.15);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 	-webkit-transition-property: border-radius, margin, padding;
 	-moz-transition-property: border-radius, margin, padding;
@@ -545,7 +546,6 @@ blockquote.content { margin: 1em 0; }
 .carenet_app.app_dragged, .carenet_app:hover.app_dragged {
 	margin: -10px; padding: 10px; -webkit-border-radius: 30px; -moz-border-radius: 30px; border-radius: 30px;
 }
-.carenet_app img { width: 32px; height: 32px; margin: 4px; }
 .app_will_remove, .app_will_remove:hover {
 	background-color: rgb(255,50,0); background-color: rgba(255,50,0,0.5);
 }
