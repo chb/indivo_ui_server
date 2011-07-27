@@ -504,42 +504,53 @@ blockquote.content { margin: 1em 0; }
     height: 60px; width: 80px; margin: 10px 10px 0 0; padding: 10px;
     font-size: 0.8em; text-align: center;
     -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
+    -webkit-transition-property: border-radius, margin, padding;
+	-moz-transition-property: border-radius, margin, padding;
+	-o-transition-property: border-radius, margin, padding;
+	transition-property: border-radius, margin, padding;
+	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .app:hover, .app_showinfo {
 	background-color: rgba(0,0,0,0.1);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.9); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.9); box-shadow: 0 1px 0 rgba(255,255,255,0.9);
 }
+
 .app_dragged {
 	background-color: rgba(0,0,0,0.2); z-index: 5;
 	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
+}
+.app_dragged:hover {
+	background-color: rgb(204,204,204); background-color: rgba(0,0,0,0.2);
+	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
+}
+.app.app_dragged {
+	-webkit-border-radius: 16px; -moz-border-radius: 16px; border-radius: 16px;
+}
+
+.carenet_app {
+	position: absolute; top: 0; left: 0; width: 40px; height: 40px; cursor: pointer;
+	-webkit-border-radius: 20px; -moz-border-radius: 20px; border-radius: 20px;
+	background-color: rgb(210,210,210); background-color: rgba(0,0,0,0.15);
+	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 	-webkit-transition-property: border-radius, margin, padding;
 	-moz-transition-property: border-radius, margin, padding;
 	-o-transition-property: border-radius, margin, padding;
 	transition-property: border-radius, margin, padding;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
-.app_dragged:hover {
-	background-color: rgba(0,0,0,0.2);
-	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
+.carenet_app:hover {
+	margin: -2px; padding: 2px;
+	-webkit-border-radius: 22px; -moz-border-radius: 22px; border-radius: 22px;
 }
-.app.app_dragged {
-	-webkit-border-radius: 16px; -moz-border-radius: 16px; border-radius: 16px;
-}
-.carenet_app.app_dragged {
+.carenet_app.app_dragged, .carenet_app:hover.app_dragged {
 	margin: -10px; padding: 10px; -webkit-border-radius: 30px; -moz-border-radius: 30px; border-radius: 30px;
-}
-.carenet_app {
-	position: absolute; top: 0; left: 0; width: 40px; height: 40px; cursor: pointer;
-	-webkit-border-radius: 20px; -moz-border-radius: 20px; border-radius: 20px;
-	background-color: rgb(210,210,210); background-color: rgba(0,0,0,0.15);
-	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
 .carenet_app img { width: 32px; height: 32px; margin: 4px; }
 .app_will_remove, .app_will_remove:hover {
-	background-color: red;
+	background-color: rgb(255,50,0); background-color: rgba(255,50,0,0.5);
 }
 .app_will_transfer, .app_will_transfer:hover {
-	background-color: green;
+	background-color: rgb(204,204,204); background-color: rgba(0,0,0,0.2);
 }
 .app_info {
 	display: none; z-index: 3;
@@ -633,9 +644,10 @@ blockquote.content { margin: 1em 0; }
     background:-moz-linear-gradient(top, rgb(195,255,134), rgb(171,255,86));
 }
 .has_app {
-	background-color: rgb(102,204,255);
+	background-color: rgb(195,255,134);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(195,255,134)), to(rgb(171,255,86)));
     background:-moz-linear-gradient(top, rgb(195,255,134), rgb(171,255,86));
+    -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
 }
 
 #apps h4 img, #carenets h4 img { vertical-align: -5%; margin-right: 0.75em; }

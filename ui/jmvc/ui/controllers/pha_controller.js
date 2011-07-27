@@ -108,6 +108,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		})
 		
 		// setup app dragging
+		.bind('selectstart', function () { return false; })		// needed for WebKit (unless we upgrade jQuery UI to 1.8.6+)
 		.draggable({
 			distance: 8,
 			revert: 'invalid',
@@ -119,7 +120,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				$('#carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
 					if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
-						$(elem).css('opacity', 0.5);
+						$(elem).css('opacity', 0.4);
 					}
 				});
 				ui.helper.addClass('app_dragged');
@@ -239,7 +240,10 @@ $.Controller.extend('UI.Controllers.PHA',
 		app_view.css('opacity', 1);
 		app_view.model().temporarily_added = false;
 		carenet_view.find('.carenet_num_apps').first().text(carenet_view.model().apps.length);
-		carenet_view.delay(1000).removeClass('expanded');
+		
+		var tmp_id = 'tmp_id_' + (new Date()).getTime();
+		carenet_view.attr('id', tmp_id);
+		setTimeout("$('#" + tmp_id + "').removeClass('expanded')", 600);
 	},
 	
 	
@@ -262,7 +266,10 @@ $.Controller.extend('UI.Controllers.PHA',
 		app_view.detach();		// can't fade out here as we need this to be gone when updating the other apps positions
 		this.updateAppPositionsInCarenet(carenet_view);
 		carenet_view.find('.carenet_num_apps').first().text(carenet.apps.length);
-		carenet_view.delay(1000).removeClass('expanded');
+		
+		var tmp_id = 'tmp_id_' + (new Date()).getTime();
+		carenet_view.attr('id', tmp_id);
+		setTimeout("$('#" + tmp_id + "').removeClass('expanded')", 600);
 	},
 	
 	
@@ -297,12 +304,34 @@ $.Controller.extend('UI.Controllers.PHA',
 				//	if (!view.hasClass('app_will_transfer')) {		// uncomment to NOT delete app from other carenet when transferring
 						view.draggable('destroy');
 						
+						// tell the server
 						var carenet_view = view.parentsUntil('.carenet').last().parent();
-						carenet_view.addClass('expanded');
 						var carenet = carenet_view.model();
 						if (carenet) {
 							var app = view.model();
+							carenet_view.addClass('expanded');
 							carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', view, carenet_view));
+						}
+						
+						// animate removal
+						if (!view.hasClass('app_will_transfer')) {
+							var v = view.get(0);
+							var pos = {top: 10, left: 9};	// hardcoded correction for some style attributes. Bad, quick and dirty
+							while (v) {
+								if ('app_content' == v.getAttribute('id')) {
+									break;
+								}
+								console.log(v);
+								pos.top += v.offsetTop;
+								pos.left += v.offsetLeft;
+								
+								v = v.offsetParent;
+							}
+							
+							var clone = view.clone(false);
+							clone.css('top', pos.top + 'px').css('left', pos.left + 'px');
+							$('#app_content').append(clone);
+							clone.delay(200).fadeOut(500, function() { $(this).remove(); });
 						}
 						view.detach();
 				//	}
@@ -310,6 +339,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			})
 			
 			//** setup dragging
+			.bind('selectstart', function () { return false; })		// needed for WebKit (unless we upgrade jQuery UI to 1.8.6+)
 			.draggable({
 				distance: 8,
 				revert: true,
@@ -317,7 +347,6 @@ $.Controller.extend('UI.Controllers.PHA',
 				containment: '#app_content',
 				start: function(event, ui) {
 					var view = ui.helper;
-					view.bind('selectstart', function () { return false; });		// needed for WebKit
 					view.addClass('app_dragged');
 					var carenet_view = view.parentsUntil('.carenet').last().parent();
 					carenet_view.addClass('expanded');
@@ -327,7 +356,7 @@ $.Controller.extend('UI.Controllers.PHA',
 					$('#carenets').find('.carenet').not('.expanded').each(function(i, elem) {
 						var app_arr = $(elem).model().apps;
 						if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
-							$(elem).css('opacity', 0.5);
+							$(elem).css('opacity', 0.4);
 						}
 					});
 				},
@@ -354,6 +383,10 @@ $.Controller.extend('UI.Controllers.PHA',
 						$(elem).css('opacity', 1);
 					});
 					$('#apps').find('.app').removeClass('app_showinfo');
+					
+					if (!view.hasClass('app_will_remove')) {
+						view.parentsUntil('.carenet').last().parent().removeClass('expanded');
+					}
 				}
 			});
 		}
