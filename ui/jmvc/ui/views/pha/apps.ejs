@@ -4,11 +4,11 @@
 		<% var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
 		<img src="/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png" alt="" /><br />
 		<%= app.data.name %>
-		<!--div class="app_info">
+		<div class="app_info">
 			<b><%= app.data.name %></b><br />
 			<%= app.data.description %><br />
 			<span><%= app.id %></span>
-		</div-->
+		</div>
 	</div>
 	<% }
 }) %>

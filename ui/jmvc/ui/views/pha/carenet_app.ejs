@@ -2,9 +2,4 @@
 <div class="carenet_app" style="opacity: <%= opacity %>; top: <%= coords.top %>px; left: <%= coords.left %>px;" <%= app %>>
 	<% var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
 	<img src="/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png" alt="" />
-	<div class="carenet_app_info">
-		<b><%= app.data.name %></b><br />
-		<%= app.data.description %><br />
-		<span><%= app.id %></span>
-	</div>
 </div>

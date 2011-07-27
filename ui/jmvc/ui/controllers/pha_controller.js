@@ -19,7 +19,7 @@
  * WARNING: carenet stuff broken and incomplete!!!
  *
  *
- *
+ * @author Pascal Pfiffner (pascal.pfiffner@childrens.harvard.edu)
  * @author Arjun Sanyal (arjun.sanyal@childrens.harvard.edu)
  */
 $.Controller.extend('UI.Controllers.PHA',
@@ -60,7 +60,6 @@ $.Controller.extend('UI.Controllers.PHA',
 	
 	didLoadInfo: function(record) {				// loaded info, get all apps
 		this.record = record;
-		//alert($('#app_content').find(':droppable').length);
 		$('#app_content').html(this.view('show'));
 		$('#app_content_iframe').hide();
 		$('#app_content').show();
@@ -75,8 +74,11 @@ $.Controller.extend('UI.Controllers.PHA',
 		if (this.record_info.carenet_id) {
 			UI.Models.PHA.get_by_carenet(this.record_info.carenet_id, null, this.callback('didGetMyApps'));
 		}
-		else {
+		else if (this.record.record_id) {
 			UI.Models.PHA.get_by_record(this.record.record_id, null, this.callback('didGetMyApps'));
+		}
+		else {
+			alert("didGetAllApps()\n\nError, we got invalid record info, cannot continue");
 		}
 	},
 	
@@ -107,10 +109,12 @@ $.Controller.extend('UI.Controllers.PHA',
 		
 		// setup app dragging
 		.draggable({
-			revert: true,
+			distance: 8,
+			revert: 'invalid',
+			revertDuration: 300,
 			helper: 'clone',
 			containment: '#app_content',
-			start: function(event) {
+			start: function(event, ui) {
 				var app_id = $(this).model().id;
 				$('#carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
@@ -118,6 +122,7 @@ $.Controller.extend('UI.Controllers.PHA',
 						$(elem).css('opacity', 0.5);
 					}
 				});
+				ui.helper.addClass('app_dragged');
 			},
 			stop: function(event) {				// this may be called AFTER another 'start' if the user very quickly drags another app. We could use 'drag' instead of 'start'
 				$('#carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
@@ -164,18 +169,13 @@ $.Controller.extend('UI.Controllers.PHA',
 		};
 		nets.empty().html(this.view('carenets', params));
 		
-		// setup apps (do this in the EJS?)
-		nets.find('.carenet_app').click(function(event) {
-			var app_view = $(this);
-			var carenet_view = app_view.parentsUntil('.carenet').parent();
-			carenet_view.addClass('expanded');
-			var carenet = carenet_view.model();
-			var app = app_view.model();
-			carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', app_view, carenet_view));
+		// setup apps
+		var self = this;
+		nets.find('.carenet_app').each(function(i) {
+			self.setupCarenetApp($(this));
 		});
 		
 		// setup droppable
-		var self = this;
 		nets.find('.carenet').droppable({
 			accept: function(draggable) {
 				var mod = $(this).model();
@@ -184,16 +184,30 @@ $.Controller.extend('UI.Controllers.PHA',
 					return false;
 				}
 				
-				return ! _(mod.apps).detect(function(a) { return a.id === draggable.model().id; });
+				var drag_mod = draggable.model();
+				if (drag_mod) {
+					return ! _(mod.apps).detect(function(a) { return a.id === drag_mod.id; });
+				}
+				return false;
 			},
 			hoverClass: 'app_hovers',
+			over: function(event, ui) {
+				if (ui.helper.hasClass('app_will_remove')) {
+					ui.helper.addClass('app_will_transfer');
+				}
+			},
+			out: function(event, ui) {
+				if (ui.helper.hasClass('app_will_remove')) {
+					ui.helper.removeClass('app_will_transfer');
+				}
+			},
+			
+			// add app on drop
 			drop: function(event, ui) {
 				var app = ui.draggable.model();			// original element: ui.draggable
-				var cnet = $(this);
+				var carenet = $(this);
 				
-				// add app
-				self.addAppToCarenet(app, cnet);
-				ui.helper.remove();
+				self.addAppToCarenet(app, carenet);
 			}
 		});
 	},
@@ -210,13 +224,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		app.temporarily_added = true;
 		var coords = self.coordinatesForAppIndex(carenet.apps.length);
 		var new_app_view = $(this.view('carenet_app', {'app': app, 'coords': coords}));
-		new_app_view.click(function(event) {
-			var app_view = $(this);
-			app_view.css('opacity', 0.5);
-			var carenet_view = app_view.parentsUntil('.carenet').parent();
-			carenet_view.addClass('expanded');
-			carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', app_view, carenet_view));
-		});
+		this.setupCarenetApp(new_app_view);
 		
 		// add the view
 		carenet_view.find('.carenet_content').append(new_app_view);
@@ -261,6 +269,96 @@ $.Controller.extend('UI.Controllers.PHA',
 	/**
 	 * Utilities
 	 */
+	setupCarenetApp: function(app_view) {
+		if (app_view) {
+			var self = this;
+			
+			//** show app info on hover
+			app_view.bind('mouseover', function(event) {
+				var self_id = $(this).model().id;
+				$('#apps').find('.app').each(function(i) {
+					if ($(this).model().id == self_id) {
+						$(this).addClass('app_showinfo');
+					}
+				});
+			})
+			.bind('mouseout', function(event) {
+				if (!$(this).hasClass('app_dragged')) {
+					$('#apps').find('.app').removeClass('app_showinfo');
+				}
+			})
+			
+			//** setup action on mouse up (can't use "stop" of draggable as this will first revert the item)
+			.bind('mouseup', function(event) {
+				var view = $(this);
+				
+				// remove from carenet
+				if (view.hasClass('app_will_remove')) {
+				//	if (!view.hasClass('app_will_transfer')) {		// uncomment to NOT delete app from other carenet when transferring
+						view.draggable('destroy');
+						
+						var carenet_view = view.parentsUntil('.carenet').last().parent();
+						carenet_view.addClass('expanded');
+						var carenet = carenet_view.model();
+						if (carenet) {
+							var app = view.model();
+							carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', view, carenet_view));
+						}
+						view.detach();
+				//	}
+				}
+			})
+			
+			//** setup dragging
+			.draggable({
+				distance: 8,
+				revert: true,
+				revertDuration: 300,
+				containment: '#app_content',
+				start: function(event, ui) {
+					var view = ui.helper;
+					view.bind('selectstart', function () { return false; });		// needed for WebKit
+					view.addClass('app_dragged');
+					var carenet_view = view.parentsUntil('.carenet').last().parent();
+					carenet_view.addClass('expanded');
+					
+					// indicate (im)possible targets
+					var app_id = view.model().id;
+					$('#carenets').find('.carenet').not('.expanded').each(function(i, elem) {
+						var app_arr = $(elem).model().apps;
+						if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
+							$(elem).css('opacity', 0.5);
+						}
+					});
+				},
+				drag: function(event, ui) {
+					var view = ui.helper;
+					var par = view.parent();
+					var x = parseInt(view.css('left')) + view.outerWidth(true) / 2 - par.outerWidth(true) / 2;
+					var y = parseInt(view.css('top')) + view.outerHeight(true) / 2 - par.outerHeight(true) / 2;
+					var maxRad = 120;
+					var myRad = Math.sqrt(x*x + y*y);
+					if (myRad > maxRad) {
+						view.addClass('app_will_remove');
+					}
+					else {
+						view.removeClass('app_will_remove');
+					}
+				},
+				stop: function(event, ui) {
+					var view = ui.helper;
+					view.removeClass('app_dragged');
+					
+					// revert UI (note: this may be called AFTER another 'start' if the user very quickly drags another app)
+					$('#carenets').find('.carenet').each(function(i, elem) {
+						$(elem).css('opacity', 1);
+					});
+					$('#apps').find('.app').removeClass('app_showinfo');
+				}
+			});
+		}
+	},
+	
 	updateAppPositionsInCarenet: function(carenet_view) {
 		if (carenet_view) {
 			var self = this;
