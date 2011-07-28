@@ -383,6 +383,11 @@ $.Controller.extend('UI.Controllers.PHA',
 				self.addAppToCarenet(ui.draggable.model(), ui.helper, $(this));
 			}
 		});
+		
+		// setup carenet name editing
+		nets.find('a.carenet_name').each(function(i) {
+			self.setupCarenetName($(this));
+		});
 	},
 	
 	
@@ -426,7 +431,6 @@ $.Controller.extend('UI.Controllers.PHA',
 		setTimeout("$('#" + tmp_id + "').removeClass('expanded')", 600);
 	},
 	
-	
 	didRemoveAppFromCarenet: function(app_view, carenet_view, data, textStatus, xhr) {
 		
 		// remove app from carenet app array
@@ -452,10 +456,71 @@ $.Controller.extend('UI.Controllers.PHA',
 		setTimeout("$('#" + tmp_id + "').removeClass('expanded')", 600);
 	},
 	
+	changeCarenetName: function(form) {
+		$('body').unbind('click');
+		
+		var new_name = form.find('input').first().val();
+		var carenet_view = form.parentsUntil('.carenet').last().parent();
+		var carenet = carenet_view.model();
+		
+		this.record.rename_carenet(carenet.carenet_id, new_name, this.callback('didChangeCarenetName', form, new_name));
+	},
+	didChangeCarenetName: function(name_form, new_name, data, textStatus, xhr) {
+		if ('success' == textStatus) {
+			name_form.parent().find('b').show();
+			
+			// return the form to a link
+			name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
+			name_form.remove();
+		}
+		else {
+			alert("There was an error changing the name, please try again\n\n" + data);
+			name_form.find('button').removeAttr('disabled');
+		}
+	},
+	
 	
 	/**
 	 * Utilities
 	 */
+	setupCarenetName: function(carenet_name_view) {
+		if (carenet_name_view) {
+			var self = this;
+			
+			carenet_name_view.click(function(event) {
+				event.stopPropagation();
+				$(this).parent().find('b').hide();
+				
+				// insert an input field on link click
+				var field = $('<input type="name" name="carenet_name" value="' + carenet_name_view.text() + '" />');
+				var submit = $('<button type="submit">Save</button>');
+				var form = $('<form/>', {'method': 'get', 'action': 'javascript:;'}).append(field).append(submit);
+				form.submit(function() {
+					var form = $(this);
+					form.find('button').attr('disabled', 'disabled');
+					self.changeCarenetName(form);
+					return false;
+				});
+				carenet_name_view.before(form);
+				carenet_name_view.hide();
+				form.find('input').first().focus();
+				form.parent().click(function(event) { event.stopPropagation(); });
+				
+				// cancel input if we click somewhere outside
+				$('body').click(function(event) {
+					$(this).unbind('click');
+					var forms = $('#app_content').find('.carenet_inner').find('form');
+					if (forms.length > 0) {
+						forms.each(function(i) {
+							$(this).siblings().show();
+							$(this).remove();
+						});
+					}
+				});
+			});
+		}
+	},
+	
 	setupCarenetApp: function(app_view) {
 		if (app_view) {
 			var self = this;
