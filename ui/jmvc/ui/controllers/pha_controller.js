@@ -175,6 +175,32 @@ $.Controller.extend('UI.Controllers.PHA',
 		var left = 64 + b - 20;
 		
 		return {'top': top, 'left': left};
+	},
+	
+	poof: function(view) {				// view must be absolutely positioned for now
+		var poof = $('#poof');
+		if (view && 'object' == typeof view) {
+			poof.remove();
+			
+			var x = parseInt(view.css('left')) + (view.outerWidth(true) / 2) - 25;		// '#poof' is 50 pixels square
+			var y = parseInt(view.css('top')) + (view.outerHeight(true) / 2) - 25;
+			poof = $('<div/>', {'id': 'poof'}).css('left', x + 'px').css('top', y + 'px');
+			view.replaceWith(poof);
+			
+			setTimeout(UI.Controllers.PHA.poof, 50);
+		}
+		else if (poof.is('*')) {
+			var curr = poof.css('background-position').split(/\s+/);
+			if (curr.length > 1) {
+				var step = Math.floor(Math.abs(parseInt(curr[1]) / 50));
+				if (step < 4) {
+					poof.css('background-position', curr[0] + ' ' + ((step + 1) * -50) + 'px');
+					setTimeout(UI.Controllers.PHA.poof, 50);
+					return;
+				}
+				poof.fadeOut(25, function() { $(this).remove(); });
+			}
+		}
 	}
 },
 /* @Prototype */
@@ -478,7 +504,7 @@ $.Controller.extend('UI.Controllers.PHA',
 						var clone = view.clone(false);
 						clone.css('top', v_off.top + 10 + 'px').css('left', v_off.left + 10 + 'px');		// TODO: Remove manual correction
 						parent.append(clone);
-						clone.delay(200).fadeOut(400, function() { $(this).remove(); });
+						UI.Controllers.PHA.poof(clone);
 						view.detach();
 					}
 				}
