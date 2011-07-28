@@ -26,24 +26,26 @@ $.Controller.extend('UI.Controllers.PHA',
 /* @Static */
 {
 	onDocument: true,
+	animDuration: 300,
 	viewAnimationState: {},
-	animateViewPositionTo: function(view, x, y) {
+	animateViewTo: function(view, x, y, delay) {
+		delay = delay ? delay : 0;
 		var now = (new Date()).getTime();
 		UI.Controllers.PHA.viewAnimationState = {
 		       'view': view,
-		     'startX': parseInt(view.css('left')) || 0,
-		     'startY': parseInt(view.css('top')) || 0,
-		          'x': x,
-		          'y': y,
-		      'start': now,
-		   'duration': 300,
-		        'end': now + 300,
+		      'start': {   'x': parseInt(view.css('left')) || 0,
+		      			   'y': parseInt(view.css('top')) || 0,
+		      			'time': now + delay},
+		        'end': {   'x': x,
+		        		   'y': y,
+		        		'time': now + delay + UI.Controllers.PHA.animDuration},
+		   'duration': UI.Controllers.PHA.animDuration,
 		   'interval': null};
 		
-		UI.Controllers.PHA.viewAnimationState.interval = setInterval(UI.Controllers.PHA._animateViewPosition, 20);
+		UI.Controllers.PHA.viewAnimationState.interval = setInterval(UI.Controllers.PHA._animateView, 20);
 	},
 	
-	_animateViewPosition: function() {
+	_animateView: function() {
 		var s = UI.Controllers.PHA.viewAnimationState;
 		if (!s) {
 			return;
@@ -51,22 +53,126 @@ $.Controller.extend('UI.Controllers.PHA',
 		
 		// animating
 		var now = (new Date()).getTime();
-		if (now < s.end) {
-			var delta = (now - s.start) / s.duration;
+		if (now < s.end.time) {
+			var delta = (now - s.start.time) / s.duration;
 			var factor = ((delta * delta) * 3.0) - ((delta * delta * delta) * 2.0);
-			var thisX = s.startX + (factor * (s.x - s.startX));
-			var thisY = s.startY + (factor * (s.y - s.startY));
+			var thisX = s.start.x + (factor * (s.end.x - s.start.x));
+			var thisY = s.start.y + (factor * (s.end.y - s.start.y));
 			
 			s.view.css('left', thisX + 'px').css('top', thisY + 'px');
 			return;
 		}
 		
 		// finished
-		s.view.css('left', s.x + 'px').css('top', s.y + 'px');
+		s.view.css('left', s.end.x + 'px').css('top', s.end.y + 'px');
 		
 		clearInterval(s.interval);
 		s.interval = null;
 		UI.Controllers.PHA.viewAnimationState = {};
+	},
+	
+	viewCircleState: {},
+	circleViewTo: function(view, deg, centerPoint, delay) {		// view must already be in target div, absolutely positioned
+		delay = delay ? delay : 0;
+		var now = (new Date()).getTime();
+		
+		// calculate current angle
+		var x = parseInt(view.css('left')) + view.outerWidth() / 2;
+		var y = parseInt(view.css('top')) + view.outerHeight() / 2;
+		var a = x - centerPoint.x;
+		var b = y - centerPoint.y;
+		var alpha = Math.atan2(b, a);
+		var radius = Math.ceil(Math.sqrt(a*a + b*b));
+		if (Math.round(alpha / 0.017453) == deg) {
+			return false;
+		}
+		
+		// init
+		var state = {
+		       'view': view,
+		     'center': centerPoint,
+		     'radius': radius,
+		      'start': { 'rad': alpha,
+		      			'time': now + delay},
+		        'end': { 'rad': deg2rad(deg),
+		        		'time': now + delay + UI.Controllers.PHA.animDuration},
+		   'duration': UI.Controllers.PHA.animDuration,
+		   'interval': null
+		};
+		var rand = 'circle' + (new Date()).getTime() + Math.round(Math.random() * 100000);
+		if (!UI.Controllers.PHA.viewCircleState.items) {
+			UI.Controllers.PHA.viewCircleState.items = {};
+		}
+		UI.Controllers.PHA.viewCircleState.items[rand] = state;
+		
+		// set interval
+		if (!UI.Controllers.PHA.viewCircleState.interval) {
+			UI.Controllers.PHA.viewCircleState.interval = setInterval(UI.Controllers.PHA._circleView, 20);
+		}
+		return true;
+	},
+	
+	_circleView: function() {
+		var dict = UI.Controllers.PHA.viewCircleState;
+		if (!dict) {
+			return;
+		}
+		
+		var now = (new Date()).getTime();
+		var latest = 0;
+		for (var rand in UI.Controllers.PHA.viewCircleState.items) {
+			var s = UI.Controllers.PHA.viewCircleState.items[rand];
+			if (s.start.time > now) {
+				continue;
+			}
+			var thisRad = 0;
+			latest = Math.max(s.end.time);
+			
+			// animating
+			if (now < s.end.time) {
+				var delta = (now - s.start.time) / s.duration;
+				var factor = ((delta * delta) * 3.0) - ((delta * delta * delta) * 2.0);
+				thisRad = s.start.rad + (factor * (s.end.rad - s.start.rad));
+			}
+			else {
+				thisRad = s.end.rad;
+				delete UI.Controllers.PHA.viewCircleState.items[rand];
+			}
+			
+			// calculate position from angle
+			var a = Math.sin(thisRad) * s.radius;
+			var b = Math.cos(thisRad) * s.radius;
+			var x = s.center.x + b - 20;			// 40 pixels wide
+			var y = s.center.y + a - 20;
+			
+			s.view.css('left', x + 'px').css('top', y + 'px');
+		}
+		
+		// all done
+		if (latest < now) {
+			clearInterval(UI.Controllers.PHA.viewCircleState.interval);
+			UI.Controllers.PHA.viewCircleState.interval = null;
+			UI.Controllers.PHA.viewCircleState.items = {};
+		}
+	},
+	
+	angleForAppIndex: function(i) {
+		var startDeg = -70;
+		var increment = 40;
+		
+		return startDeg + (i * increment);
+	},
+	
+	coordinatesForAppIndex: function(i) {
+		var myDeg = UI.Controllers.PHA.angleForAppIndex(i);
+		
+		var radius = 72;
+		var a = Math.sin(deg2rad(myDeg)) * radius;
+		var b = Math.cos(deg2rad(myDeg)) * radius;
+		var top = 64 + a - 20;			// 40 pixels wide
+		var left = 64 + b - 20;
+		
+		return {'top': top, 'left': left};
 	}
 },
 /* @Prototype */
@@ -204,7 +310,6 @@ $.Controller.extend('UI.Controllers.PHA',
 		// show carenets and their apps
 		var nets = $('#carenets');
 		var params = {
-			'controller': this,
 			'all_apps': this.all_apps,
 			'my_apps': this.my_apps,
 			'record_info': this.record_info,
@@ -235,9 +340,9 @@ $.Controller.extend('UI.Controllers.PHA',
 			},
 			hoverClass: 'app_hovers',
 			over: function(event, ui) {
-				if (ui.helper.hasClass('app_will_remove')) {
+				//if (ui.helper.hasClass('app_will_remove')) {		// not yet set on quick drags, set without checking as it doesn't hurt
 					ui.helper.addClass('app_will_transfer');
-				}
+				//}
 			},
 			out: function(event, ui) {
 				if (ui.helper.hasClass('app_will_remove')) {
@@ -247,10 +352,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			
 			// add app on drop
 			drop: function(event, ui) {
-				var app = ui.draggable.model();
-				var carenet_view = $(this);
-				
-				self.addAppToCarenet(app, ui.helper, carenet_view);
+				self.addAppToCarenet(ui.draggable.model(), ui.helper, $(this));
 			}
 		});
 	},
@@ -268,15 +370,18 @@ $.Controller.extend('UI.Controllers.PHA',
 		var carenet_content = carenet_view.find('.carenet_content').first();
 		var pos_parent = carenet_content.offset();
 		var pos_app = dragged_view.offset();
-		var cur_coords = {'top': pos_app.top - pos_parent.top + 7, 'left': pos_app.left - pos_parent.left + 30};		// manual correction because the dragged and new app view are of different size
-		
+		var half_width = (dragged_view.outerWidth() - 40) / 2;		// we will be 40 wide
+		var half_height = (dragged_view.outerHeight() - 40) / 2;
+		var cur_coords = {'top': pos_app.top - pos_parent.top + half_height, 'left': pos_app.left - pos_parent.left + half_width};
 		var new_app_view = $(this.view('carenet_app', {'app': app, 'coords': cur_coords}));
 		this.setupCarenetApp(new_app_view);
 		
 		// add the view and animate to final position
+		dragged_view.detach();
 		carenet_content.append(new_app_view);
-		var coords = this.coordinatesForAppIndex(carenet.apps.length);
-		UI.Controllers.PHA.animateViewPositionTo(new_app_view, coords.left, coords.top);
+		var coords = UI.Controllers.PHA.coordinatesForAppIndex(carenet.apps.length);
+		UI.Controllers.PHA.animateViewTo(new_app_view, coords.left, coords.top);
+		
 		carenet_view.find('.carenet_num_apps').first().text('~');
 		
 		// add to array and tell the server
@@ -348,39 +453,32 @@ $.Controller.extend('UI.Controllers.PHA',
 				
 				// remove from carenet
 				if (view.hasClass('app_will_remove')) {
-				//	if (!view.hasClass('app_will_transfer')) {		// uncomment to NOT delete app from other carenet when transferring
-						view.draggable('destroy');
+					view.draggable('destroy');
+					
+					// tell the server
+					var carenet_view = view.parentsUntil('.carenet').last().parent();
+					var carenet = carenet_view.model();
+					if (carenet) {
+						var app = view.model();
+						carenet_view.addClass('expanded');
+						carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', view, carenet_view));
+					}
+					else {
+						view.remove();
+					}
+					
+					// animate removal
+					if (!view.hasClass('app_will_transfer')) {
+						var parent = $('#app_content');
+						//var p_off = parent.offset();		// '#app_content' is no offsetParent! Will this change? If so, subtract p_off from v_off
+						var v_off = view.offset();
 						
-						// tell the server
-						var carenet_view = view.parentsUntil('.carenet').last().parent();
-						var carenet = carenet_view.model();
-						if (carenet) {
-							var app = view.model();
-							carenet_view.addClass('expanded');
-							carenet.remove_pha(app, self.callback('didRemoveAppFromCarenet', view, carenet_view));
-						}
-						
-						// animate removal
-						if (!view.hasClass('app_will_transfer')) {
-							var v = view.get(0);
-							var pos = {top: 10, left: 9};	// hardcoded correction for some style attributes. Bad, quick and dirty
-							while (v) {
-								if ('app_content' == v.getAttribute('id')) {
-									break;
-								}
-								pos.top += v.offsetTop + (window.getComputedStyle ? parseInt(window.getComputedStyle(v, null).borderTopWidth) : 0);
-								pos.left += v.offsetLeft + (window.getComputedStyle ? parseInt(window.getComputedStyle(v, null).borderLeftWidth) : 0);
-								
-								v = v.offsetParent;
-							}
-							
-							var clone = view.clone(false);
-							clone.css('top', pos.top + 'px').css('left', pos.left + 'px');
-							$('#app_content').append(clone);
-							clone.delay(200).fadeOut(500, function() { $(this).remove(); });
-						}
+						var clone = view.clone(false);
+						clone.css('top', v_off.top + 10 + 'px').css('left', v_off.left + 10 + 'px');		// TODO: Remove manual correction
+						parent.append(clone);
+						clone.delay(200).fadeOut(400, function() { $(this).remove(); });
 						view.detach();
-				//	}
+					}
 				}
 			})
 			
@@ -440,29 +538,14 @@ $.Controller.extend('UI.Controllers.PHA',
 	
 	updateAppPositionsInCarenet: function(carenet_view) {
 		if (carenet_view) {
-			var self = this;
+			var j = 0;
 			carenet_view.find('.carenet_app').each(function(i) {
-				var coords = self.coordinatesForAppIndex(i);
-				$(this).css('top', coords.top + 'px').css('left', coords.left + 'px');
+				var angle = UI.Controllers.PHA.angleForAppIndex(i);
+				if (UI.Controllers.PHA.circleViewTo($(this), angle, {'x': 64, 'y': 64}, j*100)) {
+					j++;
+				}
 			});
 		}
-	},
-	
-	coordinatesForAppIndex: function(i) {
-		var radius = 72;
-		var startDeg = -70;
-		var increment = 40;
-		
-		var myDeg = startDeg + (i * increment);
-		var a = Math.sin(this.deg2rad(myDeg)) * radius;
-		var b = Math.cos(this.deg2rad(myDeg)) * radius;
-		var top = 64 + a - 20;
-		var left = 64 + b - 20;
-		
-		return {'top': top, 'left': left};
-	},
-	deg2rad: function(deg) {
-		return deg * 0.017453;
 	},
 	
 	
@@ -489,4 +572,10 @@ $.Controller.extend('UI.Controllers.PHA',
 		return false;
 	});	*/
 });
+
+
+
+function deg2rad(deg) {
+	return deg * 0.017453;
+}
 
