@@ -31,6 +31,7 @@ $.Controller.extend('UI.Controllers.PHA',
 	animateViewTo: function(view, x, y, delay) {
 		delay = delay ? delay : 0;
 		var now = (new Date()).getTime();
+		view.css('position', 'absolute');			// Fix for Safari 5.1
 		UI.Controllers.PHA.viewAnimationState = {
 		       'view': view,
 		      'start': {   'x': parseInt(view.css('left')) || 0,
@@ -88,6 +89,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		}
 		
 		// init
+		view.css('position', 'absolute');			// Fix for Safari 5.1
 		var state = {
 		       'view': view,
 		     'center': centerPoint,
