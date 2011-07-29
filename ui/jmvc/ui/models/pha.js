@@ -61,6 +61,17 @@ $.Model.extend('UI.Models.PHA',
 		$.getXML(url, this.single_callback(callback));
 	},
 	
+	enable_pha: function(record_id, pha, callback) {
+		var startURL = interpolate_url_template(pha.data.startURLTemplate, {'record_id' : record_id, 'carenet_id': ''});
+		console.log(startURL);
+		$.ajax({
+			type: 'get',
+			url: startURL,
+			dataType: "xml",
+			success: callback
+		});
+	},
+	
 	delete_pha: function(record_id, pha_id, callback) {
 		indivo_api_call('delete',
 						'/records/' + encodeURIComponent(record_id) + '/apps/' + encodeURIComponent(pha_id),

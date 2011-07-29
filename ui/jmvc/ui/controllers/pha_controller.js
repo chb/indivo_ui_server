@@ -279,8 +279,15 @@ $.Controller.extend('UI.Controllers.PHA',
 		this.my_apps = my_apps;
 		var self = this;
 		
+		// mark our apps in all_apps
+		for (var i = 0; i < this.all_apps.length; i++) {
+			var app = this.all_apps[i];
+			app.enabled = (_(my_apps).detect(function(a) { return a.id === app.id; }));
+		}
+		
+		// show
 		var app_div = $('#apps');
-		var params = {'all_apps': this.my_apps};
+		var params = {'all_apps': this.all_apps};
 		app_div.empty().html(this.view('apps', params));
 		$('#carenets').show();
 		
@@ -321,7 +328,31 @@ $.Controller.extend('UI.Controllers.PHA',
 			stop: function(event) {				// this may be called AFTER another 'start' if the user very quickly drags another app. We could use 'drag' instead of 'start'
 				$('#carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
 			}
+		})
+		
+		// setup enabling/disabling
+		.find('input[name="enable_app"]').click(function(event) {
+			var checkbox = $(this);
+			var app = checkbox.model();
+			
+			// enable
+			if (checkbox.attr('checked')) {
+				checkbox.attr('disabled', 'disabled');
+				self.enableApp(app, checkbox);
+			}
+			
+			// warn before disabling
+			else if (confirm('{% trans "Disable this app?\n\nBy disabling this app it will also be removed from your carenets" %}')) {
+				checkbox.attr('disabled', 'disabled');
+				self.disableApp(app, checkbox);
+			}
+			else {
+				checkbox.attr('checked', 'checked');
+			}
 		});
+		
+		// disable dragging disabled apps (must be done in the aftermath)
+		app_div.find('.app.disabled').draggable('option', 'disabled', true);
 		
 		this.record.get_carenets(null, this.callback('didGetCarenets'));
 	},
@@ -494,6 +525,82 @@ $.Controller.extend('UI.Controllers.PHA',
 			alert("There was an error changing the name, please try again\n\n" + data);
 			name_form.find('button').removeAttr('disabled');
 		}
+	},
+	
+	enableApp: function(app, checkbox) {
+		alert("Until we have changed the UI backend, you must enable apps from the \"Get more apps\" overlay");
+		return;
+		
+		var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
+		var icon = '<img class="app_tab_img" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />';
+		
+		// add to app tabs
+		if ('True' != app.data.autonomous) {
+			$('#active_app_tabs').tabs('add', '#' + app.id.replace(/@/g, '_at_').replace(/\./g,'_'), app.data.name);
+			$('#active_app_tabs_inner li:last').prepend(icon);
+			// TODO: Add click action
+		}
+		else {
+			alert("Implement autonomous apps!");
+		}
+		
+		// add to record
+		UI.Models.PHA.enable_pha(this.record.record_id, app, self.callback('didEnableApp', app, checkbox));
+	},
+	didEnableApp: function(app, checkbox, data, textStatus, xhr) {
+		console.log(data, textStatus);
+		
+		// add
+		this.my_apps.push(app);
+		
+		// update status
+		var my_apps = _(this.my_apps);
+		for (var i = 0; i < this.all_apps.length; i++) {
+			var app = this.all_apps[i];
+			app.enabled = (my_apps.detect(function(a) { return a.id === id; }));
+		}
+		checkbox.parentsUntil('.app').last().parent().removeClass('disabled').draggable('option', 'disabled', false);
+	},
+	
+	disableApp: function(app, checkbox) {
+		UI.Models.PHA.delete_pha(this.record.record_id, app.id, self.callback('didDisableApp', app, checkbox));
+	},
+	didDisableApp: function(app, checkbox, data, textStatus, xhr) {
+		checkbox.removeAttr('disabled');
+		
+		// remove from array
+		for (var i = 0; i < this.my_apps.length; i++) {
+			if (this.my_apps[i] == app.id) {
+				this.my_apps.splice(i, 1);
+				break;
+			}
+		}
+		
+		// remove from app tabs
+		var li_id = app.id.replace(/@/g, '_at_').replace(/\./g,'_');
+		$('#active_app_tabs').find('a[href="#' + li_id + '"]').parent().fadeOut('fast', function() { $(this).remove(); });
+		
+		// update view
+		var my_apps = _(this.my_apps);
+		for (var i = 0; i < this.all_apps.length; i++) {
+			var this_app = this.all_apps[i];
+			this_app.enabled = (my_apps.detect(function(a) { return a.id === app.id; }));
+		}
+		checkbox.parentsUntil('.app').last().parent().addClass('disabled').draggable('option', 'disabled', true);
+		
+		// remove from carenets (only in the UI, the server did this when disabling the app)
+		var self = this;
+		$('#carenets').find('.carenet').each(function(j) {
+			var carenet_view = $(this);
+			carenet_view.find('.carenet_app').each(function(i) {
+				var view = $(this);
+				if (view.model().id == app.id) {
+					carenet_view.addClass('expanded');
+					setTimeout(function() { UI.Controllers.PHA.poof(view); }, 200);
+					setTimeout(function() { self.didRemoveAppFromCarenet(view, carenet_view); }, 450);
+				}
+			});
+		});
 	},
 	
 	

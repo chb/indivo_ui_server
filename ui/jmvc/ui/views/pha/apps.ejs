@@ -1,12 +1,17 @@
 <% _(all_apps).each(function(app, i) {
 	if ('True' != app.data.autonomous) {
-		var img_name = app.data.name.toLowerCase().replace(/ +/, '_'); %>
-	<div class="app" style="background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png');" <%= app %>>
-		<%= app.data.name %>
+		var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
+		var input_id = "app_" + app.id.replace(/-/g, '_'); %>
+	<div class="app <%= app.enabled ? '' : 'disabled' %>" style="background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png');" <%= app %>>
+		<b class="app_name"><%= app.data.name %></b>
 		<div class="app_info">
 			<b><%= app.data.name %></b><br />
 			<%= app.data.description %><br />
 			<span><%= app.id %></span>
+		</div>
+		<div class="app_options">
+			<input type="checkbox" id="<%= input_id %>" name="enable_app" value="1" <%= app.enabled ? 'checked="checked"' : '' %> <%= app %> />
+			<label for="<%= input_id %>">Enable</label>
 		</div>
 	</div>
 	<% }

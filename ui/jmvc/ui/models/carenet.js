@@ -30,11 +30,11 @@ $.Model.extend('UI.Models.Carenet',
   },
 
   add_pha: function(pha, callback) {
-    indivo_api_call("PUT", '/carenets/' + this.carenet_id + '/apps/' + pha.id, null, callback);
+    indivo_api_call("PUT", '/carenets/' + this.carenet_id + '/apps/' + encodeURIComponent(pha.id), null, callback);
   },
 
   remove_pha: function(pha, callback) {
-    indivo_api_call("DELETE", '/carenets/' + this.carenet_id + '/apps/' + pha.id, null, callback);
+    indivo_api_call("DELETE", '/carenets/' + this.carenet_id + '/apps/' + encodeURIComponent(pha.id), null, callback);
   },
 
   add_account: function(account_id, callback) {
