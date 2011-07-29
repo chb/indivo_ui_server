@@ -657,7 +657,7 @@ blockquote.content { margin: 1em 0; }
 .drag_instructions { margin: 4em 2em 3em; text-align: center; }
 .drag_instructions img { vertical-align: middle; margin-right: 0.75em; }
 
-#poof {
+.poof {
 	position: absolute; top: 0; left: 0; width: 50px; height: 50px; overflow: hidden;
 	background: url(/jmvc/ui/resources/images/poof.png) top center no-repeat transparent;
 }

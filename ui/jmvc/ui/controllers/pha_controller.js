@@ -177,28 +177,43 @@ $.Controller.extend('UI.Controllers.PHA',
 		return {'top': top, 'left': left};
 	},
 	
-	poof: function(view) {				// view must be absolutely positioned for now
-		var poof = $('#poof');
+	poofViews: [],
+	poof: function(view) {				// view must already be absolutely positioned for now. Does NOT remove/detach 'view', only hide it
 		if (view && 'object' == typeof view) {
-			poof.remove();
+			var must_start = (UI.Controllers.PHA.poofViews.length < 1);
 			
-			var x = parseInt(view.css('left')) + (view.outerWidth(true) / 2) - 25;		// '#poof' is 50 pixels square
+			// insert
+			var x = parseInt(view.css('left')) + (view.outerWidth(true) / 2) - 25;		// '.poof' is 50 pixels square
 			var y = parseInt(view.css('top')) + (view.outerHeight(true) / 2) - 25;
-			poof = $('<div/>', {'id': 'poof'}).css('left', x + 'px').css('top', y + 'px');
-			view.replaceWith(poof);
+			poof = $('<div/>').addClass('poof').css('left', x + 'px').css('top', y + 'px');
+			view.hide().after(poof);
+			UI.Controllers.PHA.poofViews.push(poof);
 			
-			setTimeout(UI.Controllers.PHA.poof, 50);
+			// timeout for first step
+			if (must_start) {
+				setTimeout(UI.Controllers.PHA.poof, 50);
+			}
 		}
-		else if (poof.is('*')) {
-			var curr = poof.css('background-position').split(/\s+/);
-			if (curr.length > 1) {
-				var step = Math.floor(Math.abs(parseInt(curr[1]) / 50));
-				if (step < 4) {
-					poof.css('background-position', curr[0] + ' ' + ((step + 1) * -50) + 'px');
-					setTimeout(UI.Controllers.PHA.poof, 50);
-					return;
+		else if (UI.Controllers.PHA.poofViews.length > 0) {
+			var all_poofs = UI.Controllers.PHA.poofViews.slice(0);		// copy array
+			for (var i = all_poofs.length; i > 0; i--) {				// iterate backwards as we're deleting items from the array by index
+				var poof = all_poofs[i-1];
+				var curr = poof.css('background-position').split(/\s+/);
+				if (curr.length > 1) {
+					var step = Math.floor(Math.abs(parseInt(curr[1]) / 50));
+					if (step < 4) {
+						poof.css('background-position', curr[0] + ' ' + ((step + 1) * -50) + 'px');
+					}
+					else {
+						poof.fadeOut(25, function() { $(this).remove(); });
+						UI.Controllers.PHA.poofViews.splice(i-1, 1);
+					}
 				}
-				poof.fadeOut(25, function() { $(this).remove(); });
+			}
+			
+			// timeout for next step
+			if (UI.Controllers.PHA.poofViews.length > 0) {
+				setTimeout(UI.Controllers.PHA.poof, 50);
 			}
 		}
 	}
@@ -236,6 +251,8 @@ $.Controller.extend('UI.Controllers.PHA',
 	
 	didLoadInfo: function(record) {				// loaded info, get all apps
 		this.record = record;
+		//console.log(this.record);
+		//console.log(this.record_info);
 		$('#app_content').html(this.view('show'));
 		$('#app_content_iframe').hide();
 		$('#app_content').show();
@@ -447,7 +464,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		}
 		
 		// update view
-		app_view.detach();		// can't fade out here as we need this to be gone when updating the other apps positions
+		app_view.remove();		// can't fade out here as we need this to be gone when updating the other apps positions
 		this.updateAppPositionsInCarenet(carenet_view);
 		carenet_view.find('.carenet_num_apps').first().text(carenet.apps.length);
 		
@@ -566,11 +583,7 @@ $.Controller.extend('UI.Controllers.PHA',
 						//var p_off = parent.offset();		// '#app_content' is no offsetParent! Will this change? If so, subtract p_off from v_off
 						var v_off = view.offset();
 						
-						var clone = view.clone(false);
-						clone.css('top', v_off.top + 10 + 'px').css('left', v_off.left + 10 + 'px');		// TODO: Remove manual correction
-						parent.append(clone);
-						UI.Controllers.PHA.poof(clone);
-						view.detach();
+						UI.Controllers.PHA.poof(view);
 					}
 				}
 			})
