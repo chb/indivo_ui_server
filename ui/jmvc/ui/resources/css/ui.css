@@ -500,7 +500,7 @@ blockquote.content { margin: 1em 0; }
 	position: relative; margin: 1em 0 32px;
 }
 .app {
-	float: left; position: relative; z-index: 2; cursor: pointer;
+	float: left; position: relative; z-index: 2; cursor: move;
     min-height: 45px; width: 100px; margin: 10px 10px 0 0; padding: 50px 0 10px;
     font-size: 0.8em; text-align: center;
     background: url() 34px 10px no-repeat;
@@ -514,6 +514,9 @@ blockquote.content { margin: 1em 0; }
 .app:hover, .app_showinfo {
 	background-color: rgba(0,0,0,0.1);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.9); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.9); box-shadow: 0 1px 0 rgba(255,255,255,0.9);
+}
+.app.disabled {
+	cursor: default;
 }
 .app.disabled:hover {
 	background-color: rgba(0,0,0,0.05);
@@ -669,7 +672,7 @@ blockquote.content { margin: 1em 0; }
 }
 
 #apps h4 img, #carenets h4 img { vertical-align: -5%; margin-right: 0.75em; }
-.drag_instructions { margin: 4em 2em 3em; text-align: center; }
+.drag_instructions { margin: 3em 2em; text-align: center; }
 .drag_instructions img { vertical-align: middle; margin-right: 0.75em; }
 
 .poof {

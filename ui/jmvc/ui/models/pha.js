@@ -63,12 +63,25 @@ $.Model.extend('UI.Models.PHA',
 	
 	enable_pha: function(record_id, pha, callback) {
 		var startURL = interpolate_url_template(pha.data.startURLTemplate, {'record_id' : record_id, 'carenet_id': ''});
-		console.log(startURL);
 		$.ajax({
 			type: 'get',
 			url: startURL,
-			dataType: "xml",
-			success: callback
+			dataType: 'json',			// the response does NOT get parsed - because of the redirect? Anyway, just parse data.responseText in the callback
+			complete: callback			// it seems that 'success' is not called, maybe because we're getting redirected?
+		});
+	},
+	
+	authorize_token: function(token, record_id, callback) {
+		var postURL = '/oauth/authorize';		// should we really POST directly to OAuth?
+		var dict = {
+			'oauth_token': token,
+			  'record_id': record_id
+		};
+		$.ajax({
+			type: 'post',
+			url: postURL,
+			data: dict,
+			complete: callback
 		});
 	},
 	

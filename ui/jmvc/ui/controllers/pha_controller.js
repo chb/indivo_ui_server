@@ -416,7 +416,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			},
 			hoverClass: 'app_hovers',
 			over: function(event, ui) {
-				//if (ui.helper.hasClass('app_will_remove')) {		// not yet set on quick drags, set without checking as it doesn't hurt
+				//if (ui.helper.hasClass('app_will_remove')) {		// 'app_will_remove' class is not yet set for quick drags. Set 'app_will_transfer' without checking as it doesn't hurt
 					ui.helper.addClass('app_will_transfer');
 				//}
 			},
@@ -528,42 +528,56 @@ $.Controller.extend('UI.Controllers.PHA',
 	},
 	
 	enableApp: function(app, checkbox) {
-		alert("Until we have changed the UI backend, you must enable apps from the \"Get more apps\" overlay");
-		return;
-		
-		var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
-		var icon = '<img class="app_tab_img" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />';
-		
-		// add to app tabs
-		if ('True' != app.data.autonomous) {
-			$('#active_app_tabs').tabs('add', '#' + app.id.replace(/@/g, '_at_').replace(/\./g,'_'), app.data.name);
-			$('#active_app_tabs_inner li:last').prepend(icon);
-			// TODO: Add click action
-		}
-		else {
-			alert("Implement autonomous apps!");
-		}
-		
-		// add to record
-		UI.Models.PHA.enable_pha(this.record.record_id, app, self.callback('didEnableApp', app, checkbox));
+		UI.Models.PHA.enable_pha(this.record.record_id, app, this.callback('doEnableApp', app, checkbox));
 	},
-	didEnableApp: function(app, checkbox, data, textStatus, xhr) {
-		console.log(data, textStatus);
-		
-		// add
-		this.my_apps.push(app);
-		
-		// update status
-		var my_apps = _(this.my_apps);
-		for (var i = 0; i < this.all_apps.length; i++) {
-			var app = this.all_apps[i];
-			app.enabled = (my_apps.detect(function(a) { return a.id === id; }));
+	doEnableApp: function(app, checkbox, data, textStatus, xhr) {
+		if ('success' == textStatus) {
+			data = $.parseJSON(data.responseText);
+			
+			// enabled the correct app
+			if (data.app_id == app.id) {
+				if (confirm(data.title + (data.description && data.description.length > 0 ? "\n\n" + data.description : ''))) {
+					UI.Models.PHA.authorize_token(data.request_token, this.record.record_id, this.callback('didEnableApp', app, checkbox));
+					return;
+				}
+			}
 		}
-		checkbox.parentsUntil('.app').last().parent().removeClass('disabled').draggable('option', 'disabled', false);
+		
+		checkbox.removeAttr('checked').removeAttr('disabled');
+	},
+	didEnableApp: function(app, checkbox, data, textStatus) {
+		if ('success' == textStatus) {
+			
+			// add to app tabs
+			var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
+			var icon = '<img class="app_tab_img" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />';
+			var params = {'pha': app,
+					   'fire_p': false,
+					'record_id': this.record.record_id,					// TODO: supply only record_id OR carenet_id
+				   'carenet_id': this.record_info.carenet_id
+			};
+			$(document.documentElement).ui_main('add_app', params);
+			
+			// add to array and update status
+			this.my_apps.push(app);
+			var u_apps = _(this.my_apps);
+			for (var i = 0; i < this.all_apps.length; i++) {
+				var this_app = this.all_apps[i];
+				this_app.enabled = (u_apps.detect(function(a) { return a.id === app.id; }));
+			}
+			checkbox.parentsUntil('.app').last().parent().removeClass('disabled').draggable('option', 'disabled', false);
+		}
+		
+		// failed
+		else {
+			checkbox.removeAttr('checked');
+		}
+		
+		checkbox.removeAttr('disabled');
 	},
 	
 	disableApp: function(app, checkbox) {
-		UI.Models.PHA.delete_pha(this.record.record_id, app.id, self.callback('didDisableApp', app, checkbox));
+		UI.Models.PHA.delete_pha(this.record.record_id, app.id, this.callback('didDisableApp', app, checkbox));
 	},
 	didDisableApp: function(app, checkbox, data, textStatus, xhr) {
 		checkbox.removeAttr('disabled');
@@ -759,31 +773,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				}
 			});
 		}
-	},
-	
-	
-	// old handlers:
-	/*
-	$('.remove_app').click(function(evt) {
-		UI.Models.PHA.delete_pha(_this.record_info.id, evt.target.id, function(){
-			self.show(); // reload view
-			UI.Controllers.MainController._remove_app(evt.target.id); // remove app from selector
-		})
-	});
-		
-	$('#pha_carenets_form').submit(function(evt) {
-		var pha_id = $(this).find('input[type=hidden]').attr('value');
-		var local_pha = _(_this.my_apps).detect(function(l){ return l.id === pha_id; });
-		var done = function(){$('#update_carenets').val('{% trans "Updated!" %}')}
-		
-		$(this).find('input[name=carenet]').each(function(i, checkbox) {
-			var carenet = _(_this.carenets).detect(function(c){ return c.carenet_id === checkbox.value; })
-			if (checkbox.checked) { carenet.add_pha(local_pha, done); }
-			else { carenet.remove_pha(local_pha, done); }
-		});
-		_.delay(function(){self.show()}, 1000); // reload view
-		return false;
-	});	*/
+	}
 });
 
 

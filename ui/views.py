@@ -14,6 +14,7 @@ from django.conf import settings
 
 from django.views.static import serve
 from django.template import Template, Context
+from django.utils import simplejson
 
 import xml.etree.ElementTree as ET
 import urllib, re
@@ -384,28 +385,32 @@ def authorize(request):
                 record_node = ET.fromstring(record_xml)
                 RECORDS = [[record_node.attrib['id'], record_node.attrib['label']]]
                 
-                carenet_els = ET.fromstring(api.get_record_carenets(record_id = record_id).response['response_data']).findall('Carenet')
-                carenets = [{'id': c.attrib['id'], 'name': c.attrib['name']} for c in carenet_els]
+                #carenet_els = ET.fromstring(api.get_record_carenets(record_id = record_id).response['response_data']).findall('Carenet')
+                #carenets = [{'id': c.attrib['id'], 'name': c.attrib['name']} for c in carenet_els]
+                carenets = None
             else:
                 records_xml = api.read_records(account_id = urllib.unquote(request.session['account_id'])).response['response_data']
                 RECORDS = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
                 carenets = None
             
-            return utils.render_template('ui/authorize', {'app_id': app_id,
-                                                            'name': name,
-                                                     'description': description,
-                                                   'request_token': REQUEST_TOKEN,
-                                                         'records': RECORDS,
-                                                        'carenets': carenets,
-                                                      'autonomous': autonomous,
-                                                'autonomousReason': autonomousReason})
+            data = {	  'app_id': app_id,
+							'name': name,
+						   'title': '{% trans "Authorize \"{{name}}\"?" %}'.replace('{{name}}', name),
+					 'description': description,
+				   'request_token': REQUEST_TOKEN,
+						 'records': RECORDS,
+						'carenets': carenets,
+					  'autonomous': autonomous,
+				'autonomousReason': autonomousReason}
+            return HttpResponse(simplejson.dumps(data))
+            #return utils.render_template('ui/authorize', data)
         elif kind == 'same':
             # return HttpResponse('fixme: kind==same not implimented yet')
             # in this case we will have record_id in the app_info
             return _approve_and_redirect(request, REQUEST_TOKEN, record_id, carenet_id)
         else:
             return utils.render_template('ui/error', {'error_message': 'bad value for kind parameter'})
-            return HttpResponse('bad value for kind parameter')
+            #return HttpResponse('bad value for kind parameter')
     
     # process POST
     elif request.method == HTTP_METHOD_POST \
@@ -435,8 +440,8 @@ def authorize(request):
             api.post_carenet_app(carenet_id = approved_carenet_id, app_id = app_id)
         
         return location
-    else:
-        return HttpResponse('bad request method or missing param in request to authorize')
+    
+    return HttpResponse('bad request method or missing param in request to authorize')
 
 def authorize_cancel(request):
     """docstring for authorize_cancel"""
