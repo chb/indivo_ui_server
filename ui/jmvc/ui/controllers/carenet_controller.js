@@ -42,7 +42,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 											{'label': _this.label,
 											'carenets': _this.carenets,
 											'accounts': _this.accounts }))
-						$('#app_content_iframe').hide();
+						$('#app_content_iframe').attr('src', 'about:blank').hide();
 						$('#app_content').show();
 						
 						$('.remove_account').click(function(e) {

@@ -77,7 +77,7 @@ agt_family.png
 /* reset */
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{*font-size:100%;}legend{color:#000;}
 /* base */
-h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;}em{font-style:italic;}blockquote,ul,ol,dl{margin:1em;}ol,ul,dl{margin-left:2em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
+h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em 0;}h1,h2,h3,h4,h5,h6,strong{font-weight:bold;}abbr,acronym{border-bottom:1px dotted #000;cursor:help;}em{font-style:italic;}blockquote,{margin:1em;}ol li{list-style:decimal outside;}ul li{list-style:disc outside;}dl dd{margin-left:1em;}th,td{border:1px solid #000;padding:.5em;}th{font-weight:bold;text-align:center;}caption{margin-bottom:.5em;text-align:center;}p,fieldset,table,pre{margin-bottom:1em;}input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
 /* see also:
   http://www.alistapart.com/articles/howtosizetextincss/
   http://www.markboulton.co.uk/journal/comments/incremental-leading
@@ -303,119 +303,65 @@ blockquote.content { margin: 1em 0; }
 }
 
 
-/*** Apps ***/
+/*** App Selector ***/
 
 #app_selector {
-  border-top: 1px solid #ccc;
-  border-right: 1px solid white;
-  border-bottom: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  width: 17%;
-  float: left;
-  margin-top: 48px;
-  -moz-box-shadow: 0 0px 0 #fff;
-  -webkit-box-shadow: 0 0px 0 #fff;
-  border-style: dashed;
-  background: #FEFCF7;
-  -moz-border-radius-topright: 0px !important;
-  -webkit-border-top-right-radius: 0px !important;
-  -moz-border-radius-bottomright: 0px !important;
-  -webkit-border-bottom-right-radius: 0px !important;
+	float: left; width: 17%;
+	margin-top: 48px;
+	border: 1px dashed #ccc; border-right-color: white;
+	-moz-box-shadow: 0 0px 0 #fff; -webkit-box-shadow: 0 0px 0 #fff; box-shadow: 0 0px 0 #fff;
+	background: #FEFCF7;
+	-moz-border-radius: 8px 0 0 8px; -webkit-border-radius: 8px 0 0 8px; border-radius: 8px 0 0 8px;
 }
-
-/* this hides the jquery ui tabs generated panels */
-#app_selector .ui-tabs-panel { display: none; }
-
-#app_selector li {
-  margin: 10px -3px 10px 0px;
-  padding: 4px 4px 4px 10px;
-}
-
 #app_selector ul {
-  border: none !important;
-  text-transform: none !important;
-  background: #FEFCF7;
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
+	margin-left: 10px;
+}
+#app_selector li {
+	margin: 10px -3px 10px 0px; padding: 4px 4px 4px 10px;
+	list-style: none; cursor: pointer;
+	border: 1px solid transparent;
+	-moz-border-radius: 6px 0 0 6px; -webkit-border-radius: 6px 0 0 6px; border-radius: 6px 0 0 6px;
+}
+#app_selector li:hover {
+	border-color: rgb(230,230,230) #e5e5e5 rgb(230,230,230) rgb(230,230,230);
+	background-color: white;
+}
+#app_selector li.selected {
+	z-index: 2;
+	margin-right: -5px;
+	border-color: #ccc #e5e5e5 #ccc #ccc;
+	-moz-box-shadow: 0 1px 0 #ddd; -webkit-box-shadow: 0 1px 0 #ddd; box-shadow: 0 1px 0 #ddd;
 }
 
-#app_selector li a { padding: 0px 0px 0px 0px;}
-#app_selector li img:hover { border-bottom: none; cursor: pointer; }
-#app_selector li a:hover { border-bottom: none; cursor: pointer; }
+.app_tab_img { margin: 0 10px -7px 0; }
+.app_tab_img_small { margin: 0 10px -7px 0; padding: 2px 4px; }
 
-#active_app_tabs { 
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
+#background_app_tabs {
+	margin-top: 2em;
 }
-
-#background_app_tabs { 
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
-}
-
-#active_app_tabs .ui-tabs-selected {
-/*  for active app selector tab*/
-  z-index: 2;
-  margin-right: -5px;
-
-  border-bottom:1px solid #CCCCCC !important;
-  border-left:1px solid #CCCCCC;
-  border-top:1px solid #CCCCCC;
-  border-right: 1px dotted #e5e5e5;
-  -moz-border-radius-bottomleft: 8px;
-  -webkit-border-bottom-left-radius: 8px;
-  -moz-border-radius-topleft: 8px;
-  -webkit-border-top-left-radius: 8px;
-  -moz-border-radius-topright: 0px;
-  -webkit-border-top-right-radius: 0px;
-  -moz-box-shadow: 0 1px 0 #ddd;
-  -webkit-box-shadow: 0 1px 0 #ddd;
-}
-
-#app_tabs_seperator {
-  display: none;
-  text-align: center;
-  color: #ccc;
-  font-size: 0.85em;
-  margin: -3px 0 -8px;
-}
-
-#record_owned_options ul {
+#record_owned_options {
+  margin-top: 2em;
   color: inherit !important;
-  margin: 0 0;
 }
 
-#record_owned_options li {
-  list-style: none;
-  cursor: pointer;
-}
-
-.app_tab_img { margin: 0 10px -7px 0px; }
-.app_tab_img_small { margin: 0 14px -7px 5px; }
 
 #app_container {
-  background: #FEFCF7;
- -moz-box-shadow: none;
- -webkit-box-shadow: none;
- margin-bottom: 20px;
- width: 100%;
- min-width: 992px !important; /* 1024 - 16 (browser chrome) - 8 * 2 (body margin) */
- overflow: hidden;
- margin-bottom: 96px;
+	width: 100%; min-width: 992px !important; /* 1024 - 16 (browser chrome) - 8 * 2 (body margin) */
+	margin-bottom: 96px;
+	background: #FEFCF7;
+	-moz-box-shadow: none; -webkit-box-shadow: none; box-shadow: none;
+	overflow: hidden;
 }
 
 .app_content_pane {
-  float: left;
-  width: 79%;
-  -moz-box-shadow: 0px 0px 3px #aaa;
-  -webkit-box-shadow: 0px 0px 3px #aaa;
-  padding: 15px;
-  -moz-border-radius: 0px;
-  min-height: 600px;
-  min-width: 768px; /* not including padding, borders or margin. 768 + (15 * 2 (padding)) + (1 * 2) (border) = 800px total width*/
-  background: #fafafa;
-  border: 1px solid #ccc;
+	float: left; width: 79%; min-height: 600px; min-width: 768px; /* not including padding, borders or margin. 768 + (15 * 2 (padding)) + (1 * 2) (border) = 800px total width*/
+	padding: 15px;
+	border: 1px solid #ccc;
+	-moz-border-radius: 0px; -webkit-border-radius: 0px; border-radius: 0px;
+	background: #fafafa;
+	-moz-box-shadow: 0px 0px 3px #aaa; -webkit-box-shadow: 0px 0px 3px #aaa; box-shadow: 0px 0px 3px #aaa;
 }
+
 
 /*** record tabs ***/
 

@@ -1,138 +1,99 @@
 {% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-  <head>
-  	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <!-- note we don't use the standard header here, so we don't double include stuff -->
-    <link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
-    <!--[if IE]>
-      <style>
-      </style>
-    <![endif]-->
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<!-- note we don't use the standard header here, so we don't double include stuff -->
+		<link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
+		<!--[if IE]>
+			<style>
+			</style>
+		<![endif]-->
 
-    <!-- <script type="text/javascript" src="/jmvc/resources/firebug-lite/build/firebug-lite.js#startOpened"></script> -->
+		<!-- <script type="text/javascript" src="/jmvc/resources/firebug-lite/build/firebug-lite.js#startOpened"></script> -->
 
-    <script type="text/javascript">
-      var ACCOUNT_ID = "{{ ACCOUNT_ID }}";
-      var FULLNAME = "{{ FULLNAME }}";
-    </script>
-    <!-- development or production NOTE: steal path is at the top-level jmvc dir -->
-    <script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script>
+		<script type="text/javascript">
+			var ACCOUNT_ID = "{{ ACCOUNT_ID }}";
+			var FULLNAME = "{{ FULLNAME }}";
+		</script>
+		<!-- development or production NOTE: steal path is at the top-level jmvc dir -->
+		<script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script>
 
-    {% if branding %}
-      <title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
-    {% else %}
-      <title>{% trans "Indivohealth" %} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
-    {% endif %}
-  </head>
-  <body>
-    <div id="header">
-      <div id="header_logo_and_name">
-        {% if branding %}
-          <div id="header_logo_div">
-            <img id="header_logo" alt="header_logo" src='{{ branding.logo_image_src }}'/>
-          </div>
-        {% endif %}
-        <div id="header_site_name">
-          {% if branding %}
-             {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
-          {% else %}
-            {% trans "Indivohealth" %}<span id="header_trademark">&trade;</span>
-          {% endif %}
-        </div>
-        <div id="header_fullname">{% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</div>
-      </div>
-      <div id="header_controls">
-        <a href="{% url ui.views.change_password %}">
-          <img class="header_icons" alt="settings" src="/jmvc/ui/resources/images/icons_16/package_settings.png" />
-          {% trans "Settings" %}
-        </a>
-        <a id="logout" href="{% url ui.views.logout %}">
-          <img class="header_icons" alt="logout" style="opacity: 0.7;" src="/jmvc/ui/resources/images/icons_16/goto.png" />
-          {% trans "Logout" %}
-        </a>
-      </div>
-    </div>
+		{% if branding %}
+			<title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
+		{% else %}
+			<title>{% trans "Indivohealth" %} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
+		{% endif %}
+	</head>
+	<body>
+		<div id="header">
+			<div id="header_logo_and_name">
+				{% if branding %}
+					<div id="header_logo_div">
+						<img id="header_logo" alt="header_logo" src='{{ branding.logo_image_src }}'/>
+					</div>
+				{% endif %}
+				<div id="header_site_name">
+					{% if branding %}
+						 {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+					{% else %}
+						{% trans "Indivohealth" %}<span id="header_trademark">&trade;</span>
+					{% endif %}
+				</div>
+				<div id="header_fullname">{% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</div>
+			</div>
+			<div id="header_controls">
+				<a href="{% url ui.views.change_password %}">
+					<img class="header_icons" alt="settings" src="/jmvc/ui/resources/images/icons_16/package_settings.png" />
+					{% trans "Settings" %}
+				</a>
+				<a id="logout" href="{% url ui.views.logout %}">
+					<img class="header_icons" alt="logout" style="opacity: 0.7;" src="/jmvc/ui/resources/images/icons_16/goto.png" />
+					{% trans "Logout" %}
+				</a>
+			</div>
+		</div>
+		
+		<div id="record_tabs">
+			<ul id="record_tabs_inner"></ul>
+		</div>
+		
+		<div id="app_container">
+			<div id="app_selector">
+				<ul id="active_app_tabs">
+					<li id="healthfeed_li">
+						<img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/healthfeed.png" alt="" />{% trans "Healthfeed" %}
+					</li>
+					<li id="inbox_li">
+						<img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/inbox.png" alt="" />{% trans "Inbox" %}
+					</li>
+				</ul>
+				
+				<ul id="background_app_tabs" style="display: none"></ul>
+				
+				<ul id="record_owned_options">
+				{% if not HIDE_SHARING %}
+						<li id="carenet">
+							<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/groupevent.png" alt="" />{% trans "Sharing" %}
+						</li>
+				{% endif %}
+					<li id="pha">
+						<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/settings.png" alt="" />{% trans "App Settings" %}
+					</li>
+				</ul>
+			</div>
+			
+			<div id="app_content" class="app_content_pane"></div>
+			<iframe id="app_content_iframe" class="app_content_pane" src="" style="display: none"></iframe>
+		</div>
+		
+		<!-- used for jquery tools overlay -->
+		<div class="overlay" id="overlay"><div class="wrap"></div></div>
 
-    <div id="record_tabs"><ul id="record_tabs_inner"></ul></div>
-
-    <div id="app_container">
-      <div id="app_selector">
-        <div id="active_app_tabs">
-          <ul id="active_app_tabs_inner">
-            <li id="healthfeed_li">
-              <a href="#_healthfeed_tab_panel_hidden">
-                <img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/healthfeed.png" />
-                {% trans "Healthfeed" %}
-              </a>
-            </li>
-            <li id="inbox_li">
-              <a href="#_inbox_tab_panel_hidden">
-                <img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/inbox.png" />
-                {% trans "Inbox" %}
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div id="app_tabs_seperator" style="display: none">&ndash;&thinsp;&mdash;&thinsp;&ndash;</div>
-
-        <div id="background_app_tabs" style="display: none">
-          <ul id="background_app_tabs_inner"></ul>
-        </div>
-
-        <div id="record_owned_options">
-        	<ul>
-          {% if not HIDE_SHARING %}
-              <li id="sharing_list">
-                <a id="carenet" rel="#overlay">
-                  <img class="app_tab_img_small"
-                       height="24px"
-                       width="24px"
-                       src="/jmvc/ui/resources/images/icons_24/groupevent.png" />
-                  {% trans "Sharing" %}
-                </a>
-              </li>
-          {% endif %}
-          {% if not HIDE_GET_MORE_APPS %}
-              <li id="get_more_apps_list">
-                <a id="get_more_apps" rel="#overlay">
-                  <img class="app_tab_img_small"
-                       height="24px"
-                       width="24px"
-                       src="/jmvc/ui/resources/images/icons_24/edit_add.png" />
-                  {% trans "Get more apps" %}
-                </a>
-              </li>
-          {% endif %}
-            <li id="settings_list">
-              <a id="pha">
-                <img class="app_tab_img_small"
-                     height="24px"
-                     width="24px"
-                     src="/jmvc/ui/resources/images/icons_24/settings.png" />
-                {% trans "App Settings" %}
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- used for jquery ui tabs for healthfeed -->
-        <div id="_healthfeed_tab_panel_hidden" style="display: none"></div>
-        <div id="_inbox_tab_panel_hidden" style="display: none"></div>
-      </div>
-
-      <div id="app_content" class="app_content_pane"></div>
-      <iframe id="app_content_iframe" class="app_content_pane" src="" style="display: none"></iframe>
-    </div>
-
-    <!-- used for jquery tools overlay -->
-    <div class="overlay" id="overlay"><div class="wrap"></div></div>
-
-    {% if branding %}
-      {% include branding.footer_template %}
-    {% else %}
-      {% include 'ui/footer.html' %}
-    {% endif %}
-  </body>
+		{% if branding %}
+			{% include branding.footer_template %}
+		{% else %}
+			{% include 'ui/footer.html' %}
+		{% endif %}
+	</body>
 </html>

@@ -30,7 +30,7 @@ $.Controller.extend('UI.Controllers.Healthfeed',
 
         $("#active_app_tabs").tabs('select', 0);
         $('#app_content').html($.View('//ui/views/healthfeed/show.ejs',{'notifications': hf_items}))
-        $('#app_content_iframe').hide();
+        $('#app_content_iframe').attr('src', 'about:blank').hide();
         $('#app_content').show();
       });
     }
@@ -39,6 +39,6 @@ $.Controller.extend('UI.Controllers.Healthfeed',
 {
   ready: function(el, options){
     UI.Controllers.Healthfeed.show();
-    $('#healthfeed_li a').bind('click', UI.Controllers.Healthfeed.show); // use basic jquery .bind
+    $('#healthfeed_li').bind('click', UI.Controllers.Healthfeed.show); // use basic jquery .bind
   }
 });

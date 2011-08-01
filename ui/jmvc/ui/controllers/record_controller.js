@@ -57,7 +57,7 @@ $.Controller.extend('UI.Controllers.Record',
 
         RecordController.RECORD_ID = $(ui.tab).attr('href').substring(1);
         // make sure the iframe is hidden and the div is shown
-        $('#app_content_iframe').hide();
+        $('#app_content_iframe').attr('src', 'about:blank').hide();
         $('#app_content').show();
         // RecordController.dispatch('_load_record');
         _this._load_record();

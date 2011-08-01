@@ -254,7 +254,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		//console.log(this.record);
 		//console.log(this.record_info);
 		$('#app_content').html(this.view('show'));
-		$('#app_content_iframe').hide();
+		$('#app_content_iframe').attr('src', 'about:blank').hide();
 		$('#app_content').show();
 		
 		UI.Models.PHA.get_all(this.callback('didGetAllApps'));
@@ -591,8 +591,8 @@ $.Controller.extend('UI.Controllers.PHA',
 		}
 		
 		// remove from app tabs
-		var li_id = app.id.replace(/@/g, '_at_').replace(/\./g,'_');
-		$('#active_app_tabs').find('a[href="#' + li_id + '"]').parent().fadeOut('fast', function() { $(this).remove(); });
+		var li_id = app.id.replace(/\W+/g, '_');
+		$('#' + li_id).fadeOut('fast', function() { $(this).remove(); });
 		
 		// update view
 		var my_apps = _(this.my_apps);

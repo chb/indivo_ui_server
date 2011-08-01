@@ -18,7 +18,7 @@ $.Controller.extend('UI.Controllers.Message',
       UI.Controllers.Message.messages = messages;
       // manually pass messages to view
       $('#app_content').html($.View('//ui/views/message/show.ejs', {'messages': messages})) 
-      $('#app_content_iframe').hide();
+      $('#app_content_iframe').attr('src', 'about:blank').hide();
       $('#app_content').show();
       $('.message_subject').click(function(evt) {
         UI.Controllers.Message.one_message({message_id: evt.target.id});
@@ -56,7 +56,7 @@ $.Controller.extend('UI.Controllers.Message',
    * Attach the click event to the inbox tab
    */
   load: function(el, options){
-    $('#inbox_li a').bind('click', UI.Controllers.Message.show); // use basic jquery .bind
+    $('#inbox_li').bind('click', UI.Controllers.Message.show); // use basic jquery .bind
     if (ACCOUNT.RECORDS.length == 0) { _.delay(this._update_inbox_tab, 500); }
     else { this._update_inbox_tab(); }
   },
