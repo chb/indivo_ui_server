@@ -20,7 +20,7 @@ $.Controller.extend('UI.Controllers.Carenet',
     show: function() {
 		var _this = this;
 		
-		UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
+		UI.Models.Record.get(UI.Controllers.Record.activeRecord.id, null, function(record) {
 			_this.label = record.label;
 			_this.accounts = [];
 			
@@ -94,14 +94,14 @@ $.Controller.extend('UI.Controllers.Carenet',
 	
 	get_carenet: function(carenet_id) {
 		return new UI.Models.Carenet({
-			'record_id': RecordController.RECORD_ID,
+			 'record_id': UI.Controllers.Record.activeRecord ? UI.Controllers.Record.activeRecord.id : null,
 			'carenet_id': carenet_id,
-			'name': null
+			      'name': null
 		})
 	},
 	
 	create_carenet: function(name) {
-		UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
+		UI.Models.Record.get(UI.Controllers.Record.activeRecord.id, null, function(record) {
 			record.create_carenet(name);
 		})
 		return false;
@@ -109,7 +109,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 	
 	remove_carenet: function(carenet_id, carenet_name) {
 		if (confirm('Are you sure you want to remove the ' + carenet_name + ' carenet?')) {
-			UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
+			UI.Models.Record.get(UI.Controllers.Record.activeRecord.id, null, function(record) {
 				record.remove_carenet(carenet_id);
 			})
 		}
@@ -117,7 +117,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 	},
 	
 	rename_carenet: function(carenet_id, name) {
-		UI.Models.Record.get(RecordController.RECORD_ID, null, function(record) {
+		UI.Models.Record.get(UI.Controllers.Record.activeRecord.id, null, function(record) {
 			record.rename_carenet(carenet_id, name);
 		})
 		return false;

@@ -54,9 +54,7 @@
 			</div>
 		</div>
 		
-		<div id="record_tabs">
-			<ul id="record_tabs_inner"></ul>
-		</div>
+		<div id="record_tabs"></div>
 		
 		<div id="app_container">
 			<div id="app_selector">
@@ -73,9 +71,9 @@
 				
 				<ul id="record_owned_options">
 				{% if not HIDE_SHARING %}
-						<li id="carenet">
-							<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/groupevent.png" alt="" />{% trans "Sharing" %}
-						</li>
+					<li id="carenet">
+						<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/groupevent.png" alt="" />{% trans "Sharing" %}
+					</li>
 				{% endif %}
 					<li id="pha">
 						<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/settings.png" alt="" />{% trans "App Settings" %}

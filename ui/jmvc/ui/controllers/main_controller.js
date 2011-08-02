@@ -31,8 +31,8 @@ $.Controller.extend('UI.Controllers.MainController',
 	 * Simple tab functionality
 	 */
 	'#app_selector li click': function(el, ev) {
-		$('#app_selector li').removeClass('selected');
-		el.addClass('selected');
+		$('#app_selector li').removeClass('selected').css('background-color', '');
+		el.addClass('selected').css('background-color', UI.Controllers.Record.activeRecord.bgcolor);
 	},
 	
 	
@@ -67,15 +67,14 @@ $.Controller.extend('UI.Controllers.MainController',
 		// app with a UI
 		if (pha.data.ui) {
 			var startURL = interpolate_url_template(pha.data.startURLTemplate, {
-				'record_id' : params.carenet_id? "":RecordController.RECORD_ID,
-				'document_id' : RecordController.DOCUMENT_ID || "",
-				'carenet_id' : params.carenet_id || ""
+				  'record_id': params.carenet_id ? '' : UI.Controllers.Record.activeRecord.id,
+			/*	'document_id': RecordController.DOCUMENT_ID || '',	*/		// what's the replacement for this? It is nowhere being set...
+				 'carenet_id': params.carenet_id || ''
 			});
 			
 			li = $('<li/>', {'id': pha.html_id}).html(icon + pha.data.name).click(function(ev) {
-				$('#app_content_iframe').attr('src', startURL);		// load and show the iframe
-				$('#app_content').hide();
-				$('#app_content_iframe').show();
+				$('#app_content_iframe').attr('src', startURL).show();		// load and show the iframe
+				$('#app_content').empty().hide();
 			});
 			$('#active_app_tabs').append(li);
 		}
@@ -83,9 +82,8 @@ $.Controller.extend('UI.Controllers.MainController',
 		// background app
 		else {
 			li = $('<li/>', {'id': pha.html_id}).html(icon + pha.data.name).click(function(ev) {
-				$('#app_content').html($.View('//ui/views/main/background_app_info.ejs', {'pha': pha}))
+				$('#app_content').html($.View('//ui/views/main/background_app_info.ejs', {'pha': pha})).show();
 				$('#app_content_iframe').attr('src', 'about:blank').hide();
-				$('#app_content').show();
 			});
 			$('#background_app_tabs').show().append(li);
 		}
@@ -103,6 +101,6 @@ $.Controller.extend('UI.Controllers.MainController',
 	 * FIXME: Refactor
 	 */
 	clear_apps: function() {
-		$.each($('#active_app_tabs').children().slice(2), function(i, v) { $(v).remove(); })
+		$('#active_app_tabs').children().slice(2).remove();
 	}
 });

@@ -235,27 +235,23 @@ $.Controller.extend('UI.Controllers.PHA',
 	 * Click on our tab item
 	 */
     'click': function() {
-    	this.load()
+    	this.loadInfo()
     },
     
     
     /**
 	 * Chainload record info and information about the apps
 	 */
-	load: function() {
-		if (RecordController) {
-			this.record_info = RecordController.RECORDS[RecordController.RECORD_ID]; 		// get the record info from the globals (FIXME later)
-			UI.Models.Record.get(RecordController.RECORD_ID, this.record_info.carenet_id, this.callback('didLoadInfo'));
-		}
+	loadInfo: function() {
+		this.record_info = UI.Controllers.Record.activeRecord;
+		UI.Models.Record.get(this.record_info.id, this.record_info.carenet_id, this.callback('didLoadInfo'));
 	},
 	
 	didLoadInfo: function(record) {				// loaded info, get all apps
 		this.record = record;
-		//console.log(this.record);
-		//console.log(this.record_info);
-		$('#app_content').html(this.view('show'));
+		
+		$('#app_content').html(this.view('show')).show();
 		$('#app_content_iframe').attr('src', 'about:blank').hide();
-		$('#app_content').show();
 		
 		UI.Models.PHA.get_all(this.callback('didGetAllApps'));
 	},

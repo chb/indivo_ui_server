@@ -306,31 +306,28 @@ blockquote.content { margin: 1em 0; }
 /*** App Selector ***/
 
 #app_selector {
-	float: left; width: 17%;
+	float: left; position: relative; width: 17%;
 	margin-top: 48px;
-	border: 1px dashed #ccc; border-right-color: white;
+	border: 1px dashed #ccc; border-right: none;
 	-moz-box-shadow: 0 0px 0 #fff; -webkit-box-shadow: 0 0px 0 #fff; box-shadow: 0 0px 0 #fff;
-	background: #FEFCF7;
-	-moz-border-radius: 8px 0 0 8px; -webkit-border-radius: 8px 0 0 8px; border-radius: 8px 0 0 8px;
 }
 #app_selector ul {
-	margin-left: 10px;
+	margin-left: 10px; margin-right: -1px; overflow: hidden;
 }
 #app_selector li {
-	margin: 10px -3px 10px 0px; padding: 4px 4px 4px 10px;
+	margin: 5px 0; padding: 4px 4px 4px 10px;
 	list-style: none; cursor: pointer;
 	border: 1px solid transparent;
-	-moz-border-radius: 6px 0 0 6px; -webkit-border-radius: 6px 0 0 6px; border-radius: 6px 0 0 6px;
+	-moz-border-radius: 5px 0 0 5px; -webkit-border-radius: 5px 0 0 5px; border-radius: 5px 0 0 5px;
 }
 #app_selector li:hover {
 	border-color: rgb(230,230,230) #e5e5e5 rgb(230,230,230) rgb(230,230,230);
 	background-color: white;
 }
 #app_selector li.selected {
-	z-index: 2;
-	margin-right: -5px;
-	border-color: #ccc #e5e5e5 #ccc #ccc;
-	-moz-box-shadow: 0 1px 0 #ddd; -webkit-box-shadow: 0 1px 0 #ddd; box-shadow: 0 1px 0 #ddd;
+	border-color: #ccc #e5e5e5 #ccc #ccc; border-right-style: dotted;
+	-moz-box-shadow: 0px 1px 3px #aaa; -webkit-box-shadow: 0px 1px 3px #aaa; box-shadow: 0px 1px 3px #aaa;
+	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
 }
 
 .app_tab_img { margin: 0 10px -7px 0; }
@@ -340,14 +337,14 @@ blockquote.content { margin: 1em 0; }
 	margin-top: 2em;
 }
 #record_owned_options {
-  margin-top: 2em;
+  margin-top: 1em;
   color: inherit !important;
 }
 
 
 #app_container {
 	width: 100%; min-width: 992px !important; /* 1024 - 16 (browser chrome) - 8 * 2 (body margin) */
-	margin-bottom: 96px;
+	margin-bottom: 96px; padding: 5px 0;
 	background: #FEFCF7;
 	-moz-box-shadow: none; -webkit-box-shadow: none; box-shadow: none;
 	overflow: hidden;
@@ -357,59 +354,49 @@ blockquote.content { margin: 1em 0; }
 	float: left; width: 79%; min-height: 600px; min-width: 768px; /* not including padding, borders or margin. 768 + (15 * 2 (padding)) + (1 * 2) (border) = 800px total width*/
 	padding: 15px;
 	border: 1px solid #ccc;
-	-moz-border-radius: 0px; -webkit-border-radius: 0px; border-radius: 0px;
+	-moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px;
 	background: #fafafa;
-	-moz-box-shadow: 0px 0px 3px #aaa; -webkit-box-shadow: 0px 0px 3px #aaa; box-shadow: 0px 0px 3px #aaa;
+	-moz-box-shadow: 0px 1px 3px #aaa; -webkit-box-shadow: 0px 1px 3px #aaa; box-shadow: 0px 1px 3px #aaa;
+	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
 }
 
 
 /*** record tabs ***/
 
 #record_tabs {
-  float: right;
-  margin-right: 5%;
-  margin-top: -16px;
-  margin-bottom: -1px;
-  margin-left: -5px;
-  -moz-box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-}
-
-#record_tabs .ui-tabs-selected {
-  border-bottom: 1px dotted #e5e5e5 !important;
-}
-
-#record_tabs_inner {
-  border: none !important;
-  text-transform: none !important;
+	float: right; position: relative; height: 32px;
+	margin: 0 5% -6px 0; padding: 2px 5px 0;
+	overflow: hidden;
 }
 
 .record_tab {
-/*1px 0px 1px #aaa !important*/
-  -moz-box-shadow: 2px 0px 0px #ccc !important;
-  -webkit-box-shadow: 2px 0px 0px #ccc !important;
-  border-left: 1px solid #ddd !important;
-  border-top: 1px solid #ddd !important;
-  text-align: center;
-  float: right !important;
-  padding: 5px;
-  margin-left: 8px !important;
-  display: block;
+	float: right; display: block;
+	height: 22px; margin: 4px 0 0 12px; padding: 1px 12px 2px;
+	text-align: center;
+	border: 1px solid rgb(193,193,193); border-bottom: 1px dotted transparent;
+	-moz-border-radius: 5px 5px 0 0; -webkit-border-radius: 5px 5px 0 0; border-radius: 5px 5px 0 0;
+	-moz-box-shadow: 0 1px 3px #ccc; -webkit-box-shadow: 0 1px 3px #ccc; box-shadow: 0 1px 3px #ccc;
+	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+	-webkit-transition-property: margin-top, padding-bottom;
+	-moz-transition-property: margin-top, padding-bottom;
+	-o-transition-property: margin-top, padding-bottom;
+	transition-property: margin-top, padding-bottom;
+	-webkit-transition-duration: 0.1s; -o-transition-duration: 0.1s; -moz-transition-duration: 0.1s; transition-duration: 0.1s;
+}
+.record_tab:hover {
+	margin-top: 0; padding-bottom: 6px;
+	border-bottom-color: transparent; color: #212121;
+}
+#record_tabs .selected {
+	margin-top: 0; padding: 5px 12px 3px;
+	font-weight: bold;
+	border-color: rgb(193,193,193); border-bottom-color: #e5e5e5;
 }
 
-.record_tab li {
-  -moz-box-shadow: 1px 0px 0px #ccc;
-  -webkit-box-shadow: 1px 0px 0px #ccc;
-  text-align: center;
-  float: right !important;
-  padding: 5px;
-  margin-left: 10px;
-  display: block;
-}
-
-#record_tabs_inner li a:hover { border-bottom: none; }
+#record_tabs li a:hover { border-bottom: none; }
 /* this hides the jquery ui tabs generated panels */
 #record_tabs div { display: none; }
+
 
 .overlay {
   display:none;
@@ -488,7 +475,7 @@ blockquote.content { margin: 1em 0; }
 }
 
 .carenet_app {
-	position: absolute; top: 0; left: 0; width: 40px; height: 40px; cursor: pointer;
+	position: absolute; top: 0; left: 0; width: 40px; height: 40px; cursor: move;
 	-webkit-border-radius: 20px; -moz-border-radius: 20px; border-radius: 20px;
 	background: url() center center no-repeat rgb(210,210,210); background-color: rgba(0,0,0,0.15);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
@@ -632,7 +619,7 @@ blockquote.content { margin: 1em 0; }
 .ui-widget { font-family: inherit; font-size: inherit; }
 .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: inherit; font-size: 1em; }
 
-.ui-widget-content { border: none; background: #fafafa; color: inherit; -moz-box-shadow: 1px 1px 3px #ccc;  -webkit-box-shadow: 1px 1px 3px #ccc }
+.ui-widget-content { border: none; background: none; color: inherit; -moz-box-shadow: 1px 1px 3px #ccc; -webkit-box-shadow: 1px 1px 3px #ccc; box-shadow: 1px 1px 3px #ccc; }
 .ui-widget-content a { color: inherit; }
 
 .ui-widget-header { 
