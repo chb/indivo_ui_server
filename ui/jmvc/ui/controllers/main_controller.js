@@ -67,7 +67,7 @@ $.Controller.extend('UI.Controllers.MainController',
 		// app with a UI
 		if (pha.data.ui) {
 			var startURL = interpolate_url_template(pha.data.startURLTemplate, {
-				  'record_id': params.carenet_id ? '' : UI.Controllers.Record.activeRecord.id,
+				  'record_id': params.carenet_id ? '' : UI.Controllers.Record.activeRecord.record_id,
 			/*	'document_id': RecordController.DOCUMENT_ID || '',	*/		// what's the replacement for this? It is nowhere being set...
 				 'carenet_id': params.carenet_id || ''
 			});

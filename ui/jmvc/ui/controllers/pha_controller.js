@@ -220,39 +220,38 @@ $.Controller.extend('UI.Controllers.PHA',
 },
 /* @Prototype */
 {
-	record_info: {},
 	record: {},
 	all_apps: [],
 	my_apps: [],
 	carenets: [],
 	
-    ready: function() {
-    	
-    },
-    
-    
+	ready: function() {
+		
+	},
+	
+	
 	/**
 	 * Click on our tab item
 	 */
-    'click': function() {
-    	this.loadInfo()
-    },
-    
-    
-    /**
-	 * Chainload record info and information about the apps
-	 */
-	loadInfo: function() {
-		this.record_info = UI.Controllers.Record.activeRecord;
-		UI.Models.Record.get(this.record_info.id, this.record_info.carenet_id, this.callback('didLoadInfo'));
-	},
-	
-	didLoadInfo: function(record) {				// loaded info, get all apps
-		this.record = record;
-		
-		$('#app_content').html(this.view('show')).show();
+	'click': function() {
+		$('#app_content').html(this.view('show', {'label': UI.Controllers.Record.activeRecord.label})).show();
 		$('#app_content_iframe').attr('src', 'about:blank').hide();
 		
+		//this.reloadRecord();
+		this.didReloadRecord(UI.Controllers.Record.activeRecord);
+	},
+	
+	
+	/**
+	 * Chainload record info and information about the apps
+	 */
+	reloadRecord: function() {
+		var record = UI.Controllers.Record.activeRecord;
+		UI.Models.Record.get(record.record_id, record.carenet_id, this.callback('didReloadRecord'));
+	},
+	
+	didReloadRecord: function(record) {			// reloaded record, get all apps
+		this.record = record;
 		UI.Models.PHA.get_all(this.callback('didGetAllApps'));
 	},
 	
@@ -260,8 +259,8 @@ $.Controller.extend('UI.Controllers.PHA',
 		this.all_apps = all_apps;
 		
 		// is this a carenet or a record? depending on which get the associated apps
-		if (this.record_info.carenet_id) {
-			UI.Models.PHA.get_by_carenet(this.record_info.carenet_id, null, this.callback('didGetMyApps'));
+		if (this.record.carenet_id) {
+			UI.Models.PHA.get_by_carenet(this.record.carenet_id, null, this.callback('didGetMyApps'));
 		}
 		else if (this.record.record_id) {
 			UI.Models.PHA.get_by_record(this.record.record_id, null, this.callback('didGetMyApps'));
@@ -294,12 +293,12 @@ $.Controller.extend('UI.Controllers.PHA',
 				$('#carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
 					if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
-						$(elem).find('.carenet_border').addClass('has_app');
+						$(elem).addClass('has_app');
 					}
 				});
 			},
 			'mouseout': function(event) {
-				$('#carenets').find('.carenet_border').removeClass('has_app');
+				$('#carenets').find('.carenet').removeClass('has_app');
 			}
 		})
 		
@@ -383,8 +382,8 @@ $.Controller.extend('UI.Controllers.PHA',
 		var nets = $('#carenets');
 		var params = {
 			'all_apps': this.all_apps,
-			'my_apps': this.my_apps,
-			'record_info': this.record_info,
+			 'my_apps': this.my_apps,
+			  'record': this.record,
 			'carenets': this.carenets,
 		};
 		nets.empty().html(this.view('carenets', params));
@@ -548,9 +547,9 @@ $.Controller.extend('UI.Controllers.PHA',
 			var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
 			var icon = '<img class="app_tab_img" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />';
 			var params = {'pha': app,
-					   'fire_p': false,
-					'record_id': this.record.record_id,					// TODO: supply only record_id OR carenet_id
-				   'carenet_id': this.record_info.carenet_id
+				       'fire_p': false,
+				    'record_id': this.record.record_id,					// TODO: supply only record_id OR carenet_id
+				   'carenet_id': this.record.carenet_id
 			};
 			$(document.documentElement).ui_main('add_app', params);
 			

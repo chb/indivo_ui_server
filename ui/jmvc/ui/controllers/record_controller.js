@@ -31,7 +31,6 @@ $.Controller.extend('UI.Controllers.Record',
 		
 		// load the record from the model and call the callback
 		UI.Models.Record.get(record_id, this.activeRecord.carenet_id, function(record) {
-			record.id = record.record_id;								// sometimes we see record.id, sometimes record.record_id. Allow both for now
 			record.bgcolor = UI.Controllers.Record.activeRecord.bgcolor || '';
 			UI.Controllers.Record.activeRecord = record;
 			
@@ -63,7 +62,7 @@ $.Controller.extend('UI.Controllers.Record',
 					UI.Models.PHA.get_by_carenet(record.carenet_id, null, after_pha_callback);
 				}
 				else {
-					UI.Models.PHA.get_by_record(record.id, null, after_pha_callback);
+					UI.Models.PHA.get_by_record(record.record_id, null, after_pha_callback);
 				}
 			});
 		});

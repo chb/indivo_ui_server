@@ -307,7 +307,7 @@ blockquote.content { margin: 1em 0; }
 
 #app_selector {
 	float: left; position: relative; width: 17%;
-	margin-top: 48px;
+	margin-top: 48px; padding: 7px 0;
 	border: 1px dashed #ccc; border-right: none;
 	-moz-box-shadow: 0 0px 0 #fff; -webkit-box-shadow: 0 0px 0 #fff; box-shadow: 0 0px 0 #fff;
 }
@@ -590,21 +590,21 @@ blockquote.content { margin: 1em 0; }
 	margin-top: 0.3em;
 }
 
+.app_hovers .carenet_border, .has_app .carenet_border {
+	border-color: rgb(153,153,153); border-color: rgba(0,0,0,0.4);
+	background-color: rgb(200,200,200);
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(220,220,220)), to(rgb(180,180,180)));
+    background:-moz-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
+}
 .app_hovers .carenet_border {
 	width: 190px; height: 190px; margin: -32px;
 	-webkit-border-radius: 96px; -moz-border-radius: 96px; border-radius: 96px;
-	background-color: rgb(102,204,255);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(195,255,134)), to(rgb(171,255,86)));
-    background:-moz-linear-gradient(top, rgb(195,255,134), rgb(171,255,86));
 }
-.has_app {
-	background-color: rgb(195,255,134);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(195,255,134)), to(rgb(171,255,86)));
-    background:-moz-linear-gradient(top, rgb(195,255,134), rgb(171,255,86));
+.has_app .carenet_border {
     -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
 }
 
-#apps h4 img, #carenets h4 img { vertical-align: -5%; margin-right: 0.75em; }
+h4 img { vertical-align: -5%; margin-right: 0.75em; }
 .drag_instructions { margin: 3em 2em; text-align: center; }
 .drag_instructions img { vertical-align: middle; margin-right: 0.75em; }
 
