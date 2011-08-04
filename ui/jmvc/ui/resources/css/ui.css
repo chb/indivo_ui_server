@@ -207,24 +207,25 @@ blockquote.content { margin: 1em 0; }
 
 /*** Header ***/
 #header { 
-  height: 80px; /* 16px * 5 */
-  margin-bottom: 16px;
+	width: 96%; /* app-selector's 17% + app-content's 79% */ height: 80px; /* 16px * 5 */
+	margin-bottom: 16px;
 }
 
 #header_controls {
-  text-transform: uppercase;
-  font-size: .86em;
-  letter-spacing: 0px;
-  padding: 8px 8px 0 0;
-  -moz-box-shadow: 0 0 3px #aaa;
-  -webkit-box-shadow: 0 0 3px #aaa;
-  -moz-border-radius-bottomleft: 5px;
-  -webkit-border-bottom-left-radius: 5px;
-  -moz-border-radius-bottomright: 5px;
-  -webkit-border-bottom-right-radius: 5px;
-  float: right;
-  margin: -16px 16px 0px 0px;
-  height: 28px;
+	float: right; height: 28px;
+	margin: -16px -33px 0px 0px;	/* -33px = 1px left border of app-selector + 2* 15px padding of app-content + 2* 1px border op app-content */
+	padding: 8px 12px 0 12px;
+	text-transform: uppercase;
+	font-size: 0.86em;
+	border: 1px solid rgb(204,204,204); border-top-width: 0;
+	-moz-border-radius: 0 0 5px 5px; -webkit-border-radius: 0 0 5px 5px; border-radius: 0 0 5px 5px;
+	background-color: rgb(254,253,251); background-color: rgba(255,255,255,0.5);
+}
+#header_controls a {
+	margin-left: 12px;
+}
+#header_controls a:first-child {
+	margin-left: 0;
 }
 
 #header_logo_and_name {
@@ -276,12 +277,9 @@ blockquote.content { margin: 1em 0; }
 }
 
 .header_icons {
-  height: 16px;
-  width: 16px;
-  margin-left: 8px;
-  vertical-align: text-top;
-  margin-bottom: -3px;
-  margin-left: 15px;
+	width: 16px; height: 16px;
+	margin: 0 4px -3px 4px;
+	vertical-align: text-top;
 }
 
 #footer {
@@ -375,8 +373,6 @@ blockquote.content { margin: 1em 0; }
 	text-align: center;
 	border: 1px solid rgb(193,193,193); border-bottom: 1px dotted transparent;
 	-moz-border-radius: 5px 5px 0 0; -webkit-border-radius: 5px 5px 0 0; border-radius: 5px 5px 0 0;
-	-moz-box-shadow: 0 1px 3px #ccc; -webkit-box-shadow: 0 1px 3px #ccc; box-shadow: 0 1px 3px #ccc;
-	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 	-webkit-transition-property: margin-top, padding-bottom;
 	-moz-transition-property: margin-top, padding-bottom;
 	-o-transition-property: margin-top, padding-bottom;
@@ -391,6 +387,8 @@ blockquote.content { margin: 1em 0; }
 	margin-top: 0; padding: 5px 12px 3px;
 	font-weight: bold;
 	border-color: rgb(193,193,193); border-bottom-color: #e5e5e5;
+	-moz-box-shadow: 0 1px 3px #ccc; -webkit-box-shadow: 0 1px 3px #ccc; box-shadow: 0 1px 3px #ccc;
+	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 #record_tabs li a:hover { border-bottom: none; }
