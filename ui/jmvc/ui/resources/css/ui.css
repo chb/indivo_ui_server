@@ -315,17 +315,18 @@ blockquote.content { margin: 1em 0; }
 	margin-left: 10px; margin-right: -1px; overflow: hidden;
 }
 #app_selector li {
+	position: relative;
 	margin: 5px 0; padding: 4px 4px 4px 10px;
 	list-style: none; cursor: pointer;
 	border: 1px solid transparent;
 	-moz-border-radius: 5px 0 0 5px; -webkit-border-radius: 5px 0 0 5px; border-radius: 5px 0 0 5px;
 }
 #app_selector li:hover {
-	border-color: rgb(230,230,230) #e5e5e5 rgb(230,230,230) rgb(230,230,230);
+	border-color: rgb(230,230,230) rgb(204,204,204) rgb(230,230,230) rgb(230,230,230);
 	background-color: white;
 }
 #app_selector li.selected {
-	border-color: #ccc #e5e5e5 #ccc #ccc; border-right-style: dotted;
+	border-color: #ccc transparent #ccc #ccc;
 	-moz-box-shadow: 0px 1px 3px #aaa; -webkit-box-shadow: 0px 1px 3px #aaa; box-shadow: 0px 1px 3px #aaa;
 	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
 }
@@ -377,7 +378,7 @@ blockquote.content { margin: 1em 0; }
 	/* background-color will be set in JS, but we still want to fake the lower shadow for inactive tabs, here we go: */
     background-image:-webkit-linear-gradient(bottom, rgba(0,0,0,0.04), rgba(0,0,0,0) 3px);
     background-image:-moz-linear-gradient(bottom, rgba(0,0,0,0.04), rgba(0,0,0,0) 3px);
-	-webkit-transition-property: margin-top, padding;
+	-webkit-transition-property: none;	/* the animation in Safari and Chrome does not go as smoothly as in Firefox, let's disable it for now */
 	-moz-transition-property: margin-top, padding;
 	-o-transition-property: margin-top, padding;
 	transition-property: margin-top, padding;
@@ -390,7 +391,7 @@ blockquote.content { margin: 1em 0; }
 #record_tabs .selected {
 	margin-top: 0; padding: 5px 12px 3px;
 	font-weight: bold;
-	border-bottom: 1px dotted #e5e5e5;
+	border-bottom-color: transparent;
 	background-image: none;
 	-moz-box-shadow: 0 1px 3px #ccc; -webkit-box-shadow: 0 1px 3px #ccc; box-shadow: 0 1px 3px #ccc;
 	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
