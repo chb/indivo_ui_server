@@ -104,7 +104,7 @@ $.Controller.extend('UI.Controllers.Record',
 	
 	addTab: function(account, selected) {
 		var a = $('<a class="record_tab" href="javascript:void(0);" />').text(account.label);
-		a.css('background', account.bgcolor);
+		a.css('background-color', account.bgcolor);
 		if (selected) {
 			a.addClass('selected');
 		}
