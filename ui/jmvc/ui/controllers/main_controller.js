@@ -17,6 +17,7 @@ $.Controller.extend('UI.Controllers.MainController',
 /* @Static */
 { 
 	onDocument: true,
+	animateTabSelection: true
 },
 /* @Prototype */
 {
@@ -31,7 +32,31 @@ $.Controller.extend('UI.Controllers.MainController',
 	 * Simple tab functionality
 	 */
 	'#app_selector li click': function(el, ev) {
-		$('#app_selector li').removeClass('selected').css('background-color', '');
+		var selector = $('#app_selector');
+		var selected = selector.find('li.selected');
+		
+		// deselect old tab and select new tab
+		if (selected.is('*') && selected.attr('id') != el.attr('id')) {
+			var clone = selected.clone(false).css({
+				'position': 'absolute',
+				    'left': '10px',
+				   'right': '-1px',
+				     'top': selected.position().top + 'px',
+				  'height': selected.innerHeight() - 8 + 'px'		/* 8 = 4px + 4px top and bottom padding. Would be better to get this from CSS or calculate it! */
+			}).text('');
+			selected.removeClass('selected').css('background-color', '');
+			
+			// animate tab selection
+			if (UI.Controllers.MainController.animateTabSelection) {
+				selected.before(clone);
+				clone.animate({'top': el.position().top + 'px'}, 300, 'swing', function() {
+					el.addClass('selected').css('background-color', UI.Controllers.Record.activeRecord.bgcolor);
+					$(this).remove();
+				});
+				return;
+			}
+		}
+		
 		el.addClass('selected').css('background-color', UI.Controllers.Record.activeRecord.bgcolor);
 	},
 	
