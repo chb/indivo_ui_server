@@ -89,14 +89,17 @@ body{font:15px/1.6 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-sma
 
 /*** General ***/
 body {
-  font-size: 15px
-  line-height: 1.6em;
-  background: #FEFCF7;
-  color: #464337;
-  font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
-  text-rendering: optimizelegibility;
-  margin: 16px 8px;
-  /* min-width: 1000px */
+	margin: 16px;
+	font-size: 15px
+	line-height: 1.6em;
+	background: rgb(254,252,247);
+	background:-webkit-gradient(linear, left top, left 15%, from(rgb(247,243,233)), to(rgb(254,252,247)));		/* WebKit legacy */
+	background:-webkit-linear-gradient(top, rgb(247,243,233), rgb(254,252,247) 15%, rgb(254,252,247) 85%, rgb(247,243,233));;
+	background:-moz-linear-gradient(top, rgb(247,243,233), rgb(254,252,247) 15%, rgb(254,252,247) 85%, rgb(247,243,233));
+	color: #464337;
+	font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
+	text-rendering: optimizelegibility;
+	/* min-width: 1000px */
 }
 
 select,input,button,textarea {
@@ -207,19 +210,19 @@ blockquote.content { margin: 1em 0; }
 
 /*** Header ***/
 #header { 
-	width: 96%; /* app-selector's 17% + app-content's 79% */ height: 80px; /* 16px * 5 */
+	width: 99%; /* app-selector's 17% + app-content's 79% width + 2* 1.5% horizontal padding */ height: 80px; /* 16px * 5 */
 	margin-bottom: 16px;
 }
 
 #header_controls {
 	float: right; height: 28px;
-	margin: -16px -33px 0px 0px;	/* -33px = 1px left border of app-selector + 2* 15px padding of app-content + 2* 1px border op app-content */
+	margin: -16px -3px 0px 0px;	/* -3px = 1px left border of app-selector + 2* 1px border op app-content */
 	padding: 8px 12px 0 12px;
 	text-transform: uppercase;
 	font-size: 0.86em;
 	border: 1px solid rgb(204,204,204); border-top-width: 0;
 	-moz-border-radius: 0 0 5px 5px; -webkit-border-radius: 0 0 5px 5px; border-radius: 0 0 5px 5px;
-	background-color: rgb(254,253,251); background-color: rgba(255,255,255,0.5);
+	background-color: rgb(250,248,242); background-color: rgba(255,255,255,0.5);
 }
 #header_controls a {
 	margin-left: 12px;
@@ -229,10 +232,9 @@ blockquote.content { margin: 1em 0; }
 }
 
 #header_logo_and_name {
-  margin-left: 8px;
-  float: left;
-  display: inline;
-  width: 66%;
+	float: left;
+	width: 66%;
+	margin-left: 1px;
 }
 #header_logo_div {
   float: left;
@@ -283,21 +285,20 @@ blockquote.content { margin: 1em 0; }
 }
 
 #footer {
-  font-size: 0.85em;
-/*  letter-spacing:-0.4px;*/
-  text-align: center;
+	margin: 48px 0 32px;
+	font-size: 0.85em;
+	text-align: center;
 }
 
 #footer a { color: #666; }
 #footer a img {
-  height: 24px;
-  width: 24px;
-  margin-bottom: -7px;
-  margin-right: 2px;
+	width: 24px; height: 24px;
+	margin-bottom: -7px;
+	margin-right: 2px;
 }
 #copyright { 
-  color: #999;
-  font-size: .8em;
+	color: #999;
+	font-size: 0.8em;
 }
 
 
@@ -307,6 +308,7 @@ blockquote.content { margin: 1em 0; }
 	float: left; position: relative; width: 17%;
 	margin-top: 48px; padding: 7px 0;
 	border: 1px dashed #ccc; border-right: none;
+	-moz-border-radius: 5px 0 0 5px; -webkit-border-radius: 5px 0 0 5px; border-radius: 5px 0 0 5px;
 	-moz-box-shadow: 0 0px 0 #fff; -webkit-box-shadow: 0 0px 0 #fff; box-shadow: 0 0px 0 #fff;
 }
 #app_selector ul {
@@ -342,15 +344,14 @@ blockquote.content { margin: 1em 0; }
 
 #app_container {
 	width: 100%; min-width: 992px !important; /* 1024 - 16 (browser chrome) - 8 * 2 (body margin) */
-	margin-bottom: 96px; padding: 5px 0;
-	background: #FEFCF7;
+	padding: 5px 0;
 	-moz-box-shadow: none; -webkit-box-shadow: none; box-shadow: none;
 	overflow: hidden;
 }
 
 .app_content_pane {
 	float: left; width: 79%; min-height: 600px; min-width: 768px; /* not including padding, borders or margin. 768 + (15 * 2 (padding)) + (1 * 2) (border) = 800px total width*/
-	padding: 15px;
+	padding: 15px 1.5%;
 	border: 1px solid #ccc;
 	-moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px;
 	background: #fafafa;
@@ -531,6 +532,7 @@ blockquote.content { margin: 1em 0; }
 	-webkit-border-radius: 64px; -moz-border-radius: 64px; border-radius: 64px; border: 1px solid rgb(178,178,178); border-color: rgba(0,0,0,0.3);
 	background-color: rgb(220,220,220);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), to(rgb(220,220,220)));
+    background:-webkit-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
     background:-moz-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
    	-webkit-transition-property: width, height, margin, border-radius;
 	-moz-transition-property: width, height, margin, border-radius;
@@ -560,6 +562,7 @@ blockquote.content { margin: 1em 0; }
 	-webkit-border-radius: 50px; -moz-border-radius: 50px; border-radius: 50px; border: 1px solid rgb(120,120,120);
 	background-color: rgb(102,204,255);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(148,220,255)));
+    background:-webkit-linear-gradient(top, rgb(58,180,255), rgb(148,220,255));
     background:-moz-linear-gradient(top, rgb(58,180,255), rgb(148,220,255));
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
@@ -592,6 +595,7 @@ blockquote.content { margin: 1em 0; }
 	border-color: rgb(153,153,153); border-color: rgba(0,0,0,0.4);
 	background-color: rgb(200,200,200);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(220,220,220)), to(rgb(180,180,180)));
+    background:-webkit-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
     background:-moz-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
 }
 .app_hovers .carenet_border {
