@@ -94,7 +94,12 @@ $.Model.extend('UI.Models.Account',
             fixture: "-get"
         });
     },
-
+	
+	get_name: function(callback) {
+		// TODO: Implement me!!
+		callback('Mr. Anonymous', 'success', null);
+	},
+	
     get_records: function(callback) {
       $.getXML(this.base_url() + '/records/', function(record_list) {
         // If we have stale tokens for this user, we'll get "Permission Denied" here

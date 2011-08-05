@@ -1,0 +1,26 @@
+{% load i18n %}
+<% if (accounts.length > 0) {
+_(accounts).each(function(a, i) { console.log(a, i); %>
+	<div class="account" <%= a %>>
+		<div class="account_name"><%= a.fullName %></div>
+		<div class="account_id"><%= a.account_id %></div>
+		<div class="error_area" <%= (a.warning) ? '' : 'style="display: none;"' %>><%= a.warning %></div>
+	</div>
+<% });
+} %>
+<div class="account new" <%= null %>>
+	<div class="account_name">
+		<img src="/jmvc/ui/resources/images/add_20.png" alt="" />
+		{% trans "Add account" %}
+	</div>
+	<form id="new_account_form" action="javascript:void(0);" method="get" style="display: none;">
+		<div class="account_id">{% trans "Account ID:" %}</div>
+		<input type="text" class="account_name" placeholder="" name="new_account_id" value="" />
+		<div class="account_buttons">
+			<button type="reset" class="small">{% trans "Cancel" %}</button>
+			<button type="submit">{% trans "Add" %}</button>
+		</div>
+		<div class="error_area" style="display: none;"></div>
+	</form>
+</div>
+<div style="clear: left;"> </div>

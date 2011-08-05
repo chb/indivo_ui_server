@@ -105,6 +105,9 @@ body {
 select,input,button,textarea {
   font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
 }
+input.error {
+	border-color: rgb(220,0,0); background-color: rgb(255,219,207);
+}
 
 pre,code,kbd,samp,tt {
   font-family:"Andale Mono", Consolas, monospace
@@ -427,28 +430,83 @@ blockquote.content { margin: 1em 0; }
 }
 
 
-/*** Sharing Settings ***/
+/***
+ * Sharing Settings
+ */
+
+/*** accounts ***/
 #known_accounts {
 	position: relative;
 }
+.account {
+	float: left; position: relative; z-index: 2; cursor: move; overflow: hidden;
+	width: 180px; min-height: 40px; margin: 10px 10px 0 0; padding: 6px 10px;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+	border: 1px solid rgb(201,201,201); border-color: rgba(0,0,0,0.1);
+	-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px;
+	background-color: rgb(224,224,224); background-color: rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.9); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.9); box-shadow: 0 1px 0 rgba(255,255,255,0.9);
+	-webkit-transition-property: opacity;
+	-moz-transition-property: opacity;
+	-o-transition-property: opacity;
+	transition-property: opacity;
+	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
+}
+.account.new {
+	cursor: pointer;
+}
+.account.active {
+	border: 1px solid rgb(174,174,174); border-color: rgba(0,0,0,0.2);
+	background-color: rgb(218,218,218); background-color: rgba(0,0,0,0.125);
+	-webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.account_name {
+	white-space: nowrap;
+}
+.account.new .account_name {
+	line-height: 40px;
+}
+input.account_name {
+	width: 95%;
+}
+.account.new .account_name img {
+	vertical-align: -12%; margin-right: 0.5em;
+}
+.account_id {
+	font-size: 0.8em; white-space: nowrap; color: rgb(128,128,128); color: rgba(0,0,0,0.5);
+}
+.account_buttons {
+	margin: 0.5em 0 0.25em; text-align: right;
+}
+.account_buttons img {
+	margin: 0 0.5em 0 1em;
+	vertical-align: -5%;
+}
+.account .error_area {
+	font-size: 0.8em;
+}
 
+
+/*** apps ***/
 #apps {
 	position: relative; margin: 1em 0 32px;
 }
 .app {
 	float: left; position: relative; z-index: 2; cursor: move;
-    min-height: 45px; width: 100px; margin: 10px 10px 0 0; padding: 50px 0 10px;
-    font-size: 0.8em; text-align: center;
-    background: url() 34px 10px no-repeat;
-    -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
-    -webkit-transition-property: min-height, border-radius, margin, padding, opacity;
+	width: 100px; min-height: 45px; margin: 10px 10px 0 0; padding: 50px 0 10px;
+	font-size: 0.8em; text-align: center;
+	border: 1px solid transparent;
+	-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px;
+	background: url() 34px 10px no-repeat;
+	-webkit-transition-property: min-height, border-radius, margin, padding, opacity;
 	-moz-transition-property: min-height, border-radius, margin, padding, opacity;
 	-o-transition-property: min-height, border-radius, margin, padding, opacity;
 	transition-property: min-height, border-radius, margin, padding, opacity;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .app:hover, .app_showinfo {
-	background-color: rgba(0,0,0,0.1);
+	border-color: rgb(201,201,201); border-color: rgba(0,0,0,0.1);
+	background-color: rgb(224,224,224); background-color: rgba(0,0,0,0.1);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.9); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.9); box-shadow: 0 1px 0 rgba(255,255,255,0.9);
 }
 .app.disabled {
@@ -466,10 +524,12 @@ blockquote.content { margin: 1em 0; }
 
 .app_dragged {
 	min-height: 20px; z-index: 5;
-	background-color: rgba(0,0,0,0.2);
+	border-color: transparent;
+	background-color: rgb(204,204,204); background-color: rgba(0,0,0,0.2);
 	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
 }
 .app_dragged:hover {
+	border-color: transparent;
 	background-color: rgb(204,204,204); background-color: rgba(0,0,0,0.2);
 	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
 }
@@ -519,21 +579,27 @@ blockquote.content { margin: 1em 0; }
 .app_dragged .app_options, .app_dragged:hover .app_options { display: none; }
 
 
+/*** carenets ***/
 #carenets {
 	position: relative;
 }
 .carenet {
 	position: relative; float: left; opacity: 1;
-	width: 128px; height: 128px; margin: 32px 40px 128px 32px;
+	width: 128px; height: 128px; margin: 32px 40px 40px 32px;
 	-webkit-transition-property: opacity;
 	-moz-transition-property: opacity;
 	-o-transition-property: opacity;
 	transition-property: opacity;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
+.carenet.square {
+	width: 202px; margin: 8px 48px 96px 0;
+}
+
 .carenet_border {
 	width: 126px; height: 126px; margin: 0;
-	-webkit-border-radius: 64px; -moz-border-radius: 64px; border-radius: 64px; border: 1px solid rgb(178,178,178); border-color: rgba(0,0,0,0.3);
+	border: 1px solid rgb(178,178,178); border-color: rgba(0,0,0,0.3);
+	-webkit-border-radius: 64px; -moz-border-radius: 64px; border-radius: 64px;
 	background-color: rgb(220,220,220);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), to(rgb(220,220,220)));
     background:-webkit-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
@@ -544,21 +610,36 @@ blockquote.content { margin: 1em 0; }
 	transition-property: width, height, margin, border-radius;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
+.carenet.square .carenet_border {
+	width: 200px; height: 76px;
+	-webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
+}
 .carenet:hover .carenet_border, .expanded .carenet_border {
-	width: 190px; height: 190px; margin: -32px; border-radius: 96px;
+	width: 190px; height: 190px; margin: -32px;
+	-moz-border-radius: 96px; -webkit-border-radius: 96px; border-radius: 96px;
 }
-.carenet_content {
-	display: block; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0;
-	-webkit-transition-property: opacity;
-	-moz-transition-property: opacity;
-	-o-transition-property: opacity;
-	transition-property: opacity;
-	-webkit-transition-duration: 0.4s; -o-transition-duration: 0.4s; -moz-transition-duration: 0.4s; transition-duration: 0.4s;
+.carenet.square:hover .carenet_border, .carenet.square.expanded .carenet_border {
+	width: 200px; height: 206px; margin: 0;
+	-moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px;
 }
-.carenet:hover .carenet_content, .app_hovers .carenet_content, .expanded .carenet_content {
-	display: block; opacity: 1;
+.carenet.new .carenet_border {
+	border-style: dashed;		/* drawn solid in Firefox 5 and lower */
 }
 
+.app_hovers .carenet_border, .has_app .carenet_border {
+	border-color: rgb(153,153,153); border-color: rgba(0,0,0,0.4);
+	background-color: rgb(200,200,200);
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(220,220,220)), to(rgb(180,180,180)));
+    background:-webkit-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
+    background:-moz-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
+}
+.app_hovers .carenet_border {
+	width: 190px; height: 190px; margin: -32px;
+	-webkit-border-radius: 96px; -moz-border-radius: 96px; border-radius: 96px;
+}
+.has_app .carenet_border {
+    -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
+}
 
 .carenet_inner {
 	position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px;
@@ -570,10 +651,25 @@ blockquote.content { margin: 1em 0; }
     background:-moz-linear-gradient(top, rgb(58,180,255), rgb(148,220,255));
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
+.carenet.square .carenet_inner {
+	height: 60px; top: 8px; left: 8px; right: 8px;
+	-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px;
+	-webkit-transition-property: border-radius;
+	-moz-transition-property: border-radius;
+	-o-transition-property: border-radius;
+	transition-property: border-radius;
+	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
+}
 .carenet:hover .carenet_inner {  }
+.carenet.square:hover .carenet_inner {
+	-webkit-border-radius: 5px 5px 0 0; -moz-border-radius: 5px 5px 0 0; border-radius: 5px 5px 0 0;
+}
 .carenet_inner p {
 	position: absolute; left: 8px; top: 30px; right: 8px; margin: 0;
 	text-align: center; line-height: 1.3; z-index: 1;
+}
+.carenet.square .carenet_inner p {
+	top: 8px;
 }
 .carenet_inner a {
 	display: block; cursor: pointer;
@@ -595,19 +691,27 @@ blockquote.content { margin: 1em 0; }
 	margin-top: 0.3em;
 }
 
-.app_hovers .carenet_border, .has_app .carenet_border {
-	border-color: rgb(153,153,153); border-color: rgba(0,0,0,0.4);
-	background-color: rgb(200,200,200);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(220,220,220)), to(rgb(180,180,180)));
-    background:-webkit-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
-    background:-moz-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
+.carenet_content {
+	display: block; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0;
+	-webkit-transition-property: opacity;
+	-moz-transition-property: opacity;
+	-o-transition-property: opacity;
+	transition-property: opacity;
+	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
-.app_hovers .carenet_border {
-	width: 190px; height: 190px; margin: -32px;
-	-webkit-border-radius: 96px; -moz-border-radius: 96px; border-radius: 96px;
+.carenet.square .carenet_content {
+	
 }
-.has_app .carenet_border {
-    -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
+.carenet:hover .carenet_content, .app_hovers .carenet_content, .expanded .carenet_content {
+	display: block; opacity: 1;
+	-webkit-transition-delay: 0.1s; -o-transition-delay: 0.1s; -moz-transition-delay: 0.1s; transition-delay: 0.1s;
+}
+.carenet_content p {
+	margin: 80px 8px 8px;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+.carenet_content p.hint {
+	text-align: center; color: rgb(128,128,128); color: rgba(0,0,0,0.5);
 }
 
 h4 img { vertical-align: -5%; margin-right: 0.75em; }
@@ -617,6 +721,10 @@ h4 img { vertical-align: -5%; margin-right: 0.75em; }
 .poof {
 	position: absolute; top: 0; left: 0; width: 50px; height: 50px; overflow: hidden;
 	background: url(/jmvc/ui/resources/images/poof.png) top center no-repeat transparent;
+}
+
+.error_area {
+	margin-top: 0.5em; color: #800;
 }
 
 

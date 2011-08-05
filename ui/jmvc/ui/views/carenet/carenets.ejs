@@ -1,0 +1,36 @@
+{% load i18n %}
+<% $(carenets).each(function(i, carenet) { %>
+<div class="carenet square" <%= carenet %>>
+	<div class="carenet_inner">
+		<p>
+			<a class="carenet_name"><%= carenet.name %></a>
+			<b class="carenet_num_apps"><%= carenet.accounts ? carenet.accounts.length : 0 %></b>
+		</p>
+	</div>
+	<div class="carenet_border">
+		<div class="carenet_content">
+		<% if (carenet.accounts && carenet.accounts.length > 0) {
+			_(carenet.accounts).each(function(app, i) { %>
+			
+			<% });
+		} else { %>
+			<p class="hint">{% trans "No accounts" %}</p>
+		<% } %>
+		</div>
+	</div>
+</div>
+<% }); %>
+
+<div class="carenet square new" <%= null %>>
+	<div class="carenet_inner">
+		<p>
+			<a class="carenet_name">{% trans "New carenet" %}</a>
+		</p>
+	</div>
+	<div class="carenet_border">
+		<div class="carenet_content">
+			<p class="hint">{% trans "No accounts" %}</p>
+		</div>
+	</div>
+</div>
+<div style="clear: left;"> </div>

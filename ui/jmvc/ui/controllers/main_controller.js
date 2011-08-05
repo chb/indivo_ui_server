@@ -1,4 +1,3 @@
-{% load i18n %}
 /**
  * @tag controllers, home
  * 
@@ -37,22 +36,21 @@ $.Controller.extend('UI.Controllers.MainController',
 		
 		// deselect old tab and select new tab
 		if (selected.is('*') && selected.attr('id') != el.attr('id')) {
-			var clone = selected.clone(false).css({
+			var sel_clone = selected.clone(false).css({
 				       'position': 'absolute',
 				           'left': '10px',
 				          'right': '-1px',
 				            'top': selected.position().top + 'px',
 				         'height': selected.innerHeight() - 8 + 'px',		/* 8 = 4px + 4px top and bottom padding. Would be better to get this from CSS or calculate it! */
 				'-moz-box-shadow': 'none', '-webkit-box-shadow': 'none', 'box-shadow': 'none'
-			}).text('');
-			console.log(selected.css('background-color'));
+			}).empty();
 			selected.removeClass('selected').css('background-color', '');
 			
 			// animate tab selection
 			el.css('background-color', 'transparent').css('border-right-color', 'transparent');
 			if (UI.Controllers.MainController.animateTabSelection) {
-				selected.parent().parent().children().first().prepend(clone);		// prepend to first <ul> to stack it behind all other tabs
-				clone.animate({
+				selected.parent().parent().children().first().prepend(sel_clone);		// prepend to first <ul> to stack it behind all other tabs
+				sel_clone.animate({
 						   'top': el.position().top + 'px',
 						'height': el.innerHeight() - 8 + 'px'
 					},

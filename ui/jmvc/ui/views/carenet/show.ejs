@@ -14,84 +14,18 @@ information.
 
 
 <!-- Accounts List -->
-<h3>{% trans "Accounts" %}</h3>
+<h3>{% trans "Known accounts" %}</h3>
 <div id="known_accounts">
-	<% if (0 == accounts.length) { %>
-		<p><em>{% trans "No accounts" %}</em></p>
-	<% }
-	else {
-		accounts.each(function(i, a) { %>
-		<div class="account"><%= a.account_id %></div>
-	<% });
-	} %>
+	<h4><img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" />{% trans "Loading accounts" %}</h4>
 </div>
 
+
+<p id="carenet_drag_accounts" class="drag_instructions" style="display: none;">
+	<img src="jmvc/ui/resources/images/arrow-down.png" alt="" />
+	{% trans "Drag accounts to carenets to start sharing with them" %}
+</p>
 
 <!-- Carenets -->
-<h3>{% trans "Carenets" %}</h3>
-<div id="carenets">
-<% if (carenets.length == 0) { %>
-	<p><em>{% trans "No carenets" %}</em></p>
-<% } %>
-
-<% $(carenets).each(function(i, carenet) { %>
-	<div class="carenet" <%= carenet %>>
-		<div class="carenet_outer">
-			<div class="carenet_inner">
-				<p>
-					<a class="carenet_name"><%= carenet.name %></a>
-					<b><%= carenet.accounts.length %></b>
-				</p>
-			</div>
-		</div>
-	</div>
-<% }); %>
-	<div style="clear: left;"> </div>
+<div id="carenets" style="display: none;">
+	<h4><img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" />{% trans "Loading carenets" %}</h4>
 </div>
-
-<h4>{% trans "Share with a new person" %}</h4>
-<form id="add_carenet_account_form">
-	<table border="0" cellpadding="5">
-	<tr><th width="100">{% trans "Account ID:" %}</th><td><input type="text" name="account_id" /></td></tr>
-	<tr><th width="100">{% trans "Carenet:" %}</th>
-		<td>
-		<select name="carenet_id">
-			<% $(carenets).each(function(i, carenet) { %>
-			<option value="<%= carenet.carenet_id %>"> <%= carenet.name %></option>
-			<% }); %>
-		</select>
-		</td>
-	</tr>
-	</table>
-	<input type="submit" value="{% trans "Share" %}" />
-</form>
-
-<br>
-
-<h4>{% trans "Create a New Carenet" %}</h4>
-<form id="new_carenet_form">
-	<table border="0" cellpadding="5">
-	<tr><th width="100">{% trans "Name:" %}</th><td><input type="text" name="new_carenet_name" /></td></tr>
-	</table>
-	<input type="submit" value="Create" />
-</form>
-
-<br>
-
-<h4>{% trans "Rename an Existing Carenet" %}</h4>
-<form id="rename_carenet_form">
-	<table border="0" cellpadding="5">
-	<tr><th width="100">{% trans "Carenet:" %}</th>
-		<td>
-		<select name="carenet_id">
-			<% $(carenets).each(function(i, carenet) { %>
-			<option value="<%= carenet.carenet_id %>"> <%= carenet.name %></option>
-			<% }); %>
-		</select>
-		</td>
-	</tr>
-	<tr><th width="100">{% trans "New Name" %}</th><td><input type="text" name="new_name" /></td></tr>
-	</table>
-	<input type="submit" value="{% trans "Rename" %}" />
-</form>
-
