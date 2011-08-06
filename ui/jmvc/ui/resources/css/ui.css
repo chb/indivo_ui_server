@@ -440,9 +440,9 @@ blockquote.content { margin: 1em 0; }
 }
 .account {
 	float: left; position: relative; z-index: 2; cursor: move; overflow: hidden;
-	width: 180px; min-height: 40px; margin: 10px 10px 0 0; padding: 6px 10px;
+	width: 180px; min-height: 40px; margin: 10px 24px 0 0; padding: 6px 10px;
 	text-shadow: 0 1px 0 rgba(255,255,255,0.8);
-	border: 1px solid rgb(201,201,201); border-color: rgba(0,0,0,0.1);
+	border: 1px solid rgb(204,204,204); border-color: rgba(0,0,0,0.1);
 	-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px;
 	background-color: rgb(224,224,224); background-color: rgba(0,0,0,0.1);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.9); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.9); box-shadow: 0 1px 0 rgba(255,255,255,0.9);
@@ -452,39 +452,47 @@ blockquote.content { margin: 1em 0; }
 	transition-property: opacity;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
-.account.new {
-	cursor: pointer;
-}
+.account.new { cursor: pointer; }
 .account.active {
 	border: 1px solid rgb(174,174,174); border-color: rgba(0,0,0,0.2);
 	background-color: rgb(218,218,218); background-color: rgba(0,0,0,0.125);
 	-webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-.account_name {
-	white-space: nowrap;
-}
-.account.new .account_name {
-	line-height: 40px;
-}
-input.account_name {
-	width: 95%;
-}
-.account.new .account_name img {
-	vertical-align: -12%; margin-right: 0.5em;
-}
-.account_id {
-	font-size: 0.8em; white-space: nowrap; color: rgb(128,128,128); color: rgba(0,0,0,0.5);
-}
-.account_buttons {
-	margin: 0.5em 0 0.25em; text-align: right;
-}
+.account_name { white-space: nowrap; }
+.account.new .account_name { line-height: 43px; }
+input.account_name { width: 95%; }
+.account.new .account_name img { vertical-align: -12%; margin-right: 0.5em; }
+.account_id { font-size: 0.8em; white-space: nowrap; color: rgb(128,128,128); color: rgba(0,0,0,0.5); }
+.account_buttons { margin: 0.5em 0 0.25em; text-align: right; }
 .account_buttons img {
 	margin: 0 0.5em 0 1em;
 	vertical-align: -5%;
 }
-.account .error_area {
-	font-size: 0.8em;
+.account .error_area { font-size: 0.8em; }
+
+.carenet_account {
+	position: relative; padding: 0 8px; cursor: move;
+	-webkit-transition-property: margin, padding, border-radius;
+	-moz-transition-property: margin, padding, border-radius;
+	-o-transition-property: margin, padding, border-radius;
+	transition-property: margin, padding, border-radius;
+	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
+.carenet_account:nth-child(even) {
+	background-color: rgba(255,255,255,0.75);
+}
+.carenet_account:last-child {
+	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.35); -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.35); box-shadow: 0 1px 1px rgba(0,0,0,0.35);
+}
+
+.account_dragged {
+	min-height: 20px; z-index: 5;
+	color: black; text-shadow: 0 0 2px white;
+	border-color: transparent;
+	background-color: rgb(153,153,153); background-color: rgba(153,153,153,0.5);
+	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
+}
+.account_dragged .error_area { display: none; }
 
 
 /*** apps ***/
@@ -505,22 +513,14 @@ input.account_name {
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .app:hover, .app_showinfo {
-	border-color: rgb(201,201,201); border-color: rgba(0,0,0,0.1);
+	border-color: rgb(204,204,204); border-color: rgba(0,0,0,0.1);
 	background-color: rgb(224,224,224); background-color: rgba(0,0,0,0.1);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.9); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.9); box-shadow: 0 1px 0 rgba(255,255,255,0.9);
 }
-.app.disabled {
-	cursor: default;
-}
-.app.disabled:hover {
-	background-color: rgba(0,0,0,0.05);
-}
-.app.disabled .app_name {
-	opacity: 0.5;
-}
-.app.ui-state-disabled {
-	opacity: 1;
-}
+.app.disabled { cursor: default; }
+.app.disabled:hover { background-color: rgba(0,0,0,0.05); }
+.app.disabled .app_name { opacity: 0.5; }
+.app.ui-state-disabled { opacity: 1; }
 
 .app_dragged {
 	min-height: 20px; z-index: 5;
@@ -555,10 +555,10 @@ input.account_name {
 .carenet_app.app_dragged, .carenet_app:hover.app_dragged {
 	margin: -10px; padding: 10px; -webkit-border-radius: 30px; -moz-border-radius: 30px; border-radius: 30px;
 }
-.app_will_remove, .app_will_remove:hover {
+.draggable_will_remove, .draggable_will_remove:hover {
 	background-color: rgb(255,50,0); background-color: rgba(255,50,0,0.5);
 }
-.app_will_transfer, .app_will_transfer:hover {
+.draggable_will_transfer, .draggable_will_transfer:hover {
 	background-color: rgb(204,204,204); background-color: rgba(0,0,0,0.2);
 }
 .app_info {
@@ -593,17 +593,17 @@ input.account_name {
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .carenet.square {
-	width: 202px; margin: 8px 48px 96px 0;
+	width: 202px; height: 208px; margin: 8px 48px 16px 0;
 }
 
 .carenet_border {
 	width: 126px; height: 126px; margin: 0;
-	border: 1px solid rgb(178,178,178); border-color: rgba(0,0,0,0.3);
+	border: 1px solid rgb(204,204,204); border-color: rgba(0,0,0,0.2);
 	-webkit-border-radius: 64px; -moz-border-radius: 64px; border-radius: 64px;
-	background-color: rgb(220,220,220);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), to(rgb(220,220,220)));
-    background:-webkit-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
-    background:-moz-linear-gradient(top, rgb(245,245,245), rgb(220,220,220));
+	background-color: rgb(220,220,220); background-color: rgba(0,0,0,0.1);
+	background: -webkit-gradient(radial, center center, 50, center center, 90, from(rgba(0,0,0,0.01)), to(rgba(0,0,0,0.1)));
+	background: -webkit-radial-gradient(circle, rgba(0,0,0,0.01) 50px, rgba(0,0,0,0.15));
+	background: -moz-radial-gradient(circle, rgba(0,0,0,0.01) 50px, rgba(0,0,0,0.15));
    	-webkit-transition-property: width, height, margin, border-radius;
 	-moz-transition-property: width, height, margin, border-radius;
 	-o-transition-property: width, height, margin, border-radius;
@@ -611,8 +611,11 @@ input.account_name {
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .carenet.square .carenet_border {
-	width: 200px; height: 76px;
+	position: relative; width: 200px; height: 76px; overflow: hidden;
 	-webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
+	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.025)), to(rgba(0,0,0,0.1))) no-repeat;
+	background: -webkit-linear-gradient(top, rgba(0,0,0,0.025), rgba(0,0,0,0.1)) no-repeat;
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.025), rgba(0,0,0,0.1)) no-repeat;
 }
 .carenet:hover .carenet_border, .expanded .carenet_border {
 	width: 190px; height: 190px; margin: -32px;
@@ -626,16 +629,24 @@ input.account_name {
 	border-style: dashed;		/* drawn solid in Firefox 5 and lower */
 }
 
-.app_hovers .carenet_border, .has_app .carenet_border {
-	border-color: rgb(153,153,153); border-color: rgba(0,0,0,0.4);
-	background-color: rgb(200,200,200);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(220,220,220)), to(rgb(180,180,180)));
-    background:-webkit-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
-    background:-moz-linear-gradient(top, rgb(220,220,220), rgb(180,180,180));
+.has_app .carenet_border {
+	border-color: rgb(178,178,178); border-color: rgba(0,0,0,0.3);
+	background-color: rgb(216,216,216); background-color: rgba(0,0,0,0.15);
+	background: -webkit-gradient(radial, center center, 50, center center, 90, from(rgba(0,0,0,0.05)), to(rgba(0,0,0,0.2)));
+	background: -webkit-radial-gradient(circle, rgba(0,0,0,0.05) 50px, rgba(0,0,0,0.25));
+	background: -moz-radial-gradient(circle, rgba(0,0,0,0.05) 50px, rgba(0,0,0,0.25));
 }
-.app_hovers .carenet_border {
+.has_app.square .carenet_border {
+	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.05)), to(rgba(0,0,0,0.2))) no-repeat;
+	background: -webkit-linear-gradient(top, rgba(0,0,0,0.05), rgba(0,0,0,0.2)) no-repeat;
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.05), rgba(0,0,0,0.2)) no-repeat;
+}
+.draggable_hovers.round .carenet_border {
 	width: 190px; height: 190px; margin: -32px;
 	-webkit-border-radius: 96px; -moz-border-radius: 96px; border-radius: 96px;
+}
+.draggable_hovers.square .carenet_border {
+	height: 206px;
 }
 .has_app .carenet_border {
     -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
@@ -644,11 +655,11 @@ input.account_name {
 .carenet_inner {
 	position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px;
 	color: white;
-	-webkit-border-radius: 50px; -moz-border-radius: 50px; border-radius: 50px; border: 1px solid rgb(120,120,120);
+	-webkit-border-radius: 50px; -moz-border-radius: 50px; border-radius: 50px; border: 1px solid rgb(74,125,153); border-color: rgba(0,0,0,0.4);
 	background-color: rgb(102,204,255);
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(58,180,255)), to(rgb(148,220,255)));
-    background:-webkit-linear-gradient(top, rgb(58,180,255), rgb(148,220,255));
-    background:-moz-linear-gradient(top, rgb(58,180,255), rgb(148,220,255));
+    background:-webkit-gradient(linear, left top, left bottom, from(rgb(108,201,255)), to(rgb(191,233,255))) no-repeat;
+    background:-webkit-linear-gradient(top, rgb(108,201,255), rgb(191,233,255)) no-repeat;
+    background:-moz-linear-gradient(top, rgb(108,201,255), rgb(191,233,255)) no-repeat;
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.8); box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
 .carenet.square .carenet_inner {
@@ -660,8 +671,7 @@ input.account_name {
 	transition-property: border-radius;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
-.carenet:hover .carenet_inner {  }
-.carenet.square:hover .carenet_inner {
+.carenet.square:hover .carenet_inner, .carenet.square.expanded .carenet_inner, .carenet.square.draggable_hovers .carenet_inner {
 	-webkit-border-radius: 5px 5px 0 0; -moz-border-radius: 5px 5px 0 0; border-radius: 5px 5px 0 0;
 }
 .carenet_inner p {
@@ -700,15 +710,25 @@ input.account_name {
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .carenet.square .carenet_content {
-	
+	top: 77px; left: 7px; right: 7px; bottom: 7px; overflow: hidden;
+	border: 1px solid rgb(174,174,174); border-color: rgba(0,0,0,0.2);
+	-webkit-border-radius: 0 0 5px 5px; -moz-border-radius: 0 0 5px 5px; border-radius: 0 0 5px 5px;
+	background-color: rgb(218,218,218); background-color: rgba(0,0,0,0.05);
+	-webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8); -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
 }
-.carenet:hover .carenet_content, .app_hovers .carenet_content, .expanded .carenet_content {
+.carenet:hover .carenet_content, .draggable_hovers .carenet_content, .expanded .carenet_content {
 	display: block; opacity: 1;
 	-webkit-transition-delay: 0.1s; -o-transition-delay: 0.1s; -moz-transition-delay: 0.1s; transition-delay: 0.1s;
 }
+.carenet.square:hover .carenet_content, .carenet.square.draggable_hovers .carenet_content {
+	-webkit-transition-property: none;
+	-moz-transition-property: none;
+	-o-transition-property: none;
+	transition-property: none;
+}
+
 .carenet_content p {
-	margin: 80px 8px 8px;
-	text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+	line-height: 124px; text-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
 .carenet_content p.hint {
 	text-align: center; color: rgb(128,128,128); color: rgba(0,0,0,0.5);

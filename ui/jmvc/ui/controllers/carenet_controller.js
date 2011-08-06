@@ -47,16 +47,6 @@ $.Controller.extend('UI.Controllers.Carenet',
 		var carenet = this.get_carenet(carenet_id);
 		if (confirm('Are you sure you want to remove ' + account_id + ' ?')) { carenet.remove_account(account_id); }
 		return false;
-	},
-	
-	addAccountToCarenet: function(account, carenet, controller) {
-		if (account && carenet) {
-			carenet.add_account(account.id, function(data, controller) {
-				if ($(data).find('ok').length !== 1) {
-					//'{% trans "Could not add ' + account.fullName + ' to the carenet, please try again" %}'
-				}
-			});
-		}
 	}
 },
 /* @Prototype */
@@ -101,22 +91,116 @@ $.Controller.extend('UI.Controllers.Carenet',
 			});
 			
 			self.carenets = carenets;
+			self.accounts = [new UI.Models.Account({'account_id': 'fake@indivo.org', 'fullName': 'Mr. Universe'})];
 			
 			// show known accounts and carenets
 			self.updateAccounts();
 			$('#carenet_drag_accounts').show();
-			$('#carenets').show().html(this.view('carenets', {'carenets': self.carenets}));
+			self.updateCarenets();
 		}
 	},
 	
+	
+	/**
+	 * UI preparations
+	 */
 	updateAccounts: function() {
 		var self = this;
 		$('#known_accounts').html(this.view('accounts', {'accounts': this.accounts}));
 		
-		// setup JS
+		// setup adding an account
 		$('#known_accounts').find('.account.new').click(function(ev) {
 			self.showNewAccountBox(ev, $(this));
 		});
+		
+		// setup app dragging
+		$('#known_accounts').find('.account').not('.new')
+		.bind('selectstart', function () { return false; })		// needed for WebKit (unless we upgrade jQuery UI to 1.8.6+)
+		.draggable({
+			distance: 8,
+			revert: 'invalid',
+			revertDuration: 300,
+			helper: 'clone',
+			containment: '#app_content',
+			start: function(event, ui) {
+				var account_id = $(this).model().account_id;
+				$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
+					var carenet = $(elem).model();
+					if (carenet && carenet.accounts && carenet.accounts.length > 0) {
+						var account_arr = carenet.accounts;
+						if (account_arr && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+							$(elem).css('opacity', 0.4);
+						}
+					}
+				});
+				ui.helper.addClass('account_dragged');
+			},
+			stop: function(event) {				// this may be called AFTER another 'start' if the user very quickly drags another app. We could use 'drag' instead of 'start'
+				$('#carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
+			}
+		})
+		
+		// setup hovering (so we see in which carenets the account already is)
+		.not('.new').bind({
+			'mouseover': function(event) {
+				var account_id = $(this).model().account_id;
+				$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
+					var account_arr = $(elem).model().accounts;
+					if (account_arr && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+						$(elem).addClass('has_app');
+					}
+				});
+			},
+			'mouseout': function(event) {
+				$('#carenets').find('.carenet').removeClass('has_app');
+			}
+		});
+	},
+	
+	updateCarenets: function() {
+		var self = this;
+		var nets = $('#carenets');
+		nets.show().html(this.view('carenets', {'carenets': this.carenets}));
+		
+		// setup droppable
+		nets.find('.carenet').droppable({
+			accept: function(draggable) {
+				var mod = $(this).model();
+				if (!mod) {
+					return $(this).hasClass('new');
+				}
+				var drag_mod = draggable.model();
+				if (drag_mod) {
+					return ! _(mod.accounts).detect(function(a) { return a.account_id === drag_mod.account_id; });
+				}
+				return false;
+			},
+			hoverClass: 'draggable_hovers',
+			over: function(event, ui) {
+				//if (ui.helper.hasClass('draggable_will_remove')) {		// 'draggable_will_remove' class is not yet set for quick drags. Set 'draggable_will_transfer' without checking as it doesn't hurt
+					ui.helper.addClass('draggable_will_transfer');
+				//}
+			},
+			out: function(event, ui) {
+				if (ui.helper.hasClass('draggable_will_remove')) {
+					ui.helper.removeClass('draggable_will_transfer');
+				}
+			},
+			
+			// add app on drop
+			drop: function(event, ui) {
+				self.addAccountToCarenet(ui.draggable.model(), ui.helper, $(this));
+			}
+		});
+		
+		// setup carenet name editing
+		nets.find('a.carenet_name').each(function(i) {
+			self.setupCarenetName($(this));
+		});
+	},
+	
+	setupCarenetAccount: function(account_view) {
+		
 	},
 	
 	
@@ -196,8 +280,40 @@ $.Controller.extend('UI.Controllers.Carenet',
 			account.fullName = data;
 			account.warning = '{% trans "You must add this account to at least one carenet in order to to keep it in your accounts list" %}';
 			this.accounts.push(account);
-			console.log(this.accounts);
 			this.updateAccounts();
 		}
+	},
+	
+	addAccountToCarenet: function(account, dragged_view, carenet_view) {
+		var carenet = carenet_view.model();
+		carenet_view.addClass('expanded');
+		account.temporarily_added = true;
+		
+		// create the view at drop position
+		var carenet_content = carenet_view.find('.carenet_content').first();
+		var pos_parent = carenet_content.offset();
+		var pos_acc = dragged_view.offset();
+		var cur_coords = {'top': pos_acc.top - pos_parent.top, 'left': pos_acc.left - pos_parent.left};
+		var new_acc_view = $(this.view('carenet_account', {'account': account}));
+		this.setupCarenetAccount(new_acc_view);
+		
+		// add the view and animate to final position
+		dragged_view.detach();
+		carenet_content.find('p.hint').remove();
+		var children = carenet_content.children();
+		var coords = {'top': 0, 'left': 0};
+		if (children.length > 0) {
+			//coords = ...
+		}
+		carenet_content.append(new_acc_view);
+		new_acc_view.animate({'left': coords.left, 'top': coords.top}, 'fast');
+		carenet_view.find('.carenet_num_apps').first().text('~');
+		
+		// add to array and tell the server
+		carenet.accounts.push(account);
+		carenet.add_account(account.account_id, this.callback('didAddAccountToCarenet', new_acc_view, carenet_view));
+	},
+	didAddAccountToCarenet: function(data, textStatus, xhr) {
+		console.log(data);
 	}
 });

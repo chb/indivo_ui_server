@@ -1,6 +1,6 @@
 {% load i18n %}
 <% if (accounts.length > 0) {
-_(accounts).each(function(a, i) { console.log(a, i); %>
+$(accounts).each(function(i, a) { %>
 	<div class="account" <%= a %>>
 		<div class="account_name"><%= a.fullName %></div>
 		<div class="account_id"><%= a.account_id %></div>

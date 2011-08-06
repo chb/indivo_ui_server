@@ -409,15 +409,15 @@ $.Controller.extend('UI.Controllers.PHA',
 				}
 				return false;
 			},
-			hoverClass: 'app_hovers',
+			hoverClass: 'draggable_hovers',
 			over: function(event, ui) {
-				//if (ui.helper.hasClass('app_will_remove')) {		// 'app_will_remove' class is not yet set for quick drags. Set 'app_will_transfer' without checking as it doesn't hurt
-					ui.helper.addClass('app_will_transfer');
+				//if (ui.helper.hasClass('draggable_will_remove')) {		// 'draggable_will_remove' class is not yet set for quick drags. Set 'draggable_will_transfer' without checking as it doesn't hurt
+					ui.helper.addClass('draggable_will_transfer');
 				//}
 			},
 			out: function(event, ui) {
-				if (ui.helper.hasClass('app_will_remove')) {
-					ui.helper.removeClass('app_will_transfer');
+				if (ui.helper.hasClass('draggable_will_remove')) {
+					ui.helper.removeClass('draggable_will_transfer');
 				}
 			},
 			
@@ -678,7 +678,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				var view = $(this);
 				
 				// remove from carenet
-				if (view.hasClass('app_will_remove')) {
+				if (view.hasClass('draggable_will_remove')) {
 					view.draggable('destroy');
 					
 					// tell the server
@@ -694,7 +694,7 @@ $.Controller.extend('UI.Controllers.PHA',
 					}
 					
 					// animate removal
-					if (!view.hasClass('app_will_transfer')) {
+					if (!view.hasClass('draggable_will_transfer')) {
 						var parent = $('#app_content');
 						//var p_off = parent.offset();		// '#app_content' is no offsetParent! Will this change? If so, subtract p_off from v_off
 						var v_off = view.offset();
@@ -734,10 +734,10 @@ $.Controller.extend('UI.Controllers.PHA',
 					var maxRad = 120;
 					var myRad = Math.sqrt(x*x + y*y);
 					if (myRad > maxRad) {
-						view.addClass('app_will_remove');
+						view.addClass('draggable_will_remove');
 					}
 					else {
-						view.removeClass('app_will_remove');
+						view.removeClass('draggable_will_remove');
 					}
 				},
 				stop: function(event, ui) {
@@ -750,7 +750,7 @@ $.Controller.extend('UI.Controllers.PHA',
 					});
 					$('#apps').find('.app').removeClass('app_showinfo');
 					
-					if (!view.hasClass('app_will_remove')) {
+					if (!view.hasClass('draggable_will_remove')) {
 						view.parentsUntil('.carenet').last().parent().removeClass('expanded');
 					}
 				}
