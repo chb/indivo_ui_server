@@ -452,11 +452,16 @@ blockquote.content { margin: 1em 0; }
 	transition-property: opacity;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
-.account.new { cursor: pointer; }
-.account.active {
+.account.new {
+	width: auto; cursor: pointer;
+}
+.account.highlight {
 	border: 1px solid rgb(174,174,174); border-color: rgba(0,0,0,0.2);
 	background-color: rgb(218,218,218); background-color: rgba(0,0,0,0.125);
-	-webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+	-webkit-box-shadow: 0 1px 4px rgba(0,0,0,0.3); -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.3); box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+#new_account_form {
+	width: 180px;
 }
 .account_name { white-space: nowrap; }
 .account.new .account_name { line-height: 43px; }
@@ -470,18 +475,20 @@ input.account_name { width: 95%; }
 }
 .account .error_area { font-size: 0.8em; }
 
-.carenet_account {
-	position: relative; padding: 0 8px; cursor: move;
+.carenet .account {
+	position: relative; float: none; display: block; cursor: move;
+	width: auto; min-height: 0; margin: 0; padding: 0 8px;
+	border: none; -webkit-border-radius: 0; -moz-border-radius: 0; border-radius: 0;
 	-webkit-transition-property: margin, padding, border-radius;
 	-moz-transition-property: margin, padding, border-radius;
 	-o-transition-property: margin, padding, border-radius;
 	transition-property: margin, padding, border-radius;
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
-.carenet_account:nth-child(even) {
+.carenet .account:nth-child(even) {
 	background-color: rgba(255,255,255,0.75);
 }
-.carenet_account:last-child {
+.carenet .account:last-child {
 	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.35); -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.35); box-shadow: 0 1px 1px rgba(0,0,0,0.35);
 }
 
@@ -611,7 +618,7 @@ input.account_name { width: 95%; }
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .carenet.square .carenet_border {
-	position: relative; width: 200px; height: 76px; overflow: hidden;
+	position: relative; width: 200px; height: 76px;
 	-webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
 	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.025)), to(rgba(0,0,0,0.1))) no-repeat;
 	background: -webkit-linear-gradient(top, rgba(0,0,0,0.025), rgba(0,0,0,0.1)) no-repeat;
@@ -710,7 +717,7 @@ input.account_name { width: 95%; }
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 }
 .carenet.square .carenet_content {
-	top: 77px; left: 7px; right: 7px; bottom: 7px; overflow: hidden;
+	top: 77px; left: 7px; right: 7px; bottom: 7px;
 	border: 1px solid rgb(174,174,174); border-color: rgba(0,0,0,0.2);
 	-webkit-border-radius: 0 0 5px 5px; -moz-border-radius: 0 0 5px 5px; border-radius: 0 0 5px 5px;
 	background-color: rgb(218,218,218); background-color: rgba(0,0,0,0.05);
@@ -720,11 +727,8 @@ input.account_name { width: 95%; }
 	display: block; opacity: 1;
 	-webkit-transition-delay: 0.1s; -o-transition-delay: 0.1s; -moz-transition-delay: 0.1s; transition-delay: 0.1s;
 }
-.carenet.square:hover .carenet_content, .carenet.square.draggable_hovers .carenet_content {
-	-webkit-transition-property: none;
-	-moz-transition-property: none;
-	-o-transition-property: none;
-	transition-property: none;
+.carenet.square:hover .carenet_content, .carenet.square.draggable_hovers .carenet_content, .carenet.square.expanded .carenet_content {
+	display: block;
 }
 
 .carenet_content p {
