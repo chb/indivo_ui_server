@@ -175,47 +175,6 @@ $.Controller.extend('UI.Controllers.PHA',
 		var left = 64 + b - 20;
 		
 		return {'top': top, 'left': left};
-	},
-	
-	poofViews: [],
-	poof: function(view) {				// view must already be absolutely positioned for now. Does NOT remove/detach 'view', only hide it
-		if (view && 'object' == typeof view) {
-			var must_start = (UI.Controllers.PHA.poofViews.length < 1);
-			
-			// insert
-			var x = parseInt(view.css('left')) + (view.outerWidth(true) / 2) - 25;		// '.poof' is 50 pixels square
-			var y = parseInt(view.css('top')) + (view.outerHeight(true) / 2) - 25;
-			poof = $('<div/>').addClass('poof').css('left', x + 'px').css('top', y + 'px');
-			view.hide().after(poof);
-			UI.Controllers.PHA.poofViews.push(poof);
-			
-			// timeout for first step
-			if (must_start) {
-				setTimeout(UI.Controllers.PHA.poof, 50);
-			}
-		}
-		else if (UI.Controllers.PHA.poofViews.length > 0) {
-			var all_poofs = UI.Controllers.PHA.poofViews.slice(0);		// copy array
-			for (var i = all_poofs.length; i > 0; i--) {				// iterate backwards as we're deleting items from the array by index
-				var poof = all_poofs[i-1];
-				var curr = poof.css('background-position').split(/\s+/);
-				if (curr.length > 1) {
-					var step = Math.floor(Math.abs(parseInt(curr[1]) / 50));
-					if (step < 4) {
-						poof.css('background-position', curr[0] + ' ' + ((step + 1) * -50) + 'px');
-					}
-					else {
-						poof.fadeOut(25, function() { $(this).remove(); });
-						UI.Controllers.PHA.poofViews.splice(i-1, 1);
-					}
-				}
-			}
-			
-			// timeout for next step
-			if (UI.Controllers.PHA.poofViews.length > 0) {
-				setTimeout(UI.Controllers.PHA.poof, 50);
-			}
-		}
 	}
 },
 /* @Prototype */
@@ -388,7 +347,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		};
 		nets.empty().html(this.view('carenets', params));
 		
-		// setup apps
+		// setup apps already in carenets
 		var self = this;
 		nets.find('.carenet_app').each(function(i) {
 			self.setupCarenetApp($(this));
@@ -458,7 +417,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		var coords = UI.Controllers.PHA.coordinatesForAppIndex(carenet.apps.length);
 		UI.Controllers.PHA.animateViewTo(new_app_view, coords.left, coords.top);
 		
-		carenet_view.find('.carenet_num_apps').first().text('~');
+		carenet_view.find('.carenet_num_items').first().text('~');
 		
 		// add to array and tell the server
 		carenet.apps.push(app);
@@ -467,11 +426,9 @@ $.Controller.extend('UI.Controllers.PHA',
 	didAddAppToCarenet: function(app_view, carenet_view, data, textStatus, xhr) {
 		app_view.css('opacity', 1);
 		app_view.model().temporarily_added = false;
-		carenet_view.find('.carenet_num_apps').first().text(carenet_view.model().apps.length);
+		carenet_view.find('.carenet_num_items').first().text(carenet_view.model().apps.length);
 		
-		var tmp_id = 'tmp_id_' + (new Date()).getTime();
-		carenet_view.attr('id', tmp_id);
-		setTimeout("$('#" + tmp_id + "').removeClass('expanded')", 600);
+		window.setTimeout(function() { carenet_view.removeClass('expanded'); }, 600);
 	},
 	
 	didRemoveAppFromCarenet: function(app_view, carenet_view, data, textStatus, xhr) {
@@ -492,11 +449,9 @@ $.Controller.extend('UI.Controllers.PHA',
 		// update view
 		app_view.remove();		// can't fade out here as we need this to be gone when updating the other apps positions
 		this.updateAppPositionsInCarenet(carenet_view);
-		carenet_view.find('.carenet_num_apps').first().text(carenet.apps.length);
+		carenet_view.find('.carenet_num_items').first().text(carenet.apps.length);
 		
-		var tmp_id = 'tmp_id_' + (new Date()).getTime();
-		carenet_view.attr('id', tmp_id);
-		setTimeout("$('#" + tmp_id + "').removeClass('expanded')", 600);
+		window.setTimeout(function() { carenet_view.removeClass('expanded'); }, 600);
 	},
 	
 	changeCarenetName: function(form) {
@@ -605,7 +560,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				var view = $(this);
 				if (view.model().id == app.id) {
 					carenet_view.addClass('expanded');
-					setTimeout(function() { UI.Controllers.PHA.poof(view); }, 200);
+					setTimeout(function() { UI.Controllers.MainController.poof(view); }, 200);
 					setTimeout(function() { self.didRemoveAppFromCarenet(view, carenet_view); }, 450);
 				}
 			});
@@ -699,7 +654,7 @@ $.Controller.extend('UI.Controllers.PHA',
 						//var p_off = parent.offset();		// '#app_content' is no offsetParent! Will this change? If so, subtract p_off from v_off
 						var v_off = view.offset();
 						
-						UI.Controllers.PHA.poof(view);
+						UI.Controllers.MainController.poof(view);
 					}
 				}
 			})
@@ -729,7 +684,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				drag: function(event, ui) {
 					var view = ui.helper;
 					var par = view.parent();
-					var x = parseInt(view.css('left')) + view.outerWidth(true) / 2 - par.outerWidth(true) / 2;
+					var x = parseInt(view.css('left')) + view.outerWidth(true) / 2 - par.outerWidth(true) / 2;		// x and y as seen from the circle's center
 					var y = parseInt(view.css('top')) + view.outerHeight(true) / 2 - par.outerHeight(true) / 2;
 					var maxRad = 120;
 					var myRad = Math.sqrt(x*x + y*y);

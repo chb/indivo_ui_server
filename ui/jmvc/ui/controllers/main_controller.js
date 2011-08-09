@@ -16,7 +16,48 @@ $.Controller.extend('UI.Controllers.MainController',
 /* @Static */
 { 
 	onDocument: true,
-	animateTabSelection: true
+	animateTabSelection: true,
+	
+	poofViews: [],
+	poof: function(view) {				// view must already be absolutely positioned for now. Does NOT remove/detach 'view', only hide it
+		if (view && 'object' == typeof view) {
+			var must_start = (UI.Controllers.MainController.poofViews.length < 1);
+			
+			// insert
+			var x = parseInt(view.css('left')) + (view.outerWidth(true) / 2) - 25;		// '.poof' is 50 pixels square
+			var y = parseInt(view.css('top')) + (view.outerHeight(true) / 2) - 25;
+			poof = $('<div/>').addClass('poof').css('left', x + 'px').css('top', y + 'px');
+			view.hide().after(poof);
+			UI.Controllers.MainController.poofViews.push(poof);
+			
+			// timeout for first step
+			if (must_start) {
+				setTimeout(UI.Controllers.MainController.poof, 50);
+			}
+		}
+		else if (UI.Controllers.MainController.poofViews.length > 0) {
+			var all_poofs = UI.Controllers.MainController.poofViews.slice(0);		// copy array
+			for (var i = all_poofs.length; i > 0; i--) {				// iterate backwards as we're deleting items from the array by index
+				var poof = all_poofs[i-1];
+				var curr = poof.css('background-position').split(/\s+/);
+				if (curr.length > 1) {
+					var step = Math.floor(Math.abs(parseInt(curr[1]) / 50));
+					if (step < 4) {
+						poof.css('background-position', curr[0] + ' ' + ((step + 1) * -50) + 'px');
+					}
+					else {
+						poof.fadeOut(25, function() { $(this).remove(); });
+						UI.Controllers.MainController.poofViews.splice(i-1, 1);
+					}
+				}
+			}
+			
+			// timeout for next step
+			if (UI.Controllers.MainController.poofViews.length > 0) {
+				setTimeout(UI.Controllers.MainController.poof, 50);
+			}
+		}
+	}
 },
 /* @Prototype */
 {
