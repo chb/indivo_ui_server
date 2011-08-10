@@ -88,14 +88,15 @@ h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em
 body{font:15px/1.6 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
 
 /*** General ***/
+html, body { min-height: 100%; margin: 0; }
 body {
 	margin: 16px;
 	font-size: 15px
 	line-height: 1.6em;
 	background: rgb(254,252,247);
-	background:-webkit-gradient(linear, left top, left 15%, from(rgb(247,243,233)), to(rgb(254,252,247)));		/* WebKit legacy */
-	background:-webkit-linear-gradient(top, rgb(247,243,233), rgb(254,252,247) 15%, rgb(254,252,247) 85%, rgb(247,243,233));;
-	background:-moz-linear-gradient(top, rgb(247,243,233), rgb(254,252,247) 15%, rgb(254,252,247) 85%, rgb(247,243,233));
+	background:-webkit-gradient(linear, left top, left 15%, from(rgb(250,244,230)), to(rgb(254,252,247)));		/* WebKit legacy */
+	background:-webkit-linear-gradient(top, rgb(250,244,230), rgb(254,252,247) 15%, rgb(254,252,247) 85%, rgb(250,244,230));
+	background:-moz-linear-gradient(top, rgb(250,244,230), rgb(254,252,247) 15%, rgb(254,252,247) 85%, rgb(250,244,230));
 	color: #464337;
 	font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
 	text-rendering: optimizelegibility;

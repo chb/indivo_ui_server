@@ -1,92 +1,81 @@
 {% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-  <head>
-  	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>  
-    <!--  Uncomment AND comment out <script> tags in header.html
-          to use jmvc3 compression without loging in: "$ ./js steal/buildjs http://localhost -to ui" -->
-    <!-- <script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script> -->
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>	 
+	<!--	Uncomment AND comment out <script> tags in header.html
+				to use jmvc3 compression without loging in: "$ ./js steal/buildjs http://localhost -to ui" -->
+	<!-- <script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script> -->
 
-    {% if branding %}
-      {% include branding.header_template %}
-    {% else %}
-      {% include 'ui/header.html' %}
-    {% endif %}
-    
-    <title>{% trans "IndivoHealth Login" %}</title>
-    <script type="text/javascript">
-      $(function(){
-        $('#username').focus();
-        $('#form').submit(function() {
-          if (!$('#username').val()) {
-            alert('{% trans "Please enter a username." %}');
-            $('#username').focus();
-            return false;
-          }
-
-          if (!$('#password').val()){
-            alert('{% trans "Please enter a password." %}');
-            $('#password').focus();
-            return false;
-          }
-          return true;
-        });
-      })
-    </script>
-  </head>
-  <body>
-    <div style="margin: 100px auto; width: 80%;">
-      <form id="form" method="post" action="/login">
-        <div style="text-align: center;">
-          {% if branding %}
-            <img style="height: 150px; margin-bottom: -70px; margin-right: 20px;"
-                 src='{{ branding.logo_image_big_src }}'/>
-          {% endif %}
-          <span id="front_site_name">
-            {% trans "Welcome to" %}
-            {% if branding %}
-              {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}</span>
-            {% else %}
-			  {% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span> </span>
-            {% endif %}
-          {% if error %}
-            <div style="width: 75%; border: 2px dashed red; padding: 10px; margin: 70px auto 20px auto; font-size: 20px;">
-              {{error}}
-            </div>
-          {% endif %}
-        </div>
-        <br />
-        <br />
-        <div style="width: 39%; float: left; text-align: right; color: #666; padding-top: 3px;">
-          <span style="font-size: 22px;">{% trans "Username:" %}</span>
-          <br />
-          <span style="font-size: 22px;">{% trans "Password:" %}</span>
-        </div>
-        <div style="width: 60%; float: right; font-size: 24px;">
-          <input type="text" style="font-size: 20px;" id="username" name="username" tabindex="1"/>
-          <br />
-          <input type="password" style="font-size: 20px;" id="password" name="password" tabindex="2" />
-          <br />
-          <div style="font-size: 12px;">
-            <a href="/forgot_password" style="font-weight: normal;">{% trans "Forgot your password?" %}</a>
-          </div>
-        </div>
-        <br clear="both" />
-        <div style="text-align: center; margin-top: 20px;">
-          <input type="hidden" name="return_url" value="{{return_url}}" />
-          <input style="font-size: 18px; width: 300px;"
-                 type="submit"
-                 name="submit"
-                 id="submit"
-                 tabindex="3"
-                 value="          {% trans "Login" %}          "/>
-        </div>
-      </form>
-    </div>
-    {% if branding %}
-      {% include branding.footer_template %}
-    {% else %}
-      {% include 'ui/footer.html' %}
-    {% endif %}
-  </body>
+	{% if branding %}
+		{% include branding.header_template %}
+	{% else %}
+		{% include 'ui/header.html' %}
+	{% endif %}
+	
+	<title>{% trans "IndivoHealth Login" %}</title>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#username').focus();
+			$('#form').submit(function() {
+				$('#username').removeClass('error');
+				$('#password').removeClass('error');
+				if (!$('#username').val()) {
+					$('#username').addClass('error').focus();
+					return false;
+				}
+				if (!$('#password').val()){
+					$('#password').addClass('error').focus();
+					return false;
+				}
+				return true;
+			});
+		})
+	</script>
+</head>
+<body style="margin: 0; background:-webkit-radial-gradient(50% 50%, rgb(254,252,247) 35%, rgb(250,244,230) 70%, rgb(240,226,192)); background: -moz-radial-gradient(50% 50%, rgb(254,252,247) 35%, rgb(250,244,230) 70%, rgb(240,226,192));">
+	<div style="position: absolute; top: 40%; left: 50%; width: 660px; height: 300px; margin-top: -150px; margin-left: -330px;">
+		<form id="form" method="post" action="/login">
+			<input type="hidden" name="return_url" value="{{return_url}}" />
+			<div style="text-align: center;">
+				{% if branding %}
+					<img style="height: 150px; margin-bottom: -70px; margin-right: 20px;" src='{{ branding.logo_image_big_src }}' />
+				{% endif %}
+				<span id="front_site_name">
+					{% trans "Welcome to" %}
+					{% if branding %}
+						{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+					{% else %}
+						{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
+					{% endif %}
+				</span>
+				{% if error %}
+					<div style="width: 75%; margin: 30px auto 20px; padding: 0.6em; font-size: 20px; border: 2px solid rgb(200,50,0); -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px; background-color: rgb(254,242,235); background-color: rgba(255,50,0,0.05);">
+						{{error}}
+					</div>
+				{% endif %}
+			</div>
+			<div style="width: 37%; float: left; margin-top: 28px; text-align: right; font-size: 22px; line-height: 40px; color: #666;">
+				{% trans "Username:" %}<br />
+				{% trans "Password:" %}
+			</div>
+			<div style="width: 60%; float: right; margin-top: 28px; font-size: 22px; line-height: 40px;">
+				<input type="text" style="width: 55%; font-size: 20px;" id="username" name="username" tabindex="1"/><br />
+				<input type="password" style="width: 55%; font-size: 20px;" id="password" name="password" tabindex="2" /><br />
+				
+				<a href="/forgot_password" style="display: block; margin-top: -12px; font-weight: normal; font-size: 12px;">{% trans "Forgot your password?" %}</a>
+				
+				<div style="margin-top: 14px;">
+					<button id="submit" style="font-size: 18px; width: 34%;" type="submit" name="submit" tabindex="3">  {% trans "Login" %}  </button>
+				</div>
+			</div>
+			<br clear="both" />
+		</form>
+	</div>
+	{% if branding %}
+		{% include branding.footer_template %}
+	{% else %}
+		{% include 'ui/footer.html' %}
+	{% endif %}
+</body>
 </html>
