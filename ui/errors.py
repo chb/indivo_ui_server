@@ -9,16 +9,18 @@ from django.utils.translation import ugettext as _
 class ErrorStr:
     error_key = None
     errors = {
-                      'missing_name_pass': _("Either the username or password is missing. Please try again."),
-                  'incorrect_credentials': _("Incorrect username or password. Please try again."),
-                               'disabled': _("This account has been disabled/locked."),
-                            'setup_error': _("There was a problem setting up your account. Please try again."),
-                     'account_init_error': _("There was a problem updating your data. Please try again. If you are unable to change your password please contact support."),
-                      'account_collision': _("That username is already taken. Please enter different one."),
-                  'password_change_error': _("There was a problem updating your password. Please try again. If you are unable to set up your account please contact support."),
-                   'password_reset_error': _("There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support."),
-                      'multiple_accounts': _("There was a problem resetting your password. Please contact support."),
-       'Socket Error: Connection refused': _("The server is currently unavailable. Please try again in a few minutes.")
+        'This account is active, log in below': _("This account is active, you may log in below"),
+                    'Name or password missing': _("Either the username or password is missing. Please try again."),
+                       'Incorrect credentials': _("Incorrect username or password. Please try again."),
+                                    'disabled': _("This account has been disabled/locked."),
+                             'unknown account': _("This account does not exist on the server"),
+                                'Setup failed': _("There was a problem setting up your account. Please try again."),
+                          'account_init_error': _("There was a problem updating your data. Please try again. If you are unable to change your password please contact support."),
+                      'Username already taken': _("That username is already taken. Please enter different one."),
+                      'Password change failed': _("There was a problem updating your password. Please try again. If you are unable to set up your account please contact support."),
+                       'Password reset failed': _("There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support."),
+                           'multiple accounts': _("There was a problem resetting your password. Please contact support."),
+            'Socket Error: Connection refused': _("The server is currently unavailable. Please try again in a few minutes.")
     }
     
     

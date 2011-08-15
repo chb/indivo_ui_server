@@ -13,19 +13,19 @@
 		{% include 'ui/header.html' %}
 	{% endif %}
 	
-	<title>{% trans "IndivoHealth Login" %}</title>
+	<title>{% trans "Register for IndivoHealth" %}</title>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('#username').focus();
-			$('#login_form').submit(function() {
-				$('#username').removeClass('error');
-				$('#password').removeClass('error');
-				if (!$('#username').val()) {
-					$('#username').addClass('error').focus();
+			$('#full_name').focus();
+			$('#signup_form').submit(function() {
+				$('#full_name').removeClass('error');
+				$('#account_id').removeClass('error');
+				if (!$('#full_name').val()) {
+					$('#full_name').addClass('error').focus();
 					return false;
 				}
-				if (!$('#password').val()){
-					$('#password').addClass('error').focus();
+				if (!$('#account_id').val()){
+					$('#account_id').addClass('error').focus();
 					return false;
 				}
 				return true;
@@ -50,36 +50,30 @@
 					{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
 				{% endif %}
 			</span>
-			{% if MESSAGE %}
-				<div class="login_message">{{MESSAGE}}</div>
-			{% endif %}
 			{% if ERROR %}
 				<div class="login_error">{{ERROR}}</div>
 			{% endif %}
 		</div>
 		
-		<!-- Login Form -->
-		<form id="login_form" class="table_form" method="post" action="/login">
-			<input type="hidden" name="return_url" value="{{return_url}}" />
+		<!-- Registration Form -->
+		<form id="signup_form" class="table_form" method="post" action="/register">
 			<div class="row">
-				<div class="cell">{% trans "Username:" %}</div>
+				<div class="cell">{% trans "Your Name:" %}</div>
 				<div class="cell">
-					<input type="text" id="username" name="username" tabindex="1"/>
+					<input type="text" id="full_name" name="full_name" tabindex="1" />
 				</div>
 			</div>
 			<div class="row">
-				<div class="cell">{% trans "Password:" %}</div>
+				<div class="cell">{% trans "Account Email:" %}</div>
 				<div class="cell">
-					<input type="password" id="password" name="password" tabindex="2" /><br />
-					<p class="moreinfo">
-						<a class="login_action_link" href="/forgot_password">{% trans "Forgot your password?" %}</a>
-					</p>
+					<input type="text" id="account_id" name="account_id" tabindex="2" onkeyup="$('#contact_email').attr('placeholder', this.value)" />
+					<p class="moreinfo">{% trans "The activation email will be sent here" %}</p>
 					
 					<div style="margin-top: 1.5em;">
-						<button id="submit" type="submit" name="submit" tabindex="3">  {% trans "Login" %}  </button>
+						<button id="submit" style="font-size: 18px; width: 34%; margin-bottom: 12px;" type="submit" name="submit" tabindex="3">  {% trans "Register" %}  </button>
 						<p class="moreinfo">
-							<a href="/register">{% trans "No account? Register here" %}</a>
-						<p>
+							<a href="/login">{% trans "Back to login" %}</a>
+						</p>
 					</div>
 				</div>
 			</div>

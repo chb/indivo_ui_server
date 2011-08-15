@@ -12,6 +12,7 @@ from django.conf import settings
 from django import http
 
 from xml.dom import minidom
+from xml.etree import ElementTree
 
 try:
     from django.forms.fields import email_re
@@ -51,27 +52,43 @@ def send_mail(subject, body, sender, recipient):
         logging.debug("send_mail to set to false, would have sent email to %s" % recipient)
 
 def render_template_raw(template_name, vars, type="html"):
-  t_obj = loader.get_template('%s.%s' % (template_name, type))
-  c_obj = Context(vars)
-  return t_obj.render(c_obj)
+    t_obj = loader.get_template('%s.%s' % (template_name, type))
+    c_obj = Context(vars)
+    return t_obj.render(c_obj)
 
 def render_template(template_name, vars, type="html"):
-  # if hasattr(settings, 'BRANDING') \
-  #    and isinstance(settings.BRANDING, types.DictType) \
-  #    and len(settings.BRANDING) > 0:
+    # if hasattr(settings, 'BRANDING') \
+    #    and isinstance(settings.BRANDING, types.DictType) \
+    #    and len(settings.BRANDING) > 0:
+    
+    if hasattr(settings, 'BRANDING'):
+        vars['branding'] = settings.BRANDING
+    content = render_template_raw(template_name, vars, type)
+    
+    if type == "html":
+        mimetype = "text/html"
+    elif type == "xml":
+        mimetype = "application/xml"
+    else:
+        mimetype = 'text/plain'
+    
+    return HttpResponse(content, mimetype=mimetype)
 
-  if hasattr(settings, 'BRANDING'):
-    vars['branding'] = settings.BRANDING
-  content = render_template_raw(template_name, vars, type)
 
-  if type == "html":
-    mimetype = "text/html"
-  elif type == "xml":
-    mimetype = "application/xml"
-  else:
-    mimetype = 'text/plain'
+def parse_account_xml(xml):
+    """
+    Parses one node of <Account> type
+    """
+    if xml is None or 0 == len(xml):
+        return {}
+    
+    tree = ElementTree.fromstring(xml)
+    account = { 'id': tree.attrib.get('id', 0), 'type': 'meta' }
+    for node in tree:
+        account.update({node.tag: node.text.strip() if node.text else ''})
+    
+    return account
 
-  return HttpResponse(content, mimetype=mimetype)
 
 # xml stuff
 def get_element_value(dom, el):
@@ -108,16 +125,16 @@ def is_browser(request):
 
 # content type from Django?
 def get_content_type(request):
-  content_type = None
-  if request.META.has_key('CONTENT_TYPE'):
-    content_type = request.META['CONTENT_TYPE']
-  if not content_type and request.META.has_key('HTTP_CONTENT_TYPE'):
-    content_type = request.META['HTTP_CONTENT_TYPE']
-  return content_type
+    content_type = None
+    if request.META.has_key('CONTENT_TYPE'):
+        content_type = request.META['CONTENT_TYPE']
+    if not content_type and request.META.has_key('HTTP_CONTENT_TYPE'):
+        content_type = request.META['HTTP_CONTENT_TYPE']
+    return content_type
 
 logging.basicConfig(
-      level = logging.DEBUG,
-      format = '%(asctime)s %(levelname)s %(message)s',
+    level = logging.DEBUG,
+    format = '%(asctime)s %(levelname)s %(message)s',
 )
 
 def log(s):

@@ -118,7 +118,7 @@ pre,code,kbd,samp,tt {
 strong { font-style: inherit; }
 em { font-weight: inherit; }
 
-/* heading heirarchy */
+/* heading hierarchy */
 h1 {font-size: 36px; margin-top: 8px; font-weight: normal; letter-spacing: -0.3px;}
 h2 {font-size: 28px; margin: 15px 0 5px 0; font-weight: normal; }
 h3 {font-size: 20px; margin-top: 4px; font-weight: bold; }
@@ -198,7 +198,7 @@ blockquote.content { margin: 1em 0; }
     width: 500px;
     margin: 10% auto 0;
     padding: 2em;
-    border: 1px solid rgba(0,0,0,0.15);
+    border: 2px solid rgba(0,0,0,0.15);
     -webkit-border-radius: 0.7em; -moz-border-radius: 0.7em; border-radius: 0.7em;
     background-color: rgb(228,226,221); background-color: rgba(0,0,0,0.1);
     -webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8);

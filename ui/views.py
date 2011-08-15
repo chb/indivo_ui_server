@@ -15,6 +15,7 @@ from django.conf import settings
 from django.views.static import serve
 from django.template import Template, Context
 from django.utils import simplejson
+from django.utils.translation import ugettext as _
 
 import xml.etree.ElementTree as ET
 import urllib, re
@@ -113,7 +114,7 @@ def login(request, info=""):
             password = request.POST[FORM_PASSWORD]
         else:
             # Also checked initially in js
-            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('missing_name_pass'), FORM_RETURN_URL: return_url})
+            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('Name or password missing'), FORM_RETURN_URL: return_url})
     else:
         utils.log('error: bad http request method in login. redirecting to /')
         return HttpResponseRedirect('/')
@@ -123,9 +124,9 @@ def login(request, info=""):
         res = tokens_get_from_server(request, username, password)
     except IOError as e:
         if 403 == e.errno:
-            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('incorrect_credentials'), FORM_RETURN_URL: return_url})
+            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('Incorrect credentials'), FORM_RETURN_URL: return_url})
         if 400 == e.errno:
-            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('missing_name_pass'), FORM_RETURN_URL: return_url})     # checked before; highly unlikely to ever arrive here
+            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('Name or password missing'), FORM_RETURN_URL: return_url})     # checked before; highly unlikely to ever arrive here
         
         err_str = ErrorStr(e.strerror)
         return utils.render_template(LOGIN_PAGE, {'error': err_str, FORM_RETURN_URL: return_url})
@@ -137,31 +138,113 @@ def logout(request):
     request.session.flush()
     return HttpResponseRedirect('/login')
 
-def account_initialization(request):
-    """
-    http://localhost/indivoapi/accounts/foo@bar.com/initialize/icmloNHxQrnCQKNn
-    """
-    
-    api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
-    
-    if request.method == HTTP_METHOD_GET:
-        return utils.render_template('ui/account_init', {})
-    
-    if request.method == HTTP_METHOD_POST:
-        # a 404 returned from this call could indicate that the account doesn't exist! Awesome REST logic!
-        account_id = request.path_info.split('/')[3]
-        ret = api.account_initialize(account_id = account_id,
-                                 primary_secret = request.path_info.split('/')[5],
-                                           data = {'secondary_secret':request.POST['conf1'] + request.POST['conf2']})
-        
-        if ret.response['response_status'] == 200:
-            return utils.render_template('ui/account_init_2', {'FULLNAME': ''})
-        else:
-            return utils.render_template('ui/account_init', {'ERROR': ErrorStr('setup_error')})
 
-def account_initialization_2(request):
+def register(request):
+    """
+    Returns the register template (GET) or creates a new account (POST)
+    """
+    if HTTP_METHOD_GET == request.method:
+        return utils.render_template('ui/register', {})
+    
+    if HTTP_METHOD_POST == request.method:
+        post = request.POST
+        user = {  'account_id': post.get('account_id'),
+               'contact_email': post.get('contact_email'),        # this key is not present in the register form
+                   'full_name': post.get('full_name'),
+            'primary_secret_p': 1}
+        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        res = api.create_account(user)
+        
+        if 200 == res.get('response_status', 0):
+            account_id = post.get('account_id')     # better: parse account_id from XML
+            return HttpResponseRedirect('/resend_secret/%s/' % account_id)
+        
+        return utils.render_template('ui/register', {'ERROR': ErrorStr(res.get('response_data', 'Setup failed'))})
+
+
+def resend_secret(request, account_id):
+    if HTTP_METHOD_GET == request.method:
+        if account_id:
+            return utils.render_template('ui/resend_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
+        
+        return utils.render_template('ui/resend_secret', {'ACCOUNT_ID': account_id})
+    
+    if HTTP_METHOD_POST == request.method:
+        if request.POST.get('re_send', False):
+            pass
+            # TODO: Re-send secrets
+        
+        return utils.render_template('ui/resend_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
+
+
+def account_initialization(request, account_id, primary_secret):
+    """
+    http://localhost/init/foo@bar.com/icmloNHxQrnCQKNn
+    Legacy: http://localhost/indivoapi/accounts/foo@bar.com/initialize/icmloNHxQrnCQKNn
+    """
+    api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+    try_to_init = False
+    
+    # is this account already initialized?
+    ret = api.account_info(account_id=account_id)
+    status = ret.response.get('response_status', 500)
+    if 404 == status:
+        return utils.render_template('ui/error', {'error_status': status, 'error_message': ErrorStr('unknown account')})
+    if 200 != status:
+        return utils.render_template('ui/error', {'error_status': status, 'error_message': ErrorStr(ret.response.get('response_data', 'Server Error'))})
+    
+    account_xml = ret.response.get('response_data', '<root/>')
+    account = utils.parse_account_xml(account_xml)
+    account_state = account.get('state')
+    if 'uninitialized' != account_state:
+        if 'active' == account_state:
+            return utils.render_template('ui/login', {'MESSAGE': ErrorStr('This account is active, log in below')})
+        return utils.render_template('ui/login', {'ERROR': ErrorStr('This account is %s' % account_state)})
+    
+    secondary_secret = ''
+    
+    # GET the init form; if we don't need a secondary secret, continue to the 2nd step automatically
+    if request.method == HTTP_METHOD_GET:
+        ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret)
+        if 200 == ret.response.get('response_status', 0):
+            ret2 = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters={'secondary_secret': secondary_secret})
+            if 200 == ret2.response.get('response_status', 0):
+                try_to_init = True
+        else:
+            # TODO: Re-send primary secret
+            ret = api.account_primary_secret(account_id=account_id)
+            print '-----'
+            print 'TODO: Offer the user to re-send the primary secret. For now printing it here:'
+            print ret.response
+            print '-----'
+            return utils.render_template('ui/account_init', {'ERROR': ErrorStr('Wrong primary secret')})
+    
+    # POSTed the secondary secret
     if request.method == HTTP_METHOD_POST:
-        account_id = request.path_info.split('/')[3]
+        secondary_secret = request.POST.get('conf1') + request.POST.get('conf2')
+        try_to_init = True
+    
+    # try to initialize
+    if try_to_init:
+        # a 404 returned from this call could indicate that the account doesn't exist! Awesome REST logic!
+        ret = api.account_initialize(account_id = account_id,
+                                 primary_secret = primary_secret,
+                                           data = {'secondary_secret': secondary_secret})
+        
+        if 200 == ret.response.get('response_status', 0):
+            return utils.render_template('ui/account_init_2', {'FULLNAME': '', 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
+        
+        print '-----'
+        print 'account_initialize failed:'
+        print ret.response
+        print '-----'
+        return utils.render_template('ui/account_init', {'ERROR': ErrorStr('Setup failed')})
+    
+    return utils.render_template('ui/account_init', {})
+
+def account_initialization_2(request, account_id, primary_secret):
+    import pdb; pdb.set_trace()
+    if request.method == HTTP_METHOD_POST:
         username = request.POST['username'].lower().strip()
         password = request.POST['pw1']
         
@@ -185,11 +268,11 @@ def account_initialization_2(request):
             
             return HttpResponseRedirect('/')
         elif ret.response['response_status'] == 400:
-             return utils.render_template('ui/account_init_2', {'ERROR': ErrorStr('account_collision')})
+             return utils.render_template('ui/account_init_2', {'ERROR': ErrorStr('Username already taken'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
         else:
-            return utils.render_template('ui/account_init_2', {'ERROR': ErrorStr('account_init_error')})
+            return utils.render_template('ui/account_init_2', {'ERROR': ErrorStr('account_init_error'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
     else:
-        return utils.render_template('ui/account_init_2', {})
+        return utils.render_template('ui/account_init_2', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
 
 def change_password(request):
     if request.method == HTTP_METHOD_POST:
@@ -202,7 +285,7 @@ def change_password(request):
         if ret.response['response_status'] == 200:
             return utils.render_template('ui/change_password_success', {})
         else:
-            return utils.render_template('ui/change_password', {'ERROR': ErrorStr('password_change_error'), 'ACCOUNT_ID': account_id})
+            return utils.render_template('ui/change_password', {'ERROR': ErrorStr('Password change failed'), 'ACCOUNT_ID': account_id})
     else:
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
         return utils.render_template('ui/change_password', {'ACCOUNT_ID': account_id})
@@ -226,7 +309,7 @@ def forgot_password(request):
             return utils.render_template('ui/forgot_password_2', {'SECONDARY_SECRET_1': SECONDARY_SECRET_1,
                                                                   'SECONDARY_SECRET_2': SECONDARY_SECRET_2})
         else:
-            return utils.render_template('ui/forgot_password', {'ERROR': ErrorStr('password_reset_error')})
+            return utils.render_template('ui/forgot_password', {'ERROR': ErrorStr('Password reset failed')})
 
 def forgot_password_2(request):
     account_id = request.path_info.split('/')[2]
@@ -247,7 +330,7 @@ def forgot_password_2(request):
         if ret.response['response_status'] == 200:
             return utils.render_template('ui/forgot_password_4', {'ACCOUNT_ID': account_id})
         else:
-            return utils.render_template('ui/forgot_password_3', {'ERROR': ErrorStr('password_reset_error')})
+            return utils.render_template('ui/forgot_password_3', {'ERROR': ErrorStr('Password reset failed')})
 
 def forgot_password_3(request):
     account_id = request.POST['account_id']
@@ -268,7 +351,7 @@ def forgot_password_3(request):
         
         return HttpResponseRedirect(reverse(index))
     else:
-        return utils.render_template('ui/forgot_password_3', {'ERROR': ErrorStr('password_reset_error')})
+        return utils.render_template('ui/forgot_password_3', {'ERROR': ErrorStr('Password reset failed')})
 
 
 def indivo_api_call_get(request):
@@ -393,15 +476,15 @@ def authorize(request):
                 RECORDS = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
                 carenets = None
             
-            data = {	  'app_id': app_id,
-							'name': name,
-						   'title': '{% trans "Authorize \"{{name}}\"?" %}'.replace('{{name}}', name),
-					 'description': description,
-				   'request_token': REQUEST_TOKEN,
-						 'records': RECORDS,
-						'carenets': carenets,
-					  'autonomous': autonomous,
-				'autonomousReason': autonomousReason}
+            data = {      'app_id': app_id,
+                            'name': name,
+                           'title': _('Authorize "{{name}}"?').replace('{{name}}', name),
+                     'description': description,
+                   'request_token': REQUEST_TOKEN,
+                         'records': RECORDS,
+                        'carenets': carenets,
+                      'autonomous': autonomous,
+                'autonomousReason': autonomousReason}
             return HttpResponse(simplejson.dumps(data))
             #return utils.render_template('ui/authorize', data)
         elif kind == 'same':

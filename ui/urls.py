@@ -12,16 +12,20 @@ urlpatterns = patterns(
     # auth
     (r'^login$', login),
     (r'^logout$', logout),
+    (r'^register$', register),
     (r'^change_password$', change_password),
     (r'^forgot_password$', forgot_password),
     (r'^forgot_password_2.*$', forgot_password_2),
     (r'^forgot_password_3$', forgot_password_3),
 
-    # special case for account init emails
-    # http://localhost/indivoapi/accounts/catherine800@indivohealth.org/initialize/icmloNHxQrnCQKNn
-    (r'^indivoapi/accounts/[^/]*/initialize/account_initialization_2', account_initialization_2),
-    # fixme: pick up account primary secret in a cleaner way
-    (r'^indivoapi/accounts/[^/]*/initialize/.*', account_initialization),
+    # account init emails
+    # http://localhost/init/catherine800@indivohealth.org/icmloNHxQrnCQKNn
+    # Legacy: http://localhost/indivoapi/accounts/catherine800@indivohealth.org/initialize/icmloNHxQrnCQKNn
+    (r'^resend_secret/(?P<account_id>[^/]*)', resend_secret),
+    (r'^init/(?P<account_id>[^/]*)/(?P<primary_secret>[^/]*)', account_initialization),
+    (r'^indivoapi/accounts/(?P<account_id>[^/]*)/initialize/(?P<primary_secret>[^/]*)', account_initialization),        # legacy support, is this still needed?
+    (r'^init2/(?P<account_id>[^/]*)/(?P<primary_secret>[^/]*)', account_initialization_2),
+    (r'^indivoapi/(?P<account_id>[^/]*)/initialize/account_initialization_2', account_initialization_2),                # legacy support, is this still needed?
 
     # indivo api calls
     (r'^indivoapi/delete_record_app/$', indivo_api_call_delete_record_app),
