@@ -13,7 +13,12 @@
 		{% include 'ui/header.html' %}
 	{% endif %}
 	
-	<title>{% trans "Register for IndivoHealth" %}</title>
+	<title>{% if branding %}
+				{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+			{% else %}
+				{% trans "Indivohealth" %}
+			{% endif %}
+			{% trans "Registration" %}</title>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('#full_name').focus();
@@ -42,20 +47,21 @@
 			{% if branding %}
 				<img style="height: 150px; margin-bottom: -70px; margin-right: 20px;" src='{{ branding.logo_image_big_src }}' />
 			{% endif %}
-			<span id="front_site_name">
-				{% trans "Welcome to" %}
+			<div id="front_site_name">
+				{% trans "Register for" %}
 				{% if branding %}
 					{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
 				{% else %}
 					{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
 				{% endif %}
-			</span>
+			</div>
 			{% if ERROR %}
 				<div class="login_error">{{ERROR}}</div>
 			{% endif %}
 		</div>
 		
 		<!-- Registration Form -->
+		{% if SETTINGS.REGISTRATION.enable %}
 		<form id="signup_form" class="table_form" method="post" action="/register">
 			<div class="row">
 				<div class="cell">{% trans "Your Name:" %}</div>
@@ -67,10 +73,12 @@
 				<div class="cell">{% trans "Account Email:" %}</div>
 				<div class="cell">
 					<input type="text" id="account_id" name="account_id" tabindex="2" onkeyup="$('#contact_email').attr('placeholder', this.value)" />
-					<p class="moreinfo">{% trans "The activation email will be sent here" %}</p>
+					{% if SETTINGS.REGISTRATION.set_primary_secret %}
+					<p class="moreinfo">{% trans "An activation code will be sent here" %}</p>
+					{% endif %}
 					
 					<div style="margin-top: 1.5em;">
-						<button id="submit" style="font-size: 18px; width: 34%; margin-bottom: 12px;" type="submit" name="submit" tabindex="3">  {% trans "Register" %}  </button>
+						<button id="submit" style="font-size: 18px; width: 34%; margin-bottom: 12px;" type="submit" name="submit" tabindex="3">{% trans "Register" %}</button>
 						<p class="moreinfo">
 							<a href="/login">{% trans "Back to login" %}</a>
 						</p>
@@ -78,6 +86,12 @@
 				</div>
 			</div>
 		</form>
+		{% else %}
+		<div class="login_error">{% trans "Online registration is not available" %}</div>
+		<p class="moreinfo">
+			<a href="/login">{% trans "Back to login" %}</a>
+		</p>
+		{% endif %}
 	</div>
 	
 	<!-- Footer -->

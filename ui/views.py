@@ -85,7 +85,7 @@ def index(request):
                                                          'HIDE_SHARING': settings.HIDE_SHARING })
             # error
             err_msg = res.response.get('response_data', '500: Unknown Error')
-            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr(err_msg), 'return_url': '/'})
+            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(err_msg), 'RETURN_URL': '/', 'SETTINGS': settings})
             
     return HttpResponseRedirect(reverse(login))
         
@@ -105,7 +105,7 @@ def login(request, info=""):
     # process form vars
     if request.method == HTTP_METHOD_GET:
         return_url = request.GET.get(FORM_RETURN_URL, '/')
-        return utils.render_template(LOGIN_PAGE, {FORM_RETURN_URL: return_url})
+        return utils.render_template(LOGIN_PAGE, {'RETURN_URL': return_url, 'SETTINGS': settings})
     
     if request.method == HTTP_METHOD_POST:
         return_url = request.POST.get(FORM_RETURN_URL, '/')
@@ -114,7 +114,7 @@ def login(request, info=""):
             password = request.POST[FORM_PASSWORD]
         else:
             # Also checked initially in js
-            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('Name or password missing'), FORM_RETURN_URL: return_url})
+            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Name or password missing'), 'RETURN_URL': return_url, 'SETTINGS': settings})
     else:
         utils.log('error: bad http request method in login. redirecting to /')
         return HttpResponseRedirect('/')
@@ -124,12 +124,12 @@ def login(request, info=""):
         res = tokens_get_from_server(request, username, password)
     except IOError as e:
         if 403 == e.errno:
-            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('Incorrect credentials'), FORM_RETURN_URL: return_url})
+            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Incorrect credentials'), 'RETURN_URL': return_url, 'SETTINGS': settings})
         if 400 == e.errno:
-            return utils.render_template(LOGIN_PAGE, {'error': ErrorStr('Name or password missing'), FORM_RETURN_URL: return_url})     # checked before; highly unlikely to ever arrive here
+            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Name or password missing'), 'RETURN_URL': return_url, 'SETTINGS': settings})     # checked before; highly unlikely to ever arrive here
         
         err_str = ErrorStr(e.strerror)
-        return utils.render_template(LOGIN_PAGE, {'error': err_str, FORM_RETURN_URL: return_url})
+        return utils.render_template(LOGIN_PAGE, {'ERROR': err_str, 'RETURN_URL': return_url, 'SETTINGS': settings})
     
     return HttpResponseRedirect(return_url)
 
@@ -144,42 +144,77 @@ def register(request):
     Returns the register template (GET) or creates a new account (POST)
     """
     if HTTP_METHOD_GET == request.method:
-        return utils.render_template('ui/register', {})
+        return utils.render_template('ui/register', {'SETTINGS': settings})
     
     if HTTP_METHOD_POST == request.method:
+        if not settings.REGISTRATION.get('enable', False):
+            return utils.render_template('ui/error', {'error_message': ErrorStr('Registration disabled'), 'error_status': 403})
+        
+        # create the account
         post = request.POST
-        user = {  'account_id': post.get('account_id'),
-               'contact_email': post.get('contact_email'),        # this key is not present in the register form
-                   'full_name': post.get('full_name'),
-            'primary_secret_p': 1}
+        set_primary = settings.REGISTRATION.get('set_primary_secret', 1)
+        user = {    'account_id': post.get('account_id'),
+                 'contact_email': post.get('contact_email'),        # this key is not present in the register form
+                     'full_name': post.get('full_name'),
+              'primary_secret_p': set_primary,
+            'secondary_secret_p': settings.REGISTRATION.get('set_secondary_secret', False)}
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         res = api.create_account(user)
+        print '-----'
+        print 'SENT'
+        print user
+        print 'RECEIVED'
+        print res
+        print '-----'
         
+        # on success, forward to page according to the secrets that were or were not generated
         if 200 == res.get('response_status', 0):
-            account_id = post.get('account_id')     # better: parse account_id from XML
-            return HttpResponseRedirect('/resend_secret/%s/' % account_id)
+            account_xml = res.get('response_data', '<root/>')
+            account = utils.parse_account_xml(account_xml)
+            account_id = account.get('id')
+            if not set_primary:
+                return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('You have successfully registered. After an administrator has approved your account you may login.'), 'SETTINGS': settings})
+            
+            return HttpResponseRedirect('/accounts/%s/send_secret/sent' % account_id)
         
-        return utils.render_template('ui/register', {'ERROR': ErrorStr(res.get('response_data', 'Setup failed'))})
+        return utils.render_template('ui/register', {'ERROR': ErrorStr(res.get('response_data', 'Setup failed')), 'SETTINGS': settings})
 
 
-def resend_secret(request, account_id):
+def send_secret(request, account_id, status):
+    """
+    http://localhost/accounts/[foo@bar.com/]send_secret/[(sent|wrong)]
+    """
     if HTTP_METHOD_GET == request.method:
         if account_id:
-            return utils.render_template('ui/resend_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
-        
-        return utils.render_template('ui/resend_secret', {'ACCOUNT_ID': account_id})
+            if 'wrong' == status:
+                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr('Wrong secret')})
+            if 'sent' == status:
+                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
+        return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id})
     
     if HTTP_METHOD_POST == request.method:
+        account_id = request.POST.get('account_id', '')
         if request.POST.get('re_send', False):
-            pass
-            # TODO: Re-send secrets
-        
-        return utils.render_template('ui/resend_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
+            api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+            ret = api.account_secret_resend(account_id=account_id)
+            # TODO: Re-send primary secret
+            ret = api.account_primary_secret(account_id=account_id)
+            print '-----'
+            print 'TODO: Emailing the secret is unimplemented. For now printing it here:'
+            print ret.response
+            print '-----'
+            if 404 == ret.response.get('response_status', 0):
+                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr('Unknown account')})
+            if 200 != ret.response.get('response_status', 0):
+                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr('<TODO: Parse status from response>')})
+            return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('The activation email has been sent')})
+        return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
+    return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id})
 
 
 def account_initialization(request, account_id, primary_secret):
     """
-    http://localhost/init/foo@bar.com/icmloNHxQrnCQKNn
+    http://localhost/accounts/foo@bar.com/initialize/icmloNHxQrnCQKNn
     Legacy: http://localhost/indivoapi/accounts/foo@bar.com/initialize/icmloNHxQrnCQKNn
     """
     api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
@@ -189,7 +224,7 @@ def account_initialization(request, account_id, primary_secret):
     ret = api.account_info(account_id=account_id)
     status = ret.response.get('response_status', 500)
     if 404 == status:
-        return utils.render_template('ui/error', {'error_status': status, 'error_message': ErrorStr('unknown account')})
+        return utils.render_template('ui/error', {'error_status': status, 'error_message': ErrorStr('Unknown account')})
     if 200 != status:
         return utils.render_template('ui/error', {'error_status': status, 'error_message': ErrorStr(ret.response.get('response_data', 'Server Error'))})
     
@@ -198,27 +233,28 @@ def account_initialization(request, account_id, primary_secret):
     account_state = account.get('state')
     if 'uninitialized' != account_state:
         if 'active' == account_state:
-            return utils.render_template('ui/login', {'MESSAGE': ErrorStr('This account is active, log in below')})
-        return utils.render_template('ui/login', {'ERROR': ErrorStr('This account is %s' % account_state)})
+            return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('This account is active, you may log in below'), 'SETTINGS': settings})
+        return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('This account is %s' % account_state), 'SETTINGS': settings})
     
+    # bail out if the primary secret is wrong
+    has_primary_secret = (len(primary_secret) > 0)      # TODO: Get this information from the server (API missing as of now)
     secondary_secret = ''
     
-    # GET the init form; if we don't need a secondary secret, continue to the 2nd step automatically
-    if request.method == HTTP_METHOD_GET:
+    if has_primary_secret:
         ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret)
-        if 200 == ret.response.get('response_status', 0):
-            ret2 = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters={'secondary_secret': secondary_secret})
-            if 200 == ret2.response.get('response_status', 0):
+        if 200 != ret.response.get('response_status', 0):
+            return HttpResponseRedirect('/accounts/%s/send_secret/wrong' % account_id)
+    
+    # GET the form; if we don't need a secondary secret, continue to the 2nd step automatically
+    if request.method == HTTP_METHOD_GET:
+        if has_primary_secret:
+            # TODO: Use a different call here to check whether a secondary secret is needed
+            ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters={'secondary_secret': secondary_secret})
+            if 200 == ret.response.get('response_status', 0):
                 try_to_init = True
         else:
-            # TODO: Re-send primary secret
-            ret = api.account_primary_secret(account_id=account_id)
-            print '-----'
-            print 'TODO: Offer the user to re-send the primary secret. For now printing it here:'
-            print ret.response
-            print '-----'
-            return utils.render_template('ui/account_init', {'ERROR': ErrorStr('Wrong primary secret')})
-    
+            return utils.render_template(LOGIN_PAGE, {'MESSAGE': _("You have successfully registered. After an administrator has approved your account you may login."), 'SETTINGS': settings})
+    import pdb; pdb.set_trace()
     # POSTed the secondary secret
     if request.method == HTTP_METHOD_POST:
         secondary_secret = request.POST.get('conf1') + request.POST.get('conf2')
@@ -226,29 +262,62 @@ def account_initialization(request, account_id, primary_secret):
     
     # try to initialize
     if try_to_init:
-        # a 404 returned from this call could indicate that the account doesn't exist! Awesome REST logic!
         ret = api.account_initialize(account_id = account_id,
                                  primary_secret = primary_secret,
                                            data = {'secondary_secret': secondary_secret})
+        status = ret.response.get('response_status', 0)
         
-        if 200 == ret.response.get('response_status', 0):
-            return utils.render_template('ui/account_init_2', {'FULLNAME': '', 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
+        if 200 == status:
+            return utils.render_template('ui/account_setup', {'FULLNAME': '', 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'settings': settings})
+        if 404 == status:
+            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
+        if 403 == status:
+            return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Wrong confirmation code')})
         
         print '-----'
         print 'account_initialize failed:'
         print ret.response
         print '-----'
-        return utils.render_template('ui/account_init', {'ERROR': ErrorStr('Setup failed')})
+        return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Setup failed')})
     
-    return utils.render_template('ui/account_init', {})
+    return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
 
-def account_initialization_2(request, account_id, primary_secret):
+
+def account_setup(request, account_id, primary_secret):
+    """
+    http://localhost/accounts/foo@bar.com/setup/taOFzInlYlDKLbiM
+    """
     import pdb; pdb.set_trace()
     if request.method == HTTP_METHOD_POST:
-        username = request.POST['username'].lower().strip()
-        password = request.POST['pw1']
-        
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        
+        # get POST data
+        post = request.POST
+        username = post.get('username', '').lower().strip()
+        password = post.get('pw1')
+        secondary_secret = post.get('secondary_secret', '')
+        has_secondary_secret = (len(secondary_secret) > 0)      # TODO: Get this information from the server (API missing)
+        
+        # verify the secrets
+        params = {}
+        if has_secondary_secret:
+            params = {'secondary_secret': secondary_secret}
+        ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters=params)
+        if 200 != ret.response.get('response_status', 0):
+            return HttpResponseRedirect('/accounts/%s/send_secret/wrong' % account_id)      # TODO: This assumes primary/both secrets are wrong. Send to "initialize" if only the secondary_secret is wrong
+        
+        # verify passwords
+        error = None
+        if len(username) < 1:
+            error = ErrorStr("Username too short")
+        if len(password) < settings.REGISTRATION.min_password_length:
+            error = ErrorStr("Password too short")
+        elif password != post.get('pw2'):
+            error = ErrorStr("Passwords do not match")
+        if error is not None:
+            return utils.render_template('ui/account_setup', {'ERROR': error, 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'settings': settings})
+        
+        # secrets are ok, passwords check out: Attach the login credentials to the account
         ret = api.add_auth_system(
             account_id = account_id,
             data = {
@@ -257,22 +326,23 @@ def account_initialization_2(request, account_id, primary_secret):
                 'password': password
             })
         
-        if ret.response['response_status'] == 200:
+        if 200 == ret.response['response_status']:
             # everything's OK, log this person in, hard redirect to change location
             try:
                 tokens_get_from_server(request, username, password)
             except IOError as e:
                 err_msg = ErrorStr(e.strerror)
                 return_url = request.POST.get('return_url', '/')
-                return utils.render_template(LOGIN_PAGE, {'error': err_msg, 'return_url': return_url})
+                return utils.render_template(LOGIN_PAGE, {'ERROR': err_msg, 'RETURN_URL': return_url, 'SETTINGS': settings})
             
             return HttpResponseRedirect('/')
-        elif ret.response['response_status'] == 400:
-             return utils.render_template('ui/account_init_2', {'ERROR': ErrorStr('Username already taken'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
-        else:
-            return utils.render_template('ui/account_init_2', {'ERROR': ErrorStr('account_init_error'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
-    else:
-        return utils.render_template('ui/account_init_2', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret})
+        elif 400 == ret.response['response_status']:
+             return utils.render_template('ui/account_setup', {'ERROR': ErrorStr('Username already taken'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'settings': settings})
+        return utils.render_template('ui/account_setup', {'ERROR': ErrorStr('account_init_error'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'settings': settings})
+    
+    # got no secondary_secret, go back to previous step
+    return HttpResponseRedirect('/accounts/%s/initialize/%s' % (account_id, primary_secret))
+
 
 def change_password(request):
     if request.method == HTTP_METHOD_POST:

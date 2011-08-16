@@ -9,14 +9,19 @@ from django.utils.translation import ugettext as _
 class ErrorStr:
     error_key = None
     errors = {
-        'This account is active, log in below': _("This account is active, you may log in below"),
                     'Name or password missing': _("Either the username or password is missing. Please try again."),
                        'Incorrect credentials': _("Incorrect username or password. Please try again."),
                                     'disabled': _("This account has been disabled/locked."),
-                             'unknown account': _("This account does not exist on the server"),
+                             'Unknown account': _("This account does not exist on the server"),
+                       'Registration disabled': _("Online registration is not available"),
+                                'Wrong secret': _("The activation code was wrong"),
+                     'Wrong confirmation code': _("The confirmation code was wrong"),
                                 'Setup failed': _("There was a problem setting up your account. Please try again."),
                           'account_init_error': _("There was a problem updating your data. Please try again. If you are unable to change your password please contact support."),
+                          'Username too short': _("This username is too short. Please choose a different one."),
                       'Username already taken': _("That username is already taken. Please enter different one."),
+                          'Password too short': _("The password is too short"),
+                      'Passwords do not match': _("Your passwords do not match. Please try again."),
                       'Password change failed': _("There was a problem updating your password. Please try again. If you are unable to set up your account please contact support."),
                        'Password reset failed': _("There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support."),
                            'multiple accounts': _("There was a problem resetting your password. Please contact support."),
