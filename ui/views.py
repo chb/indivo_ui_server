@@ -90,7 +90,7 @@ def index(request):
     return HttpResponseRedirect(reverse(login))
 
 
-def login(request, info=""):
+def login(request, status):
     """
     clear tokens in session, show a login form, get tokens from indivo_server, then redirect to index
     FIXME: make note that account will be disabled after 3 failed logins!!!
@@ -102,20 +102,25 @@ def login(request, info=""):
     FORM_USERNAME = 'username'
     FORM_PASSWORD = 'password'
     FORM_RETURN_URL = 'return_url'
+    params = {'SETTINGS': settings}
+    if 'did_logout' == status:
+        params['MESSAGE'] = _("You were logged out")
     
     # process form vars
     if request.method == HTTP_METHOD_GET:
-        return_url = request.GET.get(FORM_RETURN_URL, '/')
-        return utils.render_template(LOGIN_PAGE, {'RETURN_URL': return_url, 'SETTINGS': settings})
+        params['RETURN_URL'] = request.GET.get(FORM_RETURN_URL, '/')
+        return utils.render_template(LOGIN_PAGE, params)
     
     if request.method == HTTP_METHOD_POST:
         return_url = request.POST.get(FORM_RETURN_URL, '/')
+        params['RETURN_URL'] = return_url
         if request.POST.has_key(FORM_USERNAME) and request.POST.has_key(FORM_PASSWORD):
             username = request.POST[FORM_USERNAME].lower().strip()
             password = request.POST[FORM_PASSWORD]
         else:
             # Also checked initially in js
-            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Name or password missing'), 'RETURN_URL': return_url, 'SETTINGS': settings})
+            params['ERROR'] = ErrorStr('Name or password missing')
+            return utils.render_template(LOGIN_PAGE, params)
     else:
         utils.log('error: bad http request method in login. redirecting to /')
         return HttpResponseRedirect('/')
@@ -125,19 +130,19 @@ def login(request, info=""):
         res = tokens_get_from_server(request, username, password)
     except IOError as e:
         if 403 == e.errno:
-            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Incorrect credentials'), 'RETURN_URL': return_url, 'SETTINGS': settings})
-        if 400 == e.errno:
-            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Name or password missing'), 'RETURN_URL': return_url, 'SETTINGS': settings})     # checked before; highly unlikely to ever arrive here
-        
-        err_str = ErrorStr(e.strerror)
-        return utils.render_template(LOGIN_PAGE, {'ERROR': err_str, 'RETURN_URL': return_url, 'SETTINGS': settings})
+            params['ERROR'] = ErrorStr('Incorrect credentials')
+        elif 400 == e.errno:
+            params['ERROR'] = ErrorStr('Name or password missing')      # checked before; highly unlikely to ever arrive here
+        else:
+            params['ERROR'] = ErrorStr(e.strerror)
+        return utils.render_template(LOGIN_PAGE, params)
     
     return HttpResponseRedirect(return_url or '/')
 
 
 def logout(request):
     request.session.flush()
-    return HttpResponseRedirect('/login')
+    return HttpResponseRedirect('/login/did_logout')
 
 
 def register(request):

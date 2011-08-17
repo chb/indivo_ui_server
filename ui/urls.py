@@ -10,7 +10,8 @@ urlpatterns = patterns(
     (r'^$', index),
     
     # auth
-    (r'^login$', login),
+    (r'^login$', login, {'status': None}),
+    (r'^login/(?P<status>[^/]*)', login),
     (r'^logout$', logout),
     (r'^register$', register),
     (r'^change_password$', change_password),
