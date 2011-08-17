@@ -21,7 +21,13 @@
 			{% trans "Setup" %}</title>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('#conf1').focus();
+			$('#conf1').bind('keyup', function(ev) {
+				if ($(this).val().length >= 3) {
+					if (ev && ev.keyCode && (ev.keyCode > 47 && ev.keyCode < 58) || (ev.keyCode > 95 && ev.keyCode < 106)) {
+						$('#conf2').select();
+					}
+				}
+			}).select();
 		});
 	</script>
 </head>
@@ -35,7 +41,6 @@
 				<img style="height: 150px; margin-bottom: -70px; margin-right: 20px;" src='{{ branding.logo_image_big_src }}' />
 			{% endif %}
 			<div id="front_site_name">
-				{% trans "Welcome to" %}
 				{% if branding %}
 					{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
 				{% else %}
@@ -44,23 +49,24 @@
 			</div>
 			{% if ERROR %}
 				<div class="login_error">{{ERROR}}</div>
+			{% else %}
+				<div class="login_message">{% trans "Enter the confirmation code to activate your account" %}<br /><b>{{ ACCOUNT_ID }}</b></div>
 			{% endif %}
 		</div>
 		
 		<!-- Confirmation Code Form -->
-		<form id="form" class="table_form" method="post" action="/accounts/{{ ACCOUNT_ID }}/initialize/{{ PRIMARY_SECRET }}">
+		<form id="init_form" class="table_form" method="post" action="/accounts/{{ ACCOUNT_ID }}/init/{{ PRIMARY_SECRET }}">
 			<div class="row">
 				<div class="cell">
 					{% trans "Confirmation code:" %}
-					<p class="moreinfo">{% trans "for" %} <b>{{ACCOUNT_ID}}</b>&nbsp;&nbsp;</p>
 				</div>
 				<div class="cell">
-					<input style="font-size: 24px; width: 50px;" type="text" id="conf1" name="conf1" size="3" maxlength="3">
+					<input type="text" style="width: 50px;" id="conf1" name="conf1" size="3" maxlength="3" />
 					&mdash;
-					<input type="text" style="font-size: 24px; width: 50px;" id="conf2" name="conf2" size="3" maxlength="3">
+					<input type="text" style="width: 50px;" id="conf2" name="conf2" size="3" maxlength="3" />
 					
 					<div style="margin-top: 1.5em;">
-						<button id="submit" type="submit" name="re_send" value="1" tabindex="3">  {% trans "Confirm Account" %}  </button>
+						<button id="submit" type="submit" name="re_send" value="1" tabindex="3">{% trans "Confirm Account" %}</button>
 						<p class="moreinfo">
 							<a href="/accounts/{{ ACCOUNT_ID }}/send_secret">{% trans "Lost your confirmation code?" %}</a>
 						</p>

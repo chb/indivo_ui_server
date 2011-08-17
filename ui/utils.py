@@ -84,9 +84,15 @@ def parse_account_xml(xml):
     
     tree = ElementTree.fromstring(xml)
     account = { 'id': tree.attrib.get('id', 0), 'type': 'meta' }
+    auth_systems = []
     for node in tree:
-        account.update({node.tag: node.text.strip() if node.text else ''})
+        if 'authSystem' == node.tag:
+            system = {'name': node.attrib['name'], 'username': node.attrib['username']}
+            auth_systems.append(system)
+        else:
+            account[node.tag] = node.text.strip() if node.text else ''
     
+    account['auth_systems'] = auth_systems
     return account
 
 

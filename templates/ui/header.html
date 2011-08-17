@@ -18,10 +18,10 @@ p { margin: 0; }
 	display: table; width: 100%; margin-top: 2em;
 	font-size: 22px; line-height: 1.7;
 }
-#login_form input[type="text"], #login_form input[type="password"] {
+#login_form input[type="text"], #login_form input[type="password"], #setup_form input[type="text"], #setup_form input[type="password"] {
 	width: 65%; font-size: 20px;
 }
-.table_form input[type="text"] { width: 98%; font-size: 20px; }
+.table_form input[type="text"] { width: 98%; }
 .table_form button[type="submit"] { min-width: 34%; font-size: 18px; margin-bottom: 10px; }
 
 .row { display: table-row; }
@@ -29,7 +29,7 @@ p { margin: 0; }
 .cell:first-child { width: 39%; padding-left: 0; padding-right: 0.8em; text-align: right; color: #666; }
 .cell:last-child { padding-right: 0; }
 .moreinfo {
-	font-size: 12px; color: #666;
+	font-size: 12px; font-weight: normal; color: #666;
 }
 .login_message {
 	margin: 30px auto 15px; padding: 0.6em 1em; font-size: 20px; text-align: center;
@@ -41,6 +41,9 @@ p { margin: 0; }
 	border: 2px solid rgb(200,50,0); -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
 	background-color: rgb(254,242,235); background-color: rgba(255,50,0,0.05);
 }
+.red { color: rgb(200,50,0); }
+.green { color: rgb(121,160,0); }
+.faded { color: ; color: rgba(0,0,0,0.3); }
 
 #footer {
 	position: absolute; bottom: 0; left: 0; width: 100%;

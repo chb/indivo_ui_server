@@ -8,7 +8,7 @@ urlpatterns = patterns(
     '',
     # testing
     (r'^$', index),
-
+    
     # auth
     (r'^login$', login),
     (r'^logout$', logout),
@@ -17,18 +17,17 @@ urlpatterns = patterns(
     (r'^forgot_password$', forgot_password),
     (r'^forgot_password_2.*$', forgot_password_2),
     (r'^forgot_password_3$', forgot_password_3),
-
+    
     # account init emails
     # http://localhost/init/catherine800@indivohealth.org/icmloNHxQrnCQKNn
     # Legacy: http://localhost/indivoapi/accounts/catherine800@indivohealth.org/initialize/icmloNHxQrnCQKNn
     (r'^accounts/send_secret', send_secret, {'account_id': '', 'status': None}),
     (r'^accounts/(?P<account_id>[^/]+)/send_secret$', send_secret, {'status': None}),
     (r'^accounts/(?P<account_id>[^/]+)/send_secret/(?P<status>[^/]*)', send_secret),
-    (r'^accounts/(?P<account_id>[^/]*)/initialize/(?P<primary_secret>[^/]*)', account_initialization),
-    (r'^indivoapi/accounts/(?P<account_id>[^/]*)/initialize/(?P<primary_secret>[^/]*)', account_initialization),        # legacy support, is this still needed?
-    (r'^accounts/(?P<account_id>[^/]*)/setup/(?P<primary_secret>[^/]*)', account_setup),
-    (r'^indivoapi/accounts/(?P<account_id>[^/]*)/initialize/account_initialization_2', account_setup),                  # legacy support, is this still needed?
-
+    (r'^accounts/(?P<account_id>[^/]+)/init/(?P<primary_secret>[^/]*)', account_init),
+    (r'^accounts/(?P<account_id>[^/]+)/setup/(?P<primary_secret>[^/]+)$', account_setup, {'secondary_secret': ''}),
+    (r'^accounts/(?P<account_id>[^/]+)/setup/(?P<primary_secret>[^/]+)/(?P<secondary_secret>[^/]*)', account_setup),
+    
     # indivo api calls
     (r'^indivoapi/delete_record_app/$', indivo_api_call_delete_record_app),
     (r'^indivoapi/', indivo_api_call_get),

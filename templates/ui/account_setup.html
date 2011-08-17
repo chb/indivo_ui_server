@@ -2,87 +2,153 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-  {% include 'ui/header.html' %}
-  <title>
-  {% if branding %}
-    {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
-  {% else %}
-    Indivo
-  {% endif %}
-  {% trans "Setup" %}</title>
-  <script>
-    $(document).ready(function(){
-      $('#username').focus();
-
-      // check form values
-      $('#form').submit(function() {
-        if (!$('#username').val()) {
-          alert('{% trans "Please enter a username." %}');
-          $('#username').focus();
-          return true;
-        }
-
-        if (!$('#pw1').val() || !$('#pw2').val()) {
-          alert('{% trans "Please enter non-empty passwords." %}');
-          $('#pw1').focus();
-          return false;
-        }
-
-        if ($('#pw1').val() != $('#pw2').val()) {
-          alert('{% trans "Your passwords do not match. Please try again." %}');
-          $('#pw1').val('');
-          $('#pw2').val('');
-          $('#pw1').focus();
-          return false;
-        }
-        return true;
-      });
-    })
-  </script>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>	 
+	<!--	Uncomment AND comment out <script> tags in header.html
+				to use jmvc3 compression without loging in: "$ ./js steal/buildjs http://localhost -to ui" -->
+	<!-- <script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script> -->
+	
+	{% if branding %}
+		{% include branding.header_template %}
+	{% else %}
+		{% include 'ui/header.html' %}
+	{% endif %}
+	
+	<title>{% if branding %}
+				{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+			{% else %}
+				{% trans "Indivohealth" %}
+			{% endif %}
+			{% trans "Setup" %}</title>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('#username').select();
+			
+			// live feedback
+			$('#pw1').bind('keyup', function(ev) {
+				checkPwLength();
+			});
+			$('#pw2').bind('keyup', function(ev) {
+				checkPwMatch();
+			});
+			
+			// check form values
+			$('#setup_form').submit(function() {
+				$('#username').removeClass('error');
+				$('#pw1').removeClass('error');
+				$('#pw2').removeClass('error');
+				
+				if ($('#username').val().length < 1) {
+					$('#username').addClass('error').focus();
+					return false;
+				}
+				
+				if (!checkPwLength()) {
+					$('#pw1').addClass('error').focus();
+					return false;
+				}
+				
+				if (!checkPwMatch()) {
+					$('#pw2').addClass('error').select();
+					return false;
+				}
+				return true;
+			});
+		});
+		
+		function checkPwLength() {
+			var password = $('#pw1').val();
+			var hint = $('#password_length');
+			if (password.length >= {{ SETTINGS.REGISTRATION.min_password_length }}) {
+				hint.removeClass('red').removeClass('faded').addClass('green');
+				return true;
+			}
+			else if (password.length > 0) {
+				hint.removeClass('green').removeClass('faded').addClass('red');
+			}
+			else {
+				hint.removeClass('red').removeClass('green').addClass('faded');
+			}
+			return false;
+		}
+		
+		function checkPwMatch() {
+			var p1 = $('#pw1').val();
+			var p2 = $('#pw2').val();
+			var hint = $('#password_match');
+			if (p1 == p2) {
+				hint.removeClass('red').removeClass('faded').addClass('green');
+				return true;
+			}
+			else if (p2.length > 0) {
+				hint.removeClass('green').removeClass('faded').addClass('red');
+			}
+			else {
+				hint.removeClass('red').removeClass('green').addClass('faded');
+			}
+			return false;
+		}
+	</script>
 </head>
-  <body>
-    <div style="margin: 100px auto; width: 70%;">
-    <form id='form' method='post' action="account_initialization_2">
-      <div style="text-align: center;">
-        {% if ERROR %}
-          <div style="border: 2px dashed red; padding: 20px; margin: 10px; font-size: 18px">
-            {{ERROR}}
-          </div>
-        {% endif %}
-
-        <h2>{% trans "Your account is confirmed." %}</h2>
-        <br>
-        <h3>{% trans "Please Enter a Username and Password:" %}</h3>
-      </div>
-      <br>
-      <br>
-      <div style="width: 40%; float: left; text-align: right; padding-right: 20px">
-        <span style="font-size: 24px;">{% trans "Username" %} <span style="font-size: 14px;">({% trans "No spaces please" %})</span>:</span>
-        <br>
-        <span style="font-size: 24px;">{% trans "Password:" %}</span>
-        <br>
-        <br>
-        <span style="font-size: 24px;">{% trans "Confirm Password:" %}</span>
-      </div>
-      <div style="padding-left: 20px;">
-        <input type="text" style="font-size: 24px;" id="username" name="username">
-        <br>
-        <br>
-        <input type="password" style="font-size: 24px;" id="pw1" name="pw1">
-        <br>
-        <br>
-        <input type="password" style="font-size: 24px;" id="pw2" name="pw2">
-      </div>
-      <div style="text-align: center; margin-top: 50px;">
-        <input style="font-size: 18px" type="submit" name="conf_submit" value="{% trans "Set Username and Password" %}" id="conf_submit">
-      </div>
-    </form>
-    </div>
-    {% if branding %}
-      {% include branding.footer_template %}
-    {% else %}
-      {% include 'ui/footer.html' %}
-    {% endif %}
-  </body>
+<body>
+<div id="full_height">
+	<div id="main_box">
+		
+		<!-- Header -->
+		<div style="text-align: center;">
+			{% if branding %}
+				<img style="height: 150px; margin-bottom: -70px; margin-right: 20px;" src='{{ branding.logo_image_big_src }}' />
+			{% endif %}
+			<div id="front_site_name">
+				{% trans "Account setup for" %}
+				{% if branding %}
+					{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+				{% else %}
+					{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
+				{% endif %}
+			</div>
+			{% if ERROR %}
+				<div class="login_error">{{ERROR}}</div>
+			{% else %}
+				<div class="login_message">{% trans "Please chose a username and password for your account" %}<br /><b>{{ ACCOUNT_ID }}</b></div>
+			{% endif %}
+		</div>
+		
+		<!-- Main Form -->
+		<form id="setup_form" class="table_form" method="post" action="/accounts/{{ ACCOUNT_ID }}/setup/{{ PRIMARY_SECRET }}">
+			<input type="hidden" name="secondary_secret" value="{{ SECONDARY_SECRET }}" />
+			<div class="row">
+				<div class="cell">{% trans "Username" %}:</div>
+				<div class="cell">
+					<input type="text" id="username" name="username" />
+					<p class="moreinfo">{% trans "No spaces please" %}</p>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="cell">{% trans "Password:" %}</div>
+				<div class="cell">
+					<input type="password" id="pw1" name="pw1" />
+					<p id="password_length" class="moreinfo faded">{{ SETTINGS.REGISTRATION.min_password_length }} {% trans "characters or more" %}</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="cell">{% trans "Confirm Password:" %}</div>
+				<div class="cell">
+					<input type="password" id="pw2" name="pw2" />
+					<p id="password_match" class="moreinfo faded">{% trans "Passwords must match" %}</p>
+					
+					<div style="margin-top: 1.5em;">
+						<button id="conf_submit" type="submit" name="conf_submit">{% trans "Setup Account" %}</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	{% if branding %}
+		{% include branding.footer_template %}
+	{% else %}
+		{% include 'ui/footer.html' %}
+	{% endif %}
+</div>
+</body>
 </html>
