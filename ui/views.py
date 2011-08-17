@@ -160,7 +160,7 @@ def register(request):
                  'contact_email': post.get('contact_email'),        # this key is not present in the register form for now
                      'full_name': post.get('full_name'),
               'primary_secret_p': set_primary,
-            'secondary_secret_p': settings.REGISTRATION.get('set_secondary_secret', False)}
+            'secondary_secret_p': settings.REGISTRATION.get('set_secondary_secret', 1)}
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         res = api.create_account(user)
         
@@ -231,6 +231,7 @@ def account_init(request, account_id, primary_secret):
     account_state = account.get('state')
     has_primary_secret = (len(primary_secret) > 0)      # TODO: Get this information from the server (API missing as of now)
     secondary_secret = ''
+    has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
     
     # DEBUG
     print '-----'
@@ -255,8 +256,8 @@ def account_init(request, account_id, primary_secret):
     
     # GET the form; if we don't need a secondary secret, continue to the 2nd step automatically
     if HTTP_METHOD_GET == request.method:
-        if not has_primary_secret:
-            return utils.render_template(LOGIN_PAGE, {'MESSAGE': _("You have successfully registered. After an administrator has approved your account you may login."), 'SETTINGS': settings})
+        if not has_secondary_secret:
+            try_to_init = True
     
     # POSTed the secondary secret
     if HTTP_METHOD_POST == request.method:
@@ -265,9 +266,12 @@ def account_init(request, account_id, primary_secret):
     
     # try to initialize
     if try_to_init and not move_to_setup:
+        data = {}
+        if has_secondary_secret:
+            data = {'secondary_secret': secondary_secret}
         ret = api.account_initialize(account_id = account_id,
                                  primary_secret = primary_secret,
-                                           data = {'secondary_secret': secondary_secret})
+                                           data = data)
         status = ret.response.get('response_status', 0)
         
         if 200 == status:
@@ -285,7 +289,7 @@ def account_init(request, account_id, primary_secret):
     
     # proceed to setup if we have the correct secondary secret
     params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret}
-    if move_to_setup and len(secondary_secret) > 0:
+    if move_to_setup and (not has_secondary_secret or len(secondary_secret) > 0):
         ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters={'secondary_secret': secondary_secret})
         status = ret.response.get('response_status', 0)
         if 200 == status:
@@ -315,6 +319,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
     account = utils.parse_account_xml(account_xml)
     account_state = account.get('state')
     has_primary_secret = (len(primary_secret) > 0)      # TODO: Get this information from the server (API missing as of now)
+    has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
     
     # if the account is already active, show login IF at least one auth-system is attached
     if 'active' == account_state:
@@ -329,7 +334,6 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
         username = post.get('username', '').lower().strip()
         password = post.get('pw1')
         secondary_secret = post.get('secondary_secret', '')
-        has_secondary_secret = (len(secondary_secret) > 0)      # TODO: Get this information from the server (API missing)
         
         # verify the secrets
         params = {}
@@ -372,7 +376,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
         return utils.render_template('ui/account_setup', {'ERROR': ErrorStr('account_init_error'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings})
     
     # got no secondary_secret, go back to init step which will show a prompt for the secondary secret
-    if not secondary_secret:
+    if has_secondary_secret and not secondary_secret:
         return HttpResponseRedirect('/accounts/%s/init/%s' % (account_id, primary_secret))
     return utils.render_template('ui/account_setup', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings})
 
