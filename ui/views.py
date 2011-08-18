@@ -156,13 +156,13 @@ def register(request):
         # create the account
         post = request.POST
         set_primary = settings.REGISTRATION.get('set_primary_secret', 1)
-        user = {    'account_id': post.get('account_id'),
+        user_hash = {'account_id': post.get('account_id'),
                  'contact_email': post.get('contact_email'),        # this key is not present in the register form for now
                      'full_name': post.get('full_name'),
               'primary_secret_p': set_primary,
             'secondary_secret_p': settings.REGISTRATION.get('set_secondary_secret', 1)}
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
-        res = api.create_account(user)
+        res = api.create_account(user_hash)
         
         # on success, forward to page according to the secrets that were or were not generated
         if 200 == res.get('response_status', 0):
@@ -194,16 +194,10 @@ def send_secret(request, account_id, status):
         if request.POST.get('re_send', False):
             api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
             ret = api.account_secret_resend(account_id=account_id)
-            # TODO: Re-send primary secret
-            ret = api.account_primary_secret(account_id=account_id)
-            print '-----'
-            print 'TODO: Emailing the primary secret is unimplemented. For now printing it here:'
-            print ret.response
-            print '-----'
             if 404 == ret.response.get('response_status', 0):
                 return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr('Unknown account')})
             if 200 != ret.response.get('response_status', 0):
-                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr('<TODO: Parse status from response>')})
+                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr(ret.response.get('response_data', 'Server Error'))})
             return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('The activation email has been sent')})
         return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
     return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id})
@@ -232,11 +226,6 @@ def account_init(request, account_id, primary_secret):
     has_primary_secret = (len(primary_secret) > 0)      # TODO: Get this information from the server (API missing as of now)
     secondary_secret = ''
     has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
-    
-    # DEBUG
-    print '-----'
-    print 'ACCOUNT SECONDARY SECRET: %s' % account.get('secret')
-    print '-----'
     
     # if the account is already active, show login IF at least one auth-system is attached
     if 'uninitialized' != account_state:
@@ -274,7 +263,13 @@ def account_init(request, account_id, primary_secret):
                                            data = data)
         status = ret.response.get('response_status', 0)
         
+        # on success also create the first record if we have a full_name
         if 200 == status:
+            if account['fullName'] and len(account['fullName']) > 0:
+                record = {'full_name': account['fullName']}
+                res = api.create_record(record)
+                if 200 != res.get('response_status', 0):
+                    utils.log("account_init(): Error creating a record after initializing the account, failing silently. The error was: %s" % res.get('response_data'))
             move_to_setup = True
         elif 404 == status:
             return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
