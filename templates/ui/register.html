@@ -29,7 +29,8 @@
 					$('#full_name').addClass('error').focus();
 					return false;
 				}
-				if (!$('#account_id').val()){
+				var filter = /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})+$/;
+				if (!filter.test($('#account_id').val())) {
 					$('#account_id').addClass('error').focus();
 					return false;
 				}
@@ -55,13 +56,23 @@
 					{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
 				{% endif %}
 			</div>
+			{% if MESSAGE %}
+				<div class="login_message">{{MESSAGE}}</div>
+			{% endif %}
 			{% if ERROR %}
 				<div class="login_error">{{ERROR}}</div>
 			{% endif %}
 		</div>
 		
 		<!-- Registration Form -->
-		{% if SETTINGS.REGISTRATION.enable %}
+		{% if SECONDARY %}
+		<div style="margin-top: 1em; font-size: 3em; text-align: center;">
+			{{ SECONDARY|make_list|slice:":3"|join:"" }} – {{ SECONDARY|make_list|slice:"3:"|join:"" }}
+		</div>
+		<p class="moreinfo" style="margin-top: 2em; text-align: center;">
+			<a href="/accounts/{{ ACCOUNT_ID }}/send_secret">{% trans "Received no activation email?" %}</a>
+		</p>
+		{% else %}{% if SETTINGS.REGISTRATION.enable %}
 		<form id="signup_form" class="table_form" method="post" action="/register">
 			<div class="row">
 				<div class="cell">{% trans "Your Name:" %}</div>
@@ -78,7 +89,7 @@
 					{% endif %}
 					
 					<div style="margin-top: 1.5em;">
-						<button id="submit" style="font-size: 18px; width: 34%; margin-bottom: 12px;" type="submit" name="submit" tabindex="3">{% trans "Register" %}</button>
+						<button id="submit" type="submit" name="submit" tabindex="3">{% trans "Register" %}</button>
 						<p class="moreinfo">
 							<a href="/login">{% trans "Back to login" %}</a>
 						</p>
@@ -91,7 +102,7 @@
 		<p class="moreinfo">
 			<a href="/login">{% trans "Back to login" %}</a>
 		</p>
-		{% endif %}
+		{% endif %}{% endif %}
 	</div>
 	
 	<!-- Footer -->
