@@ -1,3 +1,4 @@
+{% load i18n %}
 /**
  * @tag controllers, home
  * 
@@ -18,6 +19,22 @@ $.Controller.extend('UI.Controllers.MainController',
 	onDocument: true,
 	animateTabSelection: true,
 	
+	/**
+	 * General record UI handling
+	 */
+	hasRecords: function() {
+		$('#app_selector_cover').remove();
+	},
+	noRecords: function() {
+		$('#app_content_iframe').attr('src', 'about:blank').hide();
+		$('#app_content').html('<div id="no_record_hint"><h2>{% trans "Start by creating a record for this account" %}</h2></div>').show();
+		$('#app_selector').append('<div id="app_selector_cover"> </div>');
+	},
+	
+	
+	/**
+	 * poof animation
+	 */
 	poofViews: [],
 	poof: function(view) {				// view must already be absolutely positioned for now. Does NOT remove/detach 'view', only hide it
 		if (view && 'object' == typeof view) {
@@ -67,6 +84,10 @@ $.Controller.extend('UI.Controllers.MainController',
 	ready: function() {
 	},
 	
+	'#add_record_tab click': function(el) {
+		UI.Controllers.Record.createNewRecord(el);
+	},
+	
 	
 	/**
 	 * Simple tab functionality
@@ -98,7 +119,8 @@ $.Controller.extend('UI.Controllers.MainController',
 					300,
 					'swing',
 					function() {
-						el.addClass('selected').css('background-color', UI.Controllers.Record.activeRecord.bgcolor).css('border-right-color', '');
+						var bgcolor = UI.Controllers.Record.activeRecord ? UI.Controllers.Record.activeRecord.bgcolor : 'rgb(250,250,250)';
+						el.addClass('selected').css('background-color', bgcolor).css('border-right-color', '');
 						$(this).remove();
 					}
 				);
@@ -106,7 +128,9 @@ $.Controller.extend('UI.Controllers.MainController',
 			}
 		}
 		
-		el.addClass('selected').css('background-color', UI.Controllers.Record.activeRecord.bgcolor);
+		// set background color
+		var bgcolor = UI.Controllers.Record.activeRecord ? UI.Controllers.Record.activeRecord.bgcolor : 'rgb(250,250,250)';
+		el.addClass('selected').css('background-color', bgcolor);
 	},
 	
 	

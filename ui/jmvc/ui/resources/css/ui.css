@@ -333,6 +333,11 @@ blockquote.content { margin: 1em 0; }
 	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
 }
 
+#app_selector_cover {
+	position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+	background-color: rgb(254,254,253); background-color: rgba(255,255,255,0.8);
+}
+
 .app_tab_img { margin: 0 10px -7px 0; }
 .app_tab_img_small { margin: 0 10px -7px 0; padding: 2px 4px; }
 
@@ -367,8 +372,11 @@ blockquote.content { margin: 1em 0; }
 
 #record_tabs {
 	float: right; position: relative; height: 32px;
-	margin: 0 5% -6px 0; padding: 2px 5px 0;
+	margin: 0 22px -6px 0; padding: 2px 5px 0;
 	overflow: hidden;
+}
+#add_record_tab img {
+	vertical-align: -6%;
 }
 
 .record_tab {
@@ -402,6 +410,12 @@ blockquote.content { margin: 1em 0; }
 /* this hides the jquery ui tabs generated panels */
 #record_tabs div { display: none; }
 
+#no_record_hint {
+	position: relative; padding: 3em;
+	text-align: center; font-size: 1.5em;
+	background: url(/jmvc/ui/resources/images/add_record_hint.png) top right no-repeat;
+}
+#no_record_hint h2 { color: rgba(0,0,0,0.5); }
 
 .overlay {
   display:none;

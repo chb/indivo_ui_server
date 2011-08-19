@@ -66,7 +66,15 @@ $.Controller.extend('UI.Controllers.Record',
 				}
 			});
 		});
-	}
+	},
+	
+	
+	/**
+	 * Create a new record
+	 */
+	createNewRecord: function(sender) {
+		
+	},
 },
 /* @Prototype */
 {
@@ -82,7 +90,6 @@ $.Controller.extend('UI.Controllers.Record',
 			var record_list = {};
 			COLORS = ['rgb(250,250,250)', 'rgb(242,246,255)', 'rgb(244,255,242)', 'rgb(250,242,255)', 'rgb(254,255,242)', 'rgb(255,248,242)', 'rgb(255,242,242)', 'rgb(255,242,251)'];
 			
-			
 			// create records list, assign colors and add tabs
 			$(ACCOUNT.RECORDS).each(function(i, record) {
 				record_list[record.id] = record;
@@ -92,7 +99,13 @@ $.Controller.extend('UI.Controllers.Record',
 			UI.Controllers.Record.allRecords = record_list;
 			
 			// load the first record
-			UI.Controllers.Record.loadRecord(ACCOUNT.RECORDS[0].id);
+			if (ACCOUNT.RECORDS.length > 0) {
+				UI.Controllers.MainController.hasRecords();
+				UI.Controllers.Record.loadRecord(ACCOUNT.RECORDS[0].id);
+			}
+			else {
+				UI.Controllers.MainController.noRecords();
+			}
 		};
 		
 		// init the ACCOUNT model and call the inner function
@@ -101,7 +114,9 @@ $.Controller.extend('UI.Controllers.Record',
 	},
 	
 	
-	
+	/**
+	 * Adds a record tab
+	 */
 	addTab: function(account, selected) {
 		var a = $('<a class="record_tab" href="javascript:void(0);" />').text(account.label);
 		a.css('background-color', account.bgcolor);
