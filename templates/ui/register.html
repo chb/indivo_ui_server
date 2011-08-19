@@ -1,24 +1,9 @@
+{% extends "ui/base.html" %}
 {% load i18n %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>	 
-	<!--	Uncomment AND comment out <script> tags in header.html
-				to use jmvc3 compression without loging in: "$ ./js steal/buildjs http://localhost -to ui" -->
-	<!-- <script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script> -->
 
-	{% if branding %}
-		{% include branding.header_template %}
-	{% else %}
-		{% include 'ui/header.html' %}
-	{% endif %}
-	
-	<title>{% if branding %}
-				{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
-			{% else %}
-				{% trans "Indivohealth" %}
-			{% endif %}
-			{% trans "Registration" %}</title>
+{% block title_suffix %}{% trans "Registration" %}{% endblock %}
+
+{% block readyscript %}
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('#full_name').focus();
@@ -38,79 +23,49 @@
 			});
 		});
 	</script>
-</head>
-<body>
-<div id="full_height">
-	<div id="main_box">
-		
-		<!-- Header -->
-		<div style="text-align: center;">
-			{% if branding %}
-				<img style="height: 150px; margin-bottom: -70px; margin-right: 20px;" src='{{ branding.logo_image_big_src }}' />
-			{% endif %}
-			<div id="front_site_name">
-				{% trans "Register for" %}
-				{% if branding %}
-					{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
-				{% else %}
-					{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
-				{% endif %}
-			</div>
-			{% if MESSAGE %}
-				<div class="login_message">{{MESSAGE}}</div>
-			{% endif %}
-			{% if ERROR %}
-				<div class="login_error">{{ERROR}}</div>
-			{% endif %}
-		</div>
-		
-		<!-- Registration Form -->
-		{% if SECONDARY %}
-		<div style="margin-top: 1em; font-size: 3em; text-align: center;">
-			{{ SECONDARY|make_list|slice:":3"|join:"" }} – {{ SECONDARY|make_list|slice:"3:"|join:"" }}
-		</div>
-		<p class="moreinfo" style="margin-top: 2em; text-align: center;">
-			<a href="/accounts/{{ ACCOUNT_ID }}/send_secret">{% trans "Received no activation email?" %}</a>
-		</p>
-		{% else %}{% if SETTINGS.REGISTRATION.enable %}
-		<form id="signup_form" class="table_form" method="post" action="/register">
-			<div class="row">
-				<div class="cell">{% trans "Your Name:" %}</div>
-				<div class="cell">
-					<input type="text" id="full_name" name="full_name" tabindex="1" />
-				</div>
-			</div>
-			<div class="row">
-				<div class="cell">{% trans "Account Email:" %}</div>
-				<div class="cell">
-					<input type="text" id="account_id" name="account_id" tabindex="2" onkeyup="$('#contact_email').attr('placeholder', this.value)" />
-					{% if SETTINGS.REGISTRATION.set_primary_secret %}
-					<p class="moreinfo">{% trans "An activation code will be sent here" %}</p>
-					{% endif %}
-					
-					<div style="margin-top: 1.5em;">
-						<button id="submit" type="submit" name="submit" tabindex="3">{% trans "Register" %}</button>
-						<p class="moreinfo">
-							<a href="/login">{% trans "Back to login" %}</a>
-						</p>
-					</div>
-				</div>
-			</div>
-		</form>
-		{% else %}
-		<div class="login_error">{% trans "Online registration is not available" %}</div>
-		<p class="moreinfo">
-			<a href="/login">{% trans "Back to login" %}</a>
-		</p>
-		{% endif %}{% endif %}
+{% endblock %}
+
+{% block welcome_prefix %}{% trans "Register for" %}{% endblock %}
+
+{% block main %}
+	<!-- Registration Form -->
+	{% if SECONDARY %}
+	<div style="margin-top: 1em; font-size: 3em; text-align: center;">
+		{{ SECONDARY|make_list|slice:":3"|join:"" }} – {{ SECONDARY|make_list|slice:"3:"|join:"" }}
 	</div>
-	
-	<!-- Footer -->
-	{% if branding %}
-		{% include branding.footer_template %}
+	<p class="moreinfo" style="margin-top: 2em; text-align: center;">
+		<a href="/accounts/{{ ACCOUNT_ID }}/send_secret">{% trans "Received no activation email?" %}</a>
+	</p>
+	{% else %}{% if SETTINGS.REGISTRATION.enable %}
+	<form id="signup_form" class="table_form" method="post" action="/register">
+		<div class="row">
+			<div class="cell">{% trans "Your Name:" %}</div>
+			<div class="cell">
+				<input type="text" id="full_name" name="full_name" tabindex="1" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="cell">{% trans "Account Email:" %}</div>
+			<div class="cell">
+				<input type="text" id="account_id" name="account_id" tabindex="2" onkeyup="$('#contact_email').attr('placeholder', this.value)" />
+				{% if SETTINGS.REGISTRATION.set_primary_secret %}
+				<p class="moreinfo">{% trans "An activation code will be sent here" %}</p>
+				{% endif %}
+				
+				<div style="margin-top: 1.5em;">
+					<button id="submit" type="submit" name="submit" tabindex="3">{% trans "Register" %}</button>
+					<p class="moreinfo">
+						<a href="/login">{% trans "Back to login" %}</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</form>
 	{% else %}
-		{% include 'ui/footer.html' %}
-	{% endif %}
-</div>
-</body>
-</html>
+	<div class="login_error">{% trans "Online registration is not available" %}</div>
+	<p class="moreinfo">
+		<a href="/login">{% trans "Back to login" %}</a>
+	</p>
+	{% endif %}{% endif %}
+	</div>
+{% endblock %}
