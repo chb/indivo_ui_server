@@ -130,7 +130,7 @@ def login(request, status):
         res = tokens_get_from_server(request, username, password)
     except IOError as e:
         if 403 == e.errno:
-            params['ERROR'] = ErrorStr('Incorrect credentials')
+            params['ERROR'] = ErrorStr('Incorrect credentials')         # a 403 could also mean logging in to a disabled account!
         elif 400 == e.errno:
             params['ERROR'] = ErrorStr('Name or password missing')      # checked before; highly unlikely to ever arrive here
         else:
@@ -145,8 +145,49 @@ def logout(request):
     return HttpResponseRedirect('/login/did_logout')
 
 
+def change_password(request):
+    """
+    http://localhost/change_password
+    """
+    params = {}
+    
+    if request.method == HTTP_METHOD_POST:
+        account_id = request.POST.get('account_id')
+        params['ACCOUNT_ID'] = account_id
+        
+        # get old password
+        old_password = request.POST.get('old_pw')
+        
+        # check new passwords
+        pw1 = request.POST.get('pw1')
+        if len(pw1) >= (settings.REGISTRATION['min_password_length'] or 8):
+            pw2 = request.POST.get('pw2')
+            if pw1 == pw2:
+                api = get_api(request)
+                ret = api.account_change_password(account_id=account_id, data={'old': old_password, 'new': pw1})
+                status = ret.response.get('response_status', 0)
+                
+                # password was reset, log the user in
+                if 200 == status:
+                    params['MESSAGE'] = _('Your password has been changed')
+                elif 403 == status:
+                    params['ERROR'] = ErrorStr('Wrong old password')
+                else:
+                    params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Password change failed')
+            else:
+                params['ERROR'] = ErrorStr('Passwords do not match')
+        else:
+            params['ERROR'] = ErrorStr('Password too short')
+    else:
+        account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
+        params['ACCOUNT_ID'] = account_id
+    
+    return utils.render_template('ui/change_password', params)
+
+
 def register(request):
     """
+    http://localhost/change_password
     Returns the register template (GET) or creates a new account (POST)
     """
     if HTTP_METHOD_POST == request.method:
@@ -170,7 +211,12 @@ def register(request):
             account = utils.parse_account_xml(account_xml)
             account_id = account.get('id')
             if not set_primary:
-                return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('You have successfully registered. After an administrator has approved your account you may login.'), 'SETTINGS': settings})
+                return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('You have successfully registered.') + ' ' + _('After an administrator has approved your account you may login.'), 'SETTINGS': settings})
+            
+            # display the secondary secret if there is one
+            has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
+            if has_secondary_secret:
+                return utils.render_template('ui/register', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'SECONDARY': account.get('secret'), 'MESSAGE': _('You have successfully registered.') + ' ' + _('At the link sent to your email address, enter the following activation code:')})
             return HttpResponseRedirect('/accounts/%s/send_secret/sent' % account_id)
         return utils.render_template('ui/register', {'ERROR': ErrorStr(res.get('response_data', 'Setup failed')), 'SETTINGS': settings})
     return utils.render_template('ui/register', {'SETTINGS': settings})
@@ -180,27 +226,50 @@ def send_secret(request, account_id, status):
     """
     http://localhost/accounts/[foo@bar.com/]send_secret/[(sent|wrong)]
     """
+    params = {'ACCOUNT_ID': account_id}
+    
     if HTTP_METHOD_GET == request.method:
-        params = {'ACCOUNT_ID': account_id}
         if account_id:
             if 'wrong' == status:
                 params['ERROR'] = ErrorStr('Wrong secret')
-            if 'sent' == status:
+            elif 'sent' == status:
                 params['MESSAGE'] = _('Use the link sent to your email address to proceed with account activation')
-        return utils.render_template('ui/send_secret', params)
     
-    if HTTP_METHOD_POST == request.method:
+    elif HTTP_METHOD_POST == request.method:
         account_id = request.POST.get('account_id', '')
+        params['ACCOUNT_ID'] = account_id
+        
+        # re-send the primary secret and display the secondary, if needed
         if request.POST.get('re_send', False):
             api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
             ret = api.account_secret_resend(account_id=account_id)
+            
             if 404 == ret.response.get('response_status', 0):
-                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr('Unknown account')})
-            if 200 != ret.response.get('response_status', 0):
-                return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'ERROR': ErrorStr(ret.response.get('response_data', 'Server Error'))})
-            return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('The activation email has been sent')})
-        return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id, 'MESSAGE': _('Use the link sent to your email address to proceed with account activation')})
-    return utils.render_template('ui/send_secret', {'ACCOUNT_ID': account_id})
+                params['ERROR'] = ErrorStr('Unknown account')
+            elif 200 != ret.response.get('response_status', 0):
+                params['ERROR'] = ErrorStr(ret.response.get('response_data', 'Server Error'))
+            
+            # re-sent the primary, display a secondary if there is one
+            else:
+                params['MESSAGE'] = _('The activation email has been sent')
+                
+                ret = api.account_info(account_id=account_id)
+                status = ret.response.get('response_status', 500)
+                if 404 == status:
+                    params['ERROR'] = ErrorStr('Unknown account')
+                elif 200 != status:
+                    params['ERROR'] = ErrorStr(ret.response.get('response_data', 'Server Error'))
+                else:
+                    account_xml = ret.response.get('response_data', '<root/>')
+                    account = utils.parse_account_xml(account_xml)
+                    has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
+                    if has_secondary_secret:
+                        params['MESSAGE'] += '. ' + ('At the link sent to your email address, enter the following activation code:')
+                        params['SECONDARY'] = account.get('secret')
+        else:
+            params['MESSAGE'] = _('Use the link sent to your email address to proceed with account activation')
+    
+    return utils.render_template('ui/send_secret', params)
 
 
 def account_init(request, account_id, primary_secret):
@@ -231,7 +300,7 @@ def account_init(request, account_id, primary_secret):
     if 'uninitialized' != account_state:
         if 'active' == account_state:
             if len(account['auth_systems']) > 0:
-                return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('This account is active, you may log in below'), 'SETTINGS': settings})
+                return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('Your account is now active, you may log in below'), 'SETTINGS': settings})
             else:
                 move_to_setup = True
         else:
@@ -319,7 +388,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
     # if the account is already active, show login IF at least one auth-system is attached
     if 'active' == account_state:
         if len(account['auth_systems']) > 0:
-            return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('This account is active, you may log in below'), 'SETTINGS': settings})
+            return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('Your account is now active, you may log in below'), 'SETTINGS': settings})
     elif 'uninitialized' != account_state:
         return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('This account is %s' % account_state), 'SETTINGS': settings})
     
@@ -376,84 +445,87 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
     return utils.render_template('ui/account_setup', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings})
 
 
-def change_password(request):
-    if request.method == HTTP_METHOD_POST:
-        account_id = request.POST['account_id']
-        old_password = request.POST['oldpw']
-        password = request.POST['pw1']
-        
-        api = get_api(request)
-        ret = api.account_change_password(account_id = account_id, data={'old':old_password, 'new':password})
-        if ret.response['response_status'] == 200:
-            return utils.render_template('ui/change_password_success', {})
-        else:
-            return utils.render_template('ui/change_password', {'ERROR': ErrorStr('Password change failed'), 'ACCOUNT_ID': account_id})
-    else:
-        account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
-        return utils.render_template('ui/change_password', {'ACCOUNT_ID': account_id})
-
 def forgot_password(request):
-    if request.method == HTTP_METHOD_GET:
-        return utils.render_template('ui/forgot_password', {})
+    """
+    http://localhost/forgot_password
+    """
+    params = {'SETTINGS': settings}
     
     if request.method == HTTP_METHOD_POST:
-        email = request.POST['email']
+        email = request.POST.get('account_id')
         
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         # get account id from email (which we are assuming is contact email)
-        ret = api.account_forgot_password(parameters={'contact_email':email})
+        ret = api.account_forgot_password(parameters={'contact_email': email})
         
-        if ret.response['response_status'] == 200:
-            e = ET.fromstring(ret.response['response_data'])
-            SECONDARY_SECRET = e.text
-            SECONDARY_SECRET_1 = SECONDARY_SECRET[0:3]
-            SECONDARY_SECRET_2 = SECONDARY_SECRET[3:6]
-            return utils.render_template('ui/forgot_password_2', {'SECONDARY_SECRET_1': SECONDARY_SECRET_1,
-                                                                  'SECONDARY_SECRET_2': SECONDARY_SECRET_2})
+        # password was reset, show secondary secret
+        if 200 == ret.response.get('response_status', 0):
+            e = ET.fromstring(ret.response.get('response_data', '<root/>'))
+            params['SECONDARY_SECRET'] = e.text
+        
+        # error resetting, try to find out why
         else:
-            return utils.render_template('ui/forgot_password', {'ERROR': ErrorStr('Password reset failed')})
+            params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Password reset failed')
+            params['ACCOUNT_ID'] = email
+            if 'Account has not been initialized' == ret.response.get('response_data'):
+                params['UNINITIALIZED'] = True
+            
+    return utils.render_template('ui/forgot_password', params)
 
-def forgot_password_2(request):
-    account_id = request.path_info.split('/')[2]
-    primary_secret = request.path_info.split('/')[3]
+
+def reset_password(request, account_id, primary_secret):
+    """
+    http://localhost/accounts/foo@bar.com/reset_password/taOFzInlYlDKLbiM
+    """
+    params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SETTINGS': settings}
     
-    if request.method == HTTP_METHOD_GET:
-        return utils.render_template('ui/forgot_password_3', {})
-    if request.method == HTTP_METHOD_POST:
-        secondary_secret = request.POST['conf1'] + request.POST['conf2']
+    if HTTP_METHOD_POST == request.method:
+        secondary_secret = request.POST.get('conf1') + request.POST.get('conf2')
         
-        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         # check the validity of the primary and secondary secrets
-        # http://192.168.1.101/forgot_password_2/jenandfred@verizon.net/GZrggAOLxScQuNAY
+        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters={
             'secondary_secret': secondary_secret
         })
         
-        if ret.response['response_status'] == 200:
-            return utils.render_template('ui/forgot_password_4', {'ACCOUNT_ID': account_id})
-        else:
-            return utils.render_template('ui/forgot_password_3', {'ERROR': ErrorStr('Password reset failed')})
-
-def forgot_password_3(request):
-    account_id = request.POST['account_id']
-    password = request.POST['pw1']
-    
-    api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
-    ret = api.account_info(account_id = account_id)
-    e = ET.fromstring(ret.response['response_data'])
-    username = e.find('authSystem').get('username')
-    ret = api.account_set_password(account_id = account_id, data={'password':password})
-    
-    if ret.response['response_status'] == 200:
-        try:
-            tokens_get_from_server(request, username, password)
-        except IOError as e:
-            err_msg = ErrorStr(e.strerror)
-            return utils.render_template('ui/forgot_password_3', {'ERROR': err_msg})
+        # secrets are valid, set the new password:
+        if 200 == ret.response.get('response_status', 0):
+            params['SECONDARY_SECRET'] = secondary_secret
+            
+            # get account info
+            ret = api.account_info(account_id = account_id)
+            account = utils.parse_account_xml(ret.response.get('response_data') or '<root/>')
+            
+            # check passwords
+            pw1 = request.POST.get('pw1')
+            if len(pw1) >= (settings.REGISTRATION['min_password_length'] or 8):
+                pw2 = request.POST.get('pw2')
+                if pw1 == pw2:
+                    ret = api.account_set_password(account_id=account_id, data={'password': pw1})
+                    
+                    # password was reset, log the user in
+                    if 200 == ret.response.get('response_status', 0):
+                        try:
+                            try:
+                                username = account['auth_systems'][0]['username']      # TODO: I don't like this...
+                                tokens_get_from_server(request, username, pw1)
+                            except Exception as e:
+                                params['ERROR'] = ErrorStr(str(e))                     # We'll never see this
+                            return HttpResponseRedirect(reverse(index))
+                        except IOError as e:
+                            params['ERROR'] = ErrorStr(e.strerror)
+                    else:
+                        params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Password reset failed')
+                else:
+                    params['ERROR'] = ErrorStr('Passwords do not match')
+            else:
+                params['ERROR'] = ErrorStr('Password too short')
         
-        return HttpResponseRedirect(reverse(index))
-    else:
-        return utils.render_template('ui/forgot_password_3', {'ERROR': ErrorStr('Password reset failed')})
+        # wrong secrets (primary or secondary)
+        else:
+            params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Wrong confirmation code')
+    
+    return utils.render_template('ui/reset_password', params)
 
 
 def indivo_api_call_get(request):

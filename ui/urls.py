@@ -16,8 +16,6 @@ urlpatterns = patterns(
     (r'^register$', register),
     (r'^change_password$', change_password),
     (r'^forgot_password$', forgot_password),
-    (r'^forgot_password_2.*$', forgot_password_2),
-    (r'^forgot_password_3$', forgot_password_3),
     
     # account init emails
     # http://localhost/init/catherine800@indivohealth.org/icmloNHxQrnCQKNn
@@ -28,6 +26,7 @@ urlpatterns = patterns(
     (r'^accounts/(?P<account_id>[^/]+)/init/(?P<primary_secret>[^/]*)', account_init),
     (r'^accounts/(?P<account_id>[^/]+)/setup/(?P<primary_secret>[^/]+)$', account_setup, {'secondary_secret': ''}),
     (r'^accounts/(?P<account_id>[^/]+)/setup/(?P<primary_secret>[^/]+)/(?P<secondary_secret>[^/]*)', account_setup),
+    (r'^accounts/(?P<account_id>[^/]+)/reset_password/(?P<primary_secret>[^/]+)', reset_password),
     
     # indivo api calls
     (r'^indivoapi/delete_record_app/$', indivo_api_call_delete_record_app),
