@@ -80,23 +80,42 @@ $.Controller.extend('UI.Controllers.Carenet',
     
     didLoadCarenets: function(carenets) {
     	var self = this;
+		this.accounts = [];
+		this.carenets = [];
+		this.waitingForCarenetAccounts = 0;
+		
     	if (carenets && carenets.length > 0) {
+			this.carenets = carenets;
+    		this.waitingForCarenetAccounts = carenets.length;
+    		
+    		// load accounts in carenets
 			$(carenets).each(function(i, carenet) {
-				carenet.get_people(function(account_objects_list) {
-					carenet.accounts = account_objects_list;
-					if (account_objects_list && account_objects_list.length > 0) {
-						self.accounts = self.accounts.concat(account_objects_list);
-					}
-				});
+				carenet.get_people(self.callback('didGetPeople', carenet));
 			});
-			
-			self.carenets = carenets;
-			self.accounts = [new UI.Models.Account({'account_id': 'fake@indivo.org', 'fullName': 'Mr. Universe'})];
-			
-			// show known accounts and carenets
-			self.updateAccounts();
+		}
+		else {
+			this.didGetPeople(null, []);
+		}
+	},
+	
+	didGetPeople: function(carenet, c_accounts) {
+		this.waitingForCarenetAccounts--;
+		
+		// store accounts
+		if (carenet && c_accounts && c_accounts.length > 0) {
+			carenet.accounts = c_accounts;
+			for (var i = 0; i < c_accounts.length; i++) {		// can't use "concat" here as this wraps the accounts into some jquery element, stupidly :P
+				if (!_(this.accounts).detect(function(a) { return a.account_id === c_accounts[i].account_id; })) {
+					this.accounts.push(c_accounts[i]);
+				}
+			}
+		}
+		
+		// got all carenets, update UI
+		if (this.waitingForCarenetAccounts < 1) {
+			this.updateAccounts();
 			$('#carenet_drag_accounts').fadeIn('fast');
-			self.updateCarenets();
+			this.updateCarenets();
 		}
 	},
 	
@@ -126,11 +145,20 @@ $.Controller.extend('UI.Controllers.Carenet',
 				ui.helper.addClass('account_dragged');
 				
 				// indicate (im)possible targets
-				var account_id = $(this).model().account_id;
+				var account = $(this).model();
+				var account_id = account ? account.account_id : 0;
 				$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
-					var account_arr = $(elem).model().accounts;
-					if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+					if (!account_id) {
 						$(elem).css('opacity', 0.4);
+					}
+					else {
+						var carenet = $(elem).model();
+						if (carenet) {
+							var account_arr = carenet.accounts;
+							if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+								$(elem).css('opacity', 0.4);
+							}
+						}
 					}
 				});
 			},
@@ -142,13 +170,16 @@ $.Controller.extend('UI.Controllers.Carenet',
 		// setup hovering (so we see in which carenets the account already is)
 		.not('.new').bind({
 			'mouseover': function(event) {
-				var account_id = $(this).model().account_id;
-				$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
-					var account_arr = $(elem).model().accounts;
-					if (account_arr && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
-						$(elem).addClass('has_app');
-					}
-				});
+				var account = $(this).model();
+				if (account) {
+					var account_id = account.account_id;
+					$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
+						var account_arr = $(elem).model().accounts;
+						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+							$(elem).addClass('has_app');
+						}
+					});
+				}
 			},
 			'mouseout': function(event) {
 				$('#carenets').find('.carenet').removeClass('has_app');
@@ -164,13 +195,16 @@ $.Controller.extend('UI.Controllers.Carenet',
 		// setup droppable
 		nets.find('.carenet').droppable({
 			accept: function(draggable) {
-				var mod = $(this).model();
-				if (!mod) {
+				var carenet = $(this).model();
+				if (!carenet) {
 					return $(this).hasClass('new');
 				}
-				var drag_mod = draggable.model();
-				if (drag_mod) {
-					return ! _(mod.accounts).detect(function(a) { return a.account_id === drag_mod.account_id; });
+				if (!carenet.accounts || carenet.accounts.length < 1) {
+					return true;
+				}
+				var dragged_acc = draggable.model();
+				if (dragged_acc) {
+					return ! _(carenet.accounts).detect(function(a) { return a.account_id === dragged_acc.account_id; });
 				}
 				return false;
 			},
@@ -271,7 +305,6 @@ $.Controller.extend('UI.Controllers.Carenet',
 		}
 	},
 	didGetAccountName: function(account, data, textStatus, xhr) {
-		console.log(account);
 		if ('success' != textStatus) {
 			this.showNewAccountBox(null, $('#new_account_form').parent(), '{% trans "We don\\\'t have an account with this ID, sorry" %}');
 		}

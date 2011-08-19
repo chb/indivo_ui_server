@@ -5,7 +5,10 @@ $.Model.extend('UI.Models.Account',
 /* @Static */
 {
 	from_xml_node: function(xml_node) {
-		return new UI.Models.Account({'account_id': $(xml_node).attr('id')});
+		return new UI.Models.Account({
+			'account_id': $(xml_node).attr('id'),
+			  'fullName': $(xml_node).attr('fullName')
+		});
 	}
 },
 /* @Prototype */
