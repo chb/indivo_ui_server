@@ -105,6 +105,8 @@ def login(request, status):
     params = {'SETTINGS': settings}
     if 'did_logout' == status:
         params['MESSAGE'] = _("You were logged out")
+    elif 'changed' == status:
+    	params['MESSAGE'] = _("Your password has been changed")
     
     # process form vars
     if request.method == HTTP_METHOD_GET:
@@ -169,7 +171,7 @@ def change_password(request):
                 
                 # password was reset, log the user in
                 if 200 == status:
-                    params['MESSAGE'] = _('Your password has been changed')
+                    return HttpResponseRedirect('/login/changed')
                 elif 403 == status:
                     params['ERROR'] = ErrorStr('Wrong old password')
                 else:
