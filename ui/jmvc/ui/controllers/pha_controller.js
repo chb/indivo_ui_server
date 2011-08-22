@@ -370,14 +370,10 @@ $.Controller.extend('UI.Controllers.PHA',
 			},
 			hoverClass: 'draggable_hovers',
 			over: function(event, ui) {
-				//if (ui.helper.hasClass('draggable_will_remove')) {		// 'draggable_will_remove' class is not yet set for quick drags. Set 'draggable_will_transfer' without checking as it doesn't hurt
-					ui.helper.addClass('draggable_will_transfer');
-				//}
+				ui.helper.addClass('draggable_will_transfer');
 			},
 			out: function(event, ui) {
-				if (ui.helper.hasClass('draggable_will_remove')) {
-					ui.helper.removeClass('draggable_will_transfer');
-				}
+				ui.helper.removeClass('draggable_will_transfer');
 			},
 			
 			// add app on drop

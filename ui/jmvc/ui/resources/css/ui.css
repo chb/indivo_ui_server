@@ -469,9 +469,12 @@ blockquote.content { margin: 1em 0; }
 	width: auto; cursor: pointer;
 }
 .account.highlight {
-	border: 1px solid rgb(174,174,174); border-color: rgba(0,0,0,0.2);
-	background-color: rgb(218,218,218); background-color: rgba(0,0,0,0.125);
+	border: 1px solid rgb(74,125,153);
+	background-color: rgb(153,218,255);
 	-webkit-box-shadow: 0 1px 4px rgba(0,0,0,0.3); -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.3); box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.account.highlight.new {
+	border-color: rgb(174,174,174); border-color: rgba(0,0,0,0.2); background-color: rgb(218,218,218); background-color: rgba(0,0,0,0.125);
 }
 #new_account_form {
 	width: 180px;
@@ -575,10 +578,10 @@ input.account_name { width: 95%; }
 .carenet_app.app_dragged, .carenet_app:hover.app_dragged {
 	margin: -10px; padding: 10px; -webkit-border-radius: 30px; -moz-border-radius: 30px; border-radius: 30px;
 }
-.draggable_will_remove, .draggable_will_remove:hover {
+.draggable_will_remove, .draggable_will_remove:hover, .carenet .account.draggable_will_remove {
 	background-color: rgb(255,50,0); background-color: rgba(255,50,0,0.5);
 }
-.draggable_will_transfer, .draggable_will_transfer:hover {
+.draggable_will_transfer, .draggable_will_transfer:hover, .carenet .account.draggable_will_transfer {
 	background-color: rgb(204,204,204); background-color: rgba(0,0,0,0.2);
 }
 .app_info {
@@ -633,9 +636,7 @@ input.account_name { width: 95%; }
 .carenet.square .carenet_border {
 	position: relative; width: 200px; height: 76px;
 	-webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
-	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.025)), to(rgba(0,0,0,0.1))) no-repeat;
-	background: -webkit-linear-gradient(top, rgba(0,0,0,0.025), rgba(0,0,0,0.1)) no-repeat;
-	background: -moz-linear-gradient(top, rgba(0,0,0,0.025), rgba(0,0,0,0.1)) no-repeat;
+	background: rgb(237,237,237); background-color: rgba(0,0,0,0.05);
 }
 .carenet:hover .carenet_border, .expanded .carenet_border {
 	width: 190px; height: 190px; margin: -32px;
@@ -676,7 +677,7 @@ input.account_name { width: 95%; }
 	position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px;
 	color: white;
 	-webkit-border-radius: 50px; -moz-border-radius: 50px; border-radius: 50px; border: 1px solid rgb(74,125,153); border-color: rgba(0,0,0,0.4);
-	background-color: rgb(102,204,255);
+	background-color: rgb(153,218,255);
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(108,201,255)), to(rgb(191,233,255))) no-repeat;
     background:-webkit-linear-gradient(top, rgb(108,201,255), rgb(191,233,255)) no-repeat;
     background:-moz-linear-gradient(top, rgb(108,201,255), rgb(191,233,255)) no-repeat;

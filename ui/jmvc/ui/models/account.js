@@ -86,7 +86,7 @@ $.Model.extend('UI.Models.Account',
 			url: '/indivoapi'+this.base_url(),
 			dataType: 'xml',
 			data: account_id,
-			success: this.callback(function(data, textStatus, xhr){
+			success: this.callback(function(data, textStatus, xhr) {
 				this.username = $(data).find('Account').find('authSystem').attr('username');
 				this.get_records(function(records_list){
 					ACCOUNT.RECORDS = records_list;
@@ -101,8 +101,14 @@ $.Model.extend('UI.Models.Account',
 	},
 	
 	get_name: function(callback) {
-		// TODO: Implement me!!
-		callback('Mr. Anonymous', 'success', null);
+		$.ajax({
+			url: this.base_url() + '/name',
+			dataType: 'json',
+			success: this.callback(function(data, textStatus, xhr) {
+				var name = data.name ? data.name : data.account_id
+				callback(name, 'success', null);
+			})
+		});
 	},
 	
 	get_records: function(callback) {

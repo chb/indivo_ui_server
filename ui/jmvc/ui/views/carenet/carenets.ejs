@@ -4,8 +4,8 @@
 	<div class="carenet_border">
 		<div class="carenet_content">
 		<% if (carenet.accounts && carenet.accounts.length > 0) {
-			_(carenet.accounts).each(function(app, i) { %>
-			
+			_(carenet.accounts).each(function(acc, i) { %>
+				<%= controller.view('carenet_account', {'account': acc}) %>
 			<% });
 		} else { %>
 			<p class="hint">{% trans "No accounts" %}</p>

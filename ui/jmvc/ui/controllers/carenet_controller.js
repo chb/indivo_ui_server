@@ -190,7 +190,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 	updateCarenets: function() {
 		var self = this;
 		var nets = $('#carenets');
-		nets.show().html(this.view('carenets', {'carenets': this.carenets}));
+		
+		// show and setup existing accounts
+		nets.show().html(this.view('carenets', {'carenets': this.carenets, 'controller': this}));
+		nets.find('.account').each(function(i, node) {
+			self.setupCarenetAccount($(node));
+		});
 		
 		// setup droppable
 		nets.find('.carenet').droppable({
@@ -210,14 +215,10 @@ $.Controller.extend('UI.Controllers.Carenet',
 			},
 			hoverClass: 'draggable_hovers',
 			over: function(event, ui) {
-				//if (ui.helper.hasClass('draggable_will_remove')) {		// 'draggable_will_remove' class is not yet set for quick drags. Set 'draggable_will_transfer' without checking as it doesn't hurt
-					ui.helper.addClass('draggable_will_transfer');
-				//}
+				ui.helper.addClass('draggable_will_transfer');
 			},
 			out: function(event, ui) {
-				if (ui.helper.hasClass('draggable_will_remove')) {
-					ui.helper.removeClass('draggable_will_transfer');
-				}
+				ui.helper.removeClass('draggable_will_transfer');
 			},
 			
 			// add or transpfer account on drop
@@ -262,12 +263,26 @@ $.Controller.extend('UI.Controllers.Carenet',
 		// bind submit action
 		form.unbind('submit').bind('submit', function(ev) {
 			var form = $(this);
+			
+			// get desired account id
 			var name_field = form.find('input.account_name');
 			name_field.removeClass('error');
 			var acc_id = name_field.val();
 			if (!acc_id || acc_id.length < 5) {
 				name_field.addClass('error').focus();
 				return false;
+			}
+			
+			// is the account already known?
+			var known_accounts = $('#known_accounts').find('.account');
+			for (var i = 0; i < known_accounts.length; i++) {
+				var node = $(known_accounts[i]);
+				var account = node.model();
+				if (account && account.account_id == acc_id) {
+					node.addClass('highlight');
+					window.setTimeout(function() { node.removeClass('highlight'); }, 1500);
+					return false;
+				}
 			}
 			
 			// show status and fire!
@@ -310,7 +325,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		}
 		else {
 			account.fullName = data;
-			account.warning = '{% trans "You must add this account to at least one carenet in order to to keep it in your accounts list" %}';
+			account.in_no_carenet = true;
 			this.accounts.push(account);
 			this.updateAccounts();
 		}
@@ -351,7 +366,23 @@ $.Controller.extend('UI.Controllers.Carenet',
 	didAddAccountToCarenet: function(account_view, carenet_view, data, textStatus, xhr) {
 		if ('success' == textStatus) {		// as of Indivo X b3, this always return success!
 			var carenet = carenet_view.model();
-			carenet.accounts.push(account_view.model());
+			var account = account_view.model();
+			
+			// add to carenet array
+			if (account) {
+				carenet.accounts.push(account);
+				
+				// remove warning
+				if (account.in_no_carenet) {
+					$('#known_accounts').find('.account').each(function(i, node) {
+						var acc = $(node).model();
+						if (acc && acc.account_id == account.account_id) {
+							$(node).find('.error_area').fadeOut('fast');
+							return;
+						}
+					});
+				}
+			}
 			carenet_view.find('.carenet_num_items').first().text(carenet.accounts.length);
 			
 			window.setTimeout(function() { carenet_view.removeClass('expanded'); }, 600);
@@ -384,7 +415,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		}
 	},
 	didRemoveAccountFromCarenet: function(account, account_view, carenet_view, data, textStatus, xhr) {
-		if ('success' == textStatus) {		// as of Indivo X b3, this always returns "success"!
+		if ('success' == textStatus) {
 			
 			// remove from accounts array
 			var carenet = carenet_view.model();
@@ -399,12 +430,32 @@ $.Controller.extend('UI.Controllers.Carenet',
 				}
 			}
 			
-			// update view
+			// update carenet view
 			if (0 == carenet.accounts.length) {
 				carenet_view.find('.carenet_content').first().append('<p class="hint">{% trans "No accounts" %}</p>');
 			}
 			account_view.remove();
 			carenet_view.find('.carenet_num_items').first().text(carenet.accounts.length);
+			
+			// show warning when account is in no other carenet
+			var found = false;
+			$('#carenets').find('.account').each(function(i, node) {
+				var acc = $(node).model();
+				if (acc && acc.account_id == acc_id) {
+					found = true;
+					return;
+				}
+			});
+			if (!found) {
+				account.in_no_carenet = true;
+				$('#known_accounts').find('.account').each(function(i, node) {
+					var acc = $(node).model();
+					if (acc && acc.account_id == acc_id) {
+						$(node).find('.error_area').fadeIn('fast');
+						return;
+					}
+				});
+			}
 			
 			window.setTimeout(function() { carenet_view.removeClass('expanded'); }, 600);
 		}

@@ -528,6 +528,26 @@ def reset_password(request, account_id, primary_secret):
     return utils.render_template('ui/reset_password', params)
 
 
+def account_name(request, account_id):
+	"""
+	http://localhost/accounts/foo@bar.com/name
+	"""
+	api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+	ret = api.account_info(account_id=account_id)
+	status = ret.response.get('response_status', 500)
+	dict = {'account_id': account_id}
+	if 404 == status:
+		dict['error'] = ErrorStr('Unknown account')
+	elif 200 != status:
+		dict['error'] = ErrorStr(ret.response.get('response_data', 'Server Error'))
+	else:
+		account_xml = ret.response.get('response_data', '<root/>')
+		account = utils.parse_account_xml(account_xml)
+		dict['name'] = account.get('fullName')
+	
+	return HttpResponse(simplejson.dumps(dict))
+
+
 def indivo_api_call_get(request):
     """
     take the call, forward it to the Indivo server with oAuth signature using
