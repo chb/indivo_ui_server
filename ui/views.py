@@ -539,9 +539,9 @@ def account_name(request, account_id):
 	status = ret.response.get('response_status', 500)
 	dict = {'account_id': account_id}
 	if 404 == status:
-		dict['error'] = ErrorStr('Unknown account')
+		dict['error'] = ErrorStr('Unknown account').str()
 	elif 200 != status:
-		dict['error'] = ErrorStr(ret.response.get('response_data', 'Server Error'))
+		dict['error'] = ErrorStr(ret.response.get('response_data', 'Server Error')).str()
 	else:
 		account_xml = ret.response.get('response_data', '<root/>')
 		account = utils.parse_account_xml(account_xml)

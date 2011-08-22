@@ -102,20 +102,25 @@ $.Controller.extend('UI.Controllers.Carenet',
 		this.waitingForCarenetAccounts--;
 		
 		// store accounts
-		if (carenet && c_accounts && c_accounts.length > 0) {
-			carenet.accounts = c_accounts;
-			for (var i = 0; i < c_accounts.length; i++) {		// can't use "concat" here as this wraps the accounts into some jquery element, stupidly :P
-				if (!_(this.accounts).detect(function(a) { return a.account_id === c_accounts[i].account_id; })) {
-					this.accounts.push(c_accounts[i]);
+		if (carenet) {
+			if (c_accounts && c_accounts.length > 0) {
+				carenet.accounts = c_accounts;
+				for (var i = 0; i < c_accounts.length; i++) {		// can't use "concat" here as this wraps the accounts into some jquery element, stupidly :P
+					if (!_(this.accounts).detect(function(a) { return a.account_id === c_accounts[i].account_id; })) {
+						this.accounts.push(c_accounts[i]);
+					}
 				}
+			}
+			else {
+				carenet.accounts = [];
 			}
 		}
 		
 		// got all carenets, update UI
 		if (this.waitingForCarenetAccounts < 1) {
-			this.updateAccounts();
+			this.showAccounts();
 			$('#carenet_drag_accounts').fadeIn('fast');
-			this.updateCarenets();
+			this.showCarenets();
 		}
 	},
 	
@@ -123,7 +128,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 	/**
 	 * UI preparations
 	 */
-	updateAccounts: function() {
+	showAccounts: function() {
 		var self = this;
 		$('#known_accounts').html(this.view('accounts', {'accounts': this.accounts}));
 		
@@ -177,17 +182,27 @@ $.Controller.extend('UI.Controllers.Carenet',
 						var account_arr = $(elem).model().accounts;
 						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
 							$(elem).addClass('has_app');
+							
+							// also highlight the account in the list
+							$(elem).find('.account').each(function(j, node) {
+								var acc = $(node).model();
+								if (acc && acc.account_id == account_id) {
+									$(node).addClass('highlight');
+									return;
+								}
+							});
 						}
 					});
 				}
 			},
 			'mouseout': function(event) {
+				$('#carenets').find('.account').removeClass('highlight');
 				$('#carenets').find('.carenet').removeClass('has_app');
 			}
 		});
 	},
 	
-	updateCarenets: function() {
+	showCarenets: function() {
 		var self = this;
 		var nets = $('#carenets');
 		
@@ -245,9 +260,6 @@ $.Controller.extend('UI.Controllers.Carenet',
 		var self = this;
 		el.addClass('highlight');
 		var form = el.find('form');
-		if ('none' != form.css('display')) {
-			return;
-		}
 		
 		// restore view
 		form.find('input').removeAttr('disabled');
@@ -274,7 +286,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			}
 			
 			// is the account already known?
-			var known_accounts = $('#known_accounts').find('.account');
+			var known_accounts = $('#known_accounts').find('.account').not('.new');
 			for (var i = 0; i < known_accounts.length; i++) {
 				var node = $(known_accounts[i]);
 				var account = node.model();
@@ -321,13 +333,13 @@ $.Controller.extend('UI.Controllers.Carenet',
 	},
 	didGetAccountName: function(account, data, textStatus, xhr) {
 		if ('success' != textStatus) {
-			this.showNewAccountBox(null, $('#new_account_form').parent(), '{% trans "We don\\\'t have an account with this ID, sorry" %}');
+			this.showNewAccountBox(null, $('#new_account_form').parent(), data);
 		}
 		else {
 			account.fullName = data;
 			account.in_no_carenet = true;
 			this.accounts.push(account);
-			this.updateAccounts();
+			this.showAccounts();
 		}
 	},
 	
@@ -384,6 +396,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				}
 			}
 			carenet_view.find('.carenet_num_items').first().text(carenet.accounts.length);
+			$('#known_accounts').find('.account').not('.new').removeClass('highlight');
 			
 			window.setTimeout(function() { carenet_view.removeClass('expanded'); }, 600);
 		}
@@ -436,6 +449,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			}
 			account_view.remove();
 			carenet_view.find('.carenet_num_items').first().text(carenet.accounts.length);
+			$('#known_accounts').find('.account').not('.new').removeClass('highlight');
 			
 			// show warning when account is in no other carenet
 			var found = false;
@@ -452,7 +466,6 @@ $.Controller.extend('UI.Controllers.Carenet',
 					var acc = $(node).model();
 					if (acc && acc.account_id == acc_id) {
 						$(node).find('.error_area').fadeIn('fast');
-						return;
 					}
 				});
 			}
@@ -539,8 +552,8 @@ $.Controller.extend('UI.Controllers.Carenet',
 				});
 			})
 			.bind('mouseout', function(event) {
-				if (!$(this).hasClass('app_dragged')) {
-					$('#known_accounts').find('.account').removeClass('highlight');
+				if (!$(this).hasClass('account_dragged')) {
+					$('#known_accounts').find('.account').not('.new').removeClass('highlight');
 				}
 			})
 			
@@ -599,13 +612,13 @@ $.Controller.extend('UI.Controllers.Carenet',
 				},
 				stop: function(event, ui) {
 					var view = ui.helper;
-					view.removeClass('app_dragged');
+					view.removeClass('account_dragged');
 					
 					// revert UI (note: this may be called AFTER another 'start' if the user very quickly drags another app since this is only called once the move-back animation finished)
 					$('#carenets').find('.carenet').each(function(i, elem) {
 						$(elem).css('opacity', 1);
 					});
-					$('#known_accounts').find('.accounts').removeClass('highlight');
+					$('#known_accounts').find('.accounts').not('.new').removeClass('highlight');
 					
 					if (!view.hasClass('draggable_will_remove')) {
 						view.parentsUntil('.carenet').last().parent().removeClass('expanded');

@@ -105,8 +105,9 @@ $.Model.extend('UI.Models.Account',
 			url: this.base_url() + '/name',
 			dataType: 'json',
 			success: this.callback(function(data, textStatus, xhr) {
-				var name = data.name ? data.name : data.account_id
-				callback(name, 'success', null);
+				var status = data.error ? 'error' : 'success';
+				var value = ('success' == status) ? (data.name ? data.name : data.account_id) : data.error;
+				callback(value, status, null);
 			})
 		});
 	},
