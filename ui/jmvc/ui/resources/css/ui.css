@@ -676,6 +676,10 @@ input.account_name { width: 95%; }
 }
 .draggable_hovers.square .carenet_border {
 	height: 206px;
+	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.05)), to(rgba(0,0,0,0.2))) no-repeat;
+	background: -webkit-linear-gradient(top, rgba(0,0,0,0.05), rgba(0,0,0,0.2)) no-repeat;
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.05), rgba(0,0,0,0.2)) no-repeat;
+    -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
 }
 .has_app .carenet_border {
     -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);

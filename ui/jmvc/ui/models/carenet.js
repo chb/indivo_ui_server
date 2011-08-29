@@ -9,7 +9,18 @@ $.Model.extend('UI.Models.Carenet',
 		return new UI.Models.Carenet({
 			'record_id': record_id,
 			'carenet_id': $(xml_node).attr('id'),
-			'name': $(xml_node).attr('name')
+			'name': $(xml_node).attr('name'),
+			'accounts': []
+		});
+	},
+	
+	from_json: function(record_id, json) {
+		var rec_id = record_id ? record_id : json.record_id;
+		return new UI.Models.Carenet({
+			'record_id': rec_id,
+			'carenet_id': json.carenet_id,
+			'name': json.name,
+			'accounts': json.accounts
 		});
 	}
 },
@@ -29,6 +40,9 @@ $.Model.extend('UI.Models.Carenet',
 		})
 	},
 	
+	/*
+	 *	PHA handling
+	 */
 	add_pha: function(pha, callback) {
 		indivo_api_call("PUT", '/carenets/' + this.carenet_id + '/apps/' + encodeURIComponent(pha.id), null, callback);
 	},
@@ -37,6 +51,10 @@ $.Model.extend('UI.Models.Carenet',
 		indivo_api_call("DELETE", '/carenets/' + this.carenet_id + '/apps/' + encodeURIComponent(pha.id), null, callback);
 	},
 	
+	
+	/*
+	 *	account handling
+	 */
 	add_account: function(account_id, callback) {
 		indivo_api_call("POST", '/carenets/' + this.carenet_id + '/accounts/', {'account_id' : account_id, 'write': 'true'}, callback);
 	},

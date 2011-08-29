@@ -20,26 +20,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 	 * Show and manipulate carenets for this record
 	 */
 	
-	create_carenet: function(name) {
-		UI.Models.Record.get(UI.Controllers.Record.activeRecord.record_id, null, function(record) {
-			record.create_carenet(name);
-		})
-		return false;
-	},
-	
 	remove_carenet: function(carenet_id, carenet_name) {
 		if (confirm('Are you sure you want to remove the ' + carenet_name + ' carenet?')) {
 			UI.Models.Record.get(UI.Controllers.Record.activeRecord.record_id, null, function(record) {
 				record.remove_carenet(carenet_id);
 			})
 		}
-		return false;
-	},
-	
-	rename_carenet: function(carenet_id, name) {
-		UI.Models.Record.get(UI.Controllers.Record.activeRecord.record_id, null, function(record) {
-			record.rename_carenet(carenet_id, name);
-		})
 		return false;
 	},
 	
@@ -111,9 +97,6 @@ $.Controller.extend('UI.Controllers.Carenet',
 					}
 				}
 			}
-			else {
-				carenet.accounts = [];
-			}
 		}
 		
 		// got all carenets, update UI
@@ -183,7 +166,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
 							$(elem).addClass('has_app');
 							
-							// also highlight the account in the list
+							// also highlight the dragged account in the list
 							$(elem).find('.account').each(function(j, node) {
 								var acc = $(node).model();
 								if (acc && acc.account_id == account_id) {
@@ -323,7 +306,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 	
 	
 	/**
-	 * Model operations
+	 * Account Handling
 	 */
 	getAccountName: function(account_id) {
 		if (account_id) {
@@ -355,33 +338,52 @@ $.Controller.extend('UI.Controllers.Carenet',
 		this.setupCarenetAccount(new_acc_view);
 		
 		// add the view and animate to final position
-		dragged_view.detach();
+		dragged_view.remove();
 		carenet_content.find('p.hint').remove();
 		var children = carenet_content.children();
 		var coords = {'top': 0, 'left': 0};
 		if (children.length > 0) {
-			//coords = ...
+			// TODO: coords = ...
 		}
 		carenet_content.append(new_acc_view);
 		new_acc_view.animate({'left': coords.left, 'top': coords.top}, 'fast');
 		
-		// tell the server
+		// dropped on new carenet, create it first
 		var carenet = carenet_view.model();
 		if (!carenet) {
-			console.log("DROPPED ON NEW CARENET");
+			var self = this;
+			this.createCarenet('New Carenet', carenet_view, function(new_carenet, textStatus, xhr) {
+				if ('success' == textStatus) {
+					
+					// on success, add the account to the newly created carenet
+					carenet_view.find('.carenet_num_items').first().text('~');
+					new_carenet.add_account(account.account_id, self.callback('didAddAccountToCarenet', account, carenet_view));
+				}
+				else {
+					// if we end up here after dragging an account from another carenet, that
+					// account will be removed from the other carenet, but not added to the
+					// new one because the new one could not be created. This is bad, change
+					// this behavior.
+					new_acc_view.fadeOut('fast', function() { $(this).remove(); });
+				}
+			});
 		}
+		
+		// add account to existing carenet
 		else {
 			carenet_view.find('.carenet_num_items').first().text('~');
-			carenet.add_account(account.account_id, this.callback('didAddAccountToCarenet', new_acc_view, carenet_view));
+			carenet.add_account(account.account_id, this.callback('didAddAccountToCarenet', account, carenet_view));
 		}
 	},
-	didAddAccountToCarenet: function(account_view, carenet_view, data, textStatus, xhr) {
-		if ('success' == textStatus) {		// as of Indivo X b3, this always return success!
+	didAddAccountToCarenet: function(account, carenet_view, data, textStatus, xhr) {
+		if ('success' == textStatus) {
 			var carenet = carenet_view.model();
-			var account = account_view.model();
 			
 			// add to carenet array
 			if (account) {
+				if (!carenet.accounts) {
+					carenet.accounts = [];
+				}
 				carenet.accounts.push(account);
 				
 				// remove warning
@@ -395,6 +397,8 @@ $.Controller.extend('UI.Controllers.Carenet',
 					});
 				}
 			}
+			
+			// update view
 			carenet_view.find('.carenet_num_items').first().text(carenet.accounts.length);
 			$('#known_accounts').find('.account').not('.new').removeClass('highlight');
 			
@@ -474,20 +478,80 @@ $.Controller.extend('UI.Controllers.Carenet',
 		}
 	},
 	
+	
+	/**
+	 * Carenet Handling
+	 */
+	createCarenet: function(name, carenet_view, callback) {
+		var self = this;
+		this.record.create_carenet(name,
+			
+			// success callback
+			function(json, textStatus, xhr) {
+				var new_carenet = UI.Models.Carenet.from_json(null, json);
+				
+				// did create the new carenet
+				if (new_carenet && new_carenet.carenet_id) {
+					carenet_view.model(new_carenet);
+					
+					// TODO: Adjust CSS
+					
+					if (callback) {
+						callback(new_carenet, textStatus, xhr);
+					}
+					return;
+				}
+				
+				// error
+				alert('{% trans "There was an error creating your new carenet, please try again" %}');
+				if (callback) {
+					callback(null, 'error', xhr);
+				}
+			},
+			
+			// error callback
+			function(errXHR) {
+				try {
+					if (errXHR.responseText.length > 0) {
+						alert(errXHR.responseText);
+					}
+					else {
+						throw('No response text');
+					}
+				}
+				catch (exc) {
+					alert('{% trans "There was an error creating your new carenet, please try again" %}');
+				}
+				if (callback) {
+					callback(null, 'error', errXHR);
+				}
+			}
+		);
+	},
+	
 	changeCarenetName: function(form) {
 		$('body').unbind('click');
 		
 		var new_name = form.find('input').first().val();
 		var carenet_view = form.parentsUntil('.carenet').last().parent();
 		var carenet = carenet_view.model();
+		var callback = this.callback('didChangeCarenetName', form, new_name);
 		
-		this.record.rename_carenet(carenet.carenet_id, new_name, this.callback('didChangeCarenetName', form, new_name));
+		// rename existing carenet
+		if (carenet) {
+			this.record.rename_carenet(carenet.carenet_id, new_name, callback);
+		}
+		
+		// "rename" new carenet by creating it
+		else {
+			this.createCarenet(new_name, carenet_view, callback);
+		}
 	},
 	didChangeCarenetName: function(name_form, new_name, data, textStatus, xhr) {
 		if ('success' == textStatus) {
 			name_form.parent().find('b').show();
 			
-			// return the form to a link
+			// revert the form to a link
 			name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
 			name_form.remove();
 		}
@@ -495,6 +559,17 @@ $.Controller.extend('UI.Controllers.Carenet',
 			alert("There was an error changing the name, please try again\n\n" + data);
 			name_form.find('button').removeAttr('disabled');
 		}
+	},
+	
+	carenetViewForCarenet: function(carenet) {
+		var carenets = $('#carenets').find('.carenet');
+		for (var i = 0; i < carenets.length; i++) {
+			var node = $(carenets[i]);
+			if (node.model() && node.model().carenet_id == carenet.carenet_id) {
+				return node;
+			}
+		}
+		return null;
 	},
 	
 	
@@ -520,7 +595,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					return false;
 				});
 				carenet_name_view.before(form).hide();
-				form.find('input').first().focus();
+				form.find('input').first().select();
 				form.parent().click(function(event) { event.stopPropagation(); });
 				
 				// cancel input if we click somewhere outside
@@ -542,14 +617,17 @@ $.Controller.extend('UI.Controllers.Carenet',
 		if (account_view) {
 			var self = this;
 			
-			//** show occount info on hover
+			//** show account info on hover
 			account_view.bind('mouseover', function(event) {
-				var self_id = $(this).model().account_id;
-				$('#known_accounts').find('.account').not('.new').each(function(i) {
-					if ($(this).model().account_id == self_id) {
-						$(this).addClass('highlight');
-					}
-				});
+				try {
+					var self_id = $(this).model().account_id;
+					$('#known_accounts').find('.account').not('.new').each(function(i) {
+						if ($(this).model().account_id == self_id) {
+							$(this).addClass('highlight');
+						}
+					});
+				}
+				catch (exc) {}
 			})
 			.bind('mouseout', function(event) {
 				if (!$(this).hasClass('account_dragged')) {

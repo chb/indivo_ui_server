@@ -25,6 +25,7 @@ class ErrorStr:
                           'Wrong old password': _("The current password is wrong, please try again"),
                       'Password change failed': _("There was a problem updating your password. Please try again. If you are unable to set up your account please contact support."),
                        'Password reset failed': _("There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support."),
+               'Carenet name is already taken': _("This carenet name is already taken, please chose a different one"),
                            'multiple accounts': _("There was a problem resetting your password. Please contact support."),
             'Socket Error: Connection refused': _("The server is currently unavailable. Please try again in a few minutes.")
     }

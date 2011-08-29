@@ -4,7 +4,7 @@ Views for Indivo JS UI
 """
 # pylint: disable=W0311, C0301
 # fixme: rm unused imports
-from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpRequest
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, Http404, HttpRequest
 from django.contrib.auth.models import User
 from django.core.exceptions import *
 from django.core.urlresolvers import reverse
@@ -106,7 +106,7 @@ def login(request, status):
     if 'did_logout' == status:
         params['MESSAGE'] = _("You were logged out")
     elif 'changed' == status:
-    	params['MESSAGE'] = _("Your password has been changed")
+        params['MESSAGE'] = _("Your password has been changed")
     
     # process form vars
     if request.method == HTTP_METHOD_GET:
@@ -354,7 +354,7 @@ def account_init(request, account_id, primary_secret):
             return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Setup failed')})
     
     # proceed to setup if we have the correct secondary secret
-    params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret}
+    params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SETTINGS': settings}
     if move_to_setup and (not has_secondary_secret or len(secondary_secret) > 0):
         ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters={'secondary_secret': secondary_secret})
         status = ret.response.get('response_status', 0)
@@ -395,19 +395,24 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
         return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('This account is %s' % account_state), 'SETTINGS': settings})
     
     # received POST data, try to setup
+    params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings}
     if HTTP_METHOD_POST == request.method:
         post = request.POST
         username = post.get('username', '').lower().strip()
         password = post.get('pw1')
         secondary_secret = post.get('secondary_secret', '')
         
-        # verify the secrets
-        params = {}
-        if has_secondary_secret:
-            params = {'secondary_secret': secondary_secret}
-        ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters=params)
+        # verify PRIMARY secret first and send back to "resend secret" page if it is wrong
+        ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret)
         if 200 != ret.response.get('response_status', 0):
-            return HttpResponseRedirect('/accounts/%s/send_secret/wrong' % account_id)      # TODO: This assumes primary/both secrets are wrong. Send to "initialize" if only the secondary_secret is wrong
+            return HttpResponseRedirect('/accounts/%s/send_secret/wrong' % account_id)
+        
+        # verify SECONDARY secret as well, if there is one
+        if has_secondary_secret:
+            ret = api.check_account_secrets(account_id=account_id, primary_secret=primary_secret, parameters={'secondary_secret': secondary_secret})
+            if 200 != ret.response.get('response_status', 0):
+                params['ERROR'] = ErrorStr('Wrong confirmation code')
+                return utils.render_template('ui/account_init', params)
         
         # verify passwords
         error = None
@@ -418,7 +423,8 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
         elif password != post.get('pw2'):
             error = ErrorStr("Passwords do not match")
         if error is not None:
-            return utils.render_template('ui/account_setup', {'ERROR': error, 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings})
+            params['ERROR'] = error
+            return utils.render_template('ui/account_setup', params)
         
         # secrets are ok, passwords check out: Attach the login credentials to the account
         ret = api.add_auth_system(
@@ -434,17 +440,18 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
             try:
                 tokens_get_from_server(request, username, password)
             except IOError as e:
-                return_url = request.POST.get('return_url', '/')
-                return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(e.strerror), 'RETURN_URL': return_url, 'SETTINGS': settings})
+                return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(e.strerror), 'RETURN_URL': request.POST.get('return_url', '/'), 'SETTINGS': settings})
             return HttpResponseRedirect('/')
         elif 400 == ret.response['response_status']:
-             return utils.render_template('ui/account_setup', {'ERROR': ErrorStr('Username already taken'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings})
-        return utils.render_template('ui/account_setup', {'ERROR': ErrorStr('account_init_error'), 'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings})
+            params['ERROR'] = ErrorStr('Username already taken')
+            return utils.render_template('ui/account_setup', params)
+        params['ERROR'] = ErrorStr('account_init_error')
+        return utils.render_template('ui/account_setup', params)
     
     # got no secondary_secret, go back to init step which will show a prompt for the secondary secret
     if has_secondary_secret and not secondary_secret:
         return HttpResponseRedirect('/accounts/%s/init/%s' % (account_id, primary_secret))
-    return utils.render_template('ui/account_setup', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings})
+    return utils.render_template('ui/account_setup', params)
 
 
 def forgot_password(request):
@@ -531,23 +538,45 @@ def reset_password(request, account_id, primary_secret):
 
 
 def account_name(request, account_id):
-	"""
-	http://localhost/accounts/foo@bar.com/name
-	"""
-	api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
-	ret = api.account_info(account_id=account_id)
-	status = ret.response.get('response_status', 500)
-	dict = {'account_id': account_id}
-	if 404 == status:
-		dict['error'] = ErrorStr('Unknown account').str()
-	elif 200 != status:
-		dict['error'] = ErrorStr(ret.response.get('response_data', 'Server Error')).str()
-	else:
-		account_xml = ret.response.get('response_data', '<root/>')
-		account = utils.parse_account_xml(account_xml)
-		dict['name'] = account.get('fullName')
-	
-	return HttpResponse(simplejson.dumps(dict))
+    """
+    http://localhost/accounts/foo@bar.com/name
+    """
+    api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+    ret = api.account_info(account_id=account_id)
+    status = ret.response.get('response_status', 500)
+    dict = {'account_id': account_id}
+    if 404 == status:
+        dict['error'] = ErrorStr('Unknown account').str()
+    elif 200 != status:
+        dict['error'] = ErrorStr(ret.response.get('response_data', 'Server Error')).str()
+    else:
+        account_xml = ret.response.get('response_data', '<root/>')
+        account = utils.parse_account_xml(account_xml)
+        dict['name'] = account.get('fullName')
+    
+    return HttpResponse(simplejson.dumps(dict))
+
+
+def record_carenet_create(request, record_id):
+    """
+    Create a new carenet for the given record. POST data must have a name, which must not yet exist for this record
+    POST /records/{record_id}/carenets/
+    """
+    if HTTP_METHOD_POST == request.method:
+        name = request.POST.get('name')
+        if name:
+            api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+            ret = api.create_carenet(record_id=record_id, data={'name': name})
+            status = ret.response.get('response_status', 500)
+            if 200 == status:
+                nodes = ET.fromstring(ret.response.get('response_data', '<root/>')).findall('Carenet')
+                tree = nodes[0] if len(nodes) > 0 else None
+                if tree is not None:
+                    carenet = {'record_id': record_id, 'carenet_id': tree.attrib.get('id'), 'name': tree.attrib.get('name'), 'accounts': []}
+                    return HttpResponse(simplejson.dumps(carenet))
+            return HttpResponseBadRequest(ErrorStr(ret.response.get('response_data', 'Error creating carenet')).str())
+    
+    return HttpResponseBadRequest()
 
 
 def indivo_api_call_get(request):

@@ -66,14 +66,22 @@ $.Model.extend('UI.Models.Record',
         });
     },
 
-    create_carenet: function(name, callback) {
-        indivo_api_call('POST', this.base_url + '/carenets/', {'name' : name}, callback);
+    create_carenet: function(name, callback, error) {
+    	$.ajax({
+    		type: 'post',
+    		url: '/records/' + this.record_id + '/carenets/',
+    		data: {'name': name},
+    		dataType: 'json',
+    		success: callback,
+    		error: error
+    	});
     },
 
     remove_carenet: function(carenet_id, callback) {
         indivo_api_call('DELETE', '/carenets/'+carenet_id, {}, callback);
     },
-
+	
+	// TODO: Move this to carenet.js and check return value! (currently always returns 'success')
     rename_carenet: function(carenet_id, name, callback) {
         indivo_api_call('POST', '/carenets/'+carenet_id+'/rename', {'name': name}, callback);
     }
