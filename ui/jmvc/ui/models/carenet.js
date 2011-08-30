@@ -31,6 +31,27 @@ $.Model.extend('UI.Models.Carenet',
 	 name
  */
 {
+	remove: function(callback, error) {
+        $.ajax({
+			type: 'delete',
+			url: '/carenets/' + this.carenet_id,
+			dataType: 'json',
+			success: callback,
+			error: error
+		});
+    },
+	
+    rename: function(new_name, callback, error) {
+        $.ajax({
+			type: 'post',
+			url: '/carenets/' + this.carenet_id + '/rename',
+			data: {'name': new_name},
+			dataType: 'json',
+			success: callback,
+			error: error
+		});
+    },
+    
 	get_people: function(callback) {
 		indivo_api_call("GET", '/carenets/' + this.carenet_id + '/accounts/', null, function(result) {
 			var account_objects_list = $(result).find('CarenetAccount').map(function(i, account_xml_node) {

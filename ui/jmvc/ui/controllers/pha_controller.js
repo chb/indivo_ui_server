@@ -457,20 +457,21 @@ $.Controller.extend('UI.Controllers.PHA',
 		var carenet_view = form.parentsUntil('.carenet').last().parent();
 		var carenet = carenet_view.model();
 		
-		this.record.rename_carenet(carenet.carenet_id, new_name, this.callback('didChangeCarenetName', form, new_name));
+		carenet.rename(new_name, this.callback('didChangeCarenetName', form, new_name), this.callback('didNotChangeCarenetName', form, new_name));
 	},
 	didChangeCarenetName: function(name_form, new_name, data, textStatus, xhr) {
-		if ('success' == textStatus) {
-			name_form.parent().find('b').show();
-			
-			// return the form to a link
-			name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
-			name_form.remove();
+		name_form.parent().find('b').show();
+		
+		// revert the form to a link
+		name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
+		name_form.remove();
+	},
+	didNotChangeCarenetName: function(name_form, new_name, xhr, textStatus, status) {
+		var msg = (xhr && xhr.responseText) ? xhr.responseText : status;
+		if (msg) {
+			alert("There was an error changing the name, please try again\n\n" + msg);
 		}
-		else {
-			alert("There was an error changing the name, please try again\n\n" + data);
-			name_form.find('button').removeAttr('disabled');
-		}
+		name_form.find('button').removeAttr('disabled');
 	},
 	
 	enableApp: function(app, checkbox) {

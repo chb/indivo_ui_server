@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from ui.views import *
+from ui.utils import MethodDispatcher
 from widget_views import *
 
 # maps url patterns to methods in views.py
@@ -31,6 +32,10 @@ urlpatterns = patterns(
     
     # record carenet handling
     (r'^records/(?P<record_id>[^/]+)/carenets/$', record_carenet_create),
+    
+    # carenet handling
+    (r'^carenets/(?P<carenet_id>[^/]+)/rename$', carenet_rename),
+    (r'^carenets/(?P<carenet_id>[^/]+)$', MethodDispatcher({'DELETE': carenet_delete})),
     
     # indivo api calls
     (r'^indivoapi/delete_record_app/$', indivo_api_call_delete_record_app),

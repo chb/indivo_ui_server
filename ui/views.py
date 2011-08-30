@@ -4,7 +4,7 @@ Views for Indivo JS UI
 """
 # pylint: disable=W0311, C0301
 # fixme: rm unused imports
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, Http404, HttpRequest
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden, Http404, HttpRequest
 from django.contrib.auth.models import User
 from django.core.exceptions import *
 from django.core.urlresolvers import reverse
@@ -25,6 +25,7 @@ from errors import ErrorStr
 
 HTTP_METHOD_GET = 'GET'
 HTTP_METHOD_POST = 'POST'
+HTTP_METHOD_DELETE = 'DELETE'
 LOGIN_PAGE = 'ui/login'
 DEBUG = False
 
@@ -566,6 +567,9 @@ def account_name(request, account_id):
     return HttpResponse(simplejson.dumps(dict))
 
 
+##
+##  Record Carenet Handling
+##
 def record_carenet_create(request, record_id):
     """
     Create a new carenet for the given record. POST data must have a name, which must not yet exist for this record
@@ -574,7 +578,7 @@ def record_carenet_create(request, record_id):
     if HTTP_METHOD_POST == request.method:
         name = request.POST.get('name')
         if name:
-            api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+            api = get_api(request)
             ret = api.create_carenet(record_id=record_id, data={'name': name})
             status = ret.response.get('response_status', 500)
             if 200 == status:
@@ -588,6 +592,52 @@ def record_carenet_create(request, record_id):
     return HttpResponseBadRequest()
 
 
+##
+##  Carenet Handling
+##
+def carenet_rename(request, carenet_id):
+    """
+    POST 'name' to /carenets/{carenet_id}/rename
+    """
+    if HTTP_METHOD_POST == request.method:
+        name = request.POST.get('name')
+        if name:
+            api = get_api(request)
+            ret = api.rename_carenet(carenet_id=carenet_id, data={'name': name})
+            status = ret.response.get('response_status', 500)
+            if 200 == status:
+                nodes = ET.fromstring(ret.response.get('response_data', '<root/>')).findall('Carenet')
+                tree = nodes[0] if len(nodes) > 0 else None
+                if tree is not None:
+                    carenet = {'carenet_id': tree.attrib.get('id'), 'name': tree.attrib.get('name')}
+                    return HttpResponse(simplejson.dumps(carenet))
+            elif 403 == status:
+                return HttpResponseForbidden('You do not have permission to rename carenets')
+            return HttpResponseBadRequest(ErrorStr(ret.response.get('response_data', 'Error renaming carenet')).str())
+    
+    return HttpResponseBadRequest()
+
+
+def carenet_delete(request, carenet_id):
+    """
+    DELETE /carenets/{carenet_id}
+    """
+    if HTTP_METHOD_DELETE == request.method:
+        api = get_api(request)
+        ret = api.delete_carenet(carenet_id=carenet_id)
+        status = ret.response.get('response_status', 500)
+        if 200 == status:
+            return HttpResponse('ok')
+        if 403 == status:
+            return HttpResponseForbidden('You do not have permission to delete carenets')
+        return HttpResponseBadRequest(ErrorStr(ret.response.get('response_data', 'Error deleting carenet')).str())
+    
+    return HttpResponseBadRequest()
+
+
+##
+##  Helpers
+##
 def indivo_api_call_get(request):
     """
     take the call, forward it to the Indivo server with oAuth signature using

@@ -97,6 +97,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 					}
 				}
 			}
+			
+			////// DEBUG
+			////// DELETING CARENETS WITHOUT ACCOUNTS
+			else {
+			//	carenet.remove();
+			}
 		}
 		
 		// got all carenets, update UI
@@ -191,47 +197,14 @@ $.Controller.extend('UI.Controllers.Carenet',
 		
 		// show and setup existing accounts
 		nets.show().html(this.view('carenets', {'carenets': this.carenets, 'controller': this}));
+		nets.children().last().before(this.view('new_carenet'));
 		nets.find('.account').each(function(i, node) {
 			self.setupCarenetAccount($(node));
 		});
 		
-		// setup droppable
-		nets.find('.carenet').droppable({
-			accept: function(draggable) {
-				var carenet = $(this).model();
-				if (!carenet) {
-					return $(this).hasClass('new');
-				}
-				if (!carenet.accounts || carenet.accounts.length < 1) {
-					return true;
-				}
-				var dragged_acc = draggable.model();
-				if (dragged_acc) {
-					return ! _(carenet.accounts).detect(function(a) { return a.account_id === dragged_acc.account_id; });
-				}
-				return false;
-			},
-			hoverClass: 'draggable_hovers',
-			over: function(event, ui) {
-				ui.helper.addClass('draggable_will_transfer');
-			},
-			out: function(event, ui) {
-				ui.helper.removeClass('draggable_will_transfer');
-			},
-			
-			// add or transpfer account on drop
-			drop: function(event, ui) {
-				self.addAccountToCarenet(ui.draggable.model(), ui.helper, $(this));
-				
-				if (ui.helper.hasClass('draggable_will_remove')) {
-					self.removeAccountFromCarenet(ui.draggable.model(), ui.helper);
-				}
-			}
-		});
-		
-		// setup carenet name editing
-		nets.find('a.carenet_name').each(function(i) {
-			self.setupCarenetName($(this));
+		// setup droppable and name editing
+		nets.find('.carenet').each(function(i) {
+			self.setupCarenetView($(this));
 		});
 	},
 	
@@ -482,51 +455,50 @@ $.Controller.extend('UI.Controllers.Carenet',
 	/**
 	 * Carenet Handling
 	 */
+	
+	// callback takes three arguments: the new carenet, the textStatus and the xhr object
 	createCarenet: function(name, carenet_view, callback) {
-		var self = this;
-		this.record.create_carenet(name,
+		this.record.create_carenet(name, this.callback('didCreateCarenet', carenet_view, callback), this.callback('didNotCreateCarenet', carenet_view, callback));
+	},
+	didCreateCarenet: function(carenet_view, callback, json, textStatus, xhr) {
+		var new_carenet = UI.Models.Carenet.from_json(null, json);
+		
+		// did create the new carenet
+		if (new_carenet && new_carenet.carenet_id) {
+			carenet_view.model(new_carenet);
+			carenet_view.removeClass('new');
+			carenet_view.find('a.carenet_name').click();
 			
-			// success callback
-			function(json, textStatus, xhr) {
-				var new_carenet = UI.Models.Carenet.from_json(null, json);
-				
-				// did create the new carenet
-				if (new_carenet && new_carenet.carenet_id) {
-					carenet_view.model(new_carenet);
-					
-					// TODO: Adjust CSS
-					
-					if (callback) {
-						callback(new_carenet, textStatus, xhr);
-					}
-					return;
-				}
-				
-				// error
-				alert('{% trans "There was an error creating your new carenet, please try again" %}');
-				if (callback) {
-					callback(null, 'error', xhr);
-				}
-			},
+			var create_view = $(this.view('new_carenet'));
+			$('#carenets').children().last().before(create_view);
+			this.setupCarenetView(create_view);
 			
-			// error callback
-			function(errXHR) {
-				try {
-					if (errXHR.responseText.length > 0) {
-						alert(errXHR.responseText);
-					}
-					else {
-						throw('No response text');
-					}
-				}
-				catch (exc) {
-					alert('{% trans "There was an error creating your new carenet, please try again" %}');
-				}
-				if (callback) {
-					callback(null, 'error', errXHR);
-				}
+			if (callback) {
+				callback(new_carenet, textStatus, xhr);
 			}
-		);
+			return;
+		}
+		
+		// error
+		if (callback) {
+			callback(null, 'error', xhr);
+		}
+	},
+	didNotCreateCarenet: function(carenet_view, callback, errXHR) {		// error callback for createCallback
+		try {
+			if (errXHR.responseText.length > 0) {
+				alert(errXHR.responseText);
+			}
+			else {
+				throw('No response text');
+			}
+		}
+		catch (exc) {
+			alert('{% trans "There was an error creating your new carenet, please try again" %}');
+		}
+		if (callback) {
+			callback(null, 'error', errXHR);
+		}
 	},
 	
 	changeCarenetName: function(form) {
@@ -539,7 +511,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		
 		// rename existing carenet
 		if (carenet) {
-			this.record.rename_carenet(carenet.carenet_id, new_name, callback);
+			carenet.rename(new_name, callback, this.callback('didNotChangeCarenetName', form, new_name));
 		}
 		
 		// "rename" new carenet by creating it
@@ -548,17 +520,18 @@ $.Controller.extend('UI.Controllers.Carenet',
 		}
 	},
 	didChangeCarenetName: function(name_form, new_name, data, textStatus, xhr) {
-		if ('success' == textStatus) {
-			name_form.parent().find('b').show();
-			
-			// revert the form to a link
-			name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
-			name_form.remove();
+		name_form.parent().find('b').show();
+		
+		// revert the form to a link
+		name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
+		name_form.remove();
+	},
+	didNotChangeCarenetName: function(name_form, new_name, xhr, textStatus, status) {
+		var msg = (xhr && xhr.responseText) ? xhr.responseText : status;
+		if (msg) {
+			alert("There was an error changing the name, please try again\n\n" + msg);
 		}
-		else {
-			alert("There was an error changing the name, please try again\n\n" + data);
-			name_form.find('button').removeAttr('disabled');
-		}
+		name_form.find('button').removeAttr('disabled');
 	},
 	
 	carenetViewForCarenet: function(carenet) {
@@ -576,16 +549,52 @@ $.Controller.extend('UI.Controllers.Carenet',
 	/**
 	 * Utilities
 	 */
-	setupCarenetName: function(carenet_name_view) {
-		if (carenet_name_view) {
+	setupCarenetView: function(carenet_view) {
+		if (carenet_view) {
 			var self = this;
 			
-			carenet_name_view.click(function(event) {
+			// setup jQuery droppable
+			carenet_view.droppable({
+				accept: function(draggable) {
+					var carenet = $(this).model();
+					if (!carenet) {
+						return $(this).hasClass('new');
+					}
+					if (!carenet.accounts || carenet.accounts.length < 1) {
+						return true;
+					}
+					var dragged_acc = draggable.model();
+					if (dragged_acc) {
+						return ! _(carenet.accounts).detect(function(a) { return a.account_id === dragged_acc.account_id; });
+					}
+					return false;
+				},
+				hoverClass: 'draggable_hovers',
+				over: function(event, ui) {
+					ui.helper.addClass('draggable_will_transfer');
+				},
+				out: function(event, ui) {
+					ui.helper.removeClass('draggable_will_transfer');
+				},
+				
+				// add or transpfer account on drop
+				drop: function(event, ui) {
+					self.addAccountToCarenet(ui.draggable.model(), ui.helper, $(this));
+					
+					if (ui.helper.hasClass('draggable_will_remove')) {
+						self.removeAccountFromCarenet(ui.draggable.model(), ui.helper);
+					}
+				}
+			});
+			
+			// setup carenet name editing
+			carenet_view.find('a.carenet_name').first().click(function(event) {
+				var name_view = $(this);
 				event.stopPropagation();
-				$(this).parent().find('b').hide();
+				name_view.parent().find('b').hide();
 				
 				// insert an input field on link click
-				var field = $('<input type="name" name="carenet_name" value="' + carenet_name_view.text() + '" />');
+				var field = $('<input type="name" name="carenet_name" value="' + name_view.text() + '" />');
 				var submit = $('<button type="submit">Save</button>');
 				var form = $('<form/>', {'method': 'get', 'action': 'javascript:;'}).append(field).append(submit);
 				form.submit(function() {
@@ -594,7 +603,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					self.changeCarenetName(form);
 					return false;
 				});
-				carenet_name_view.before(form).hide();
+				name_view.before(form).hide();
 				form.find('input').first().select();
 				form.parent().click(function(event) { event.stopPropagation(); });
 				
