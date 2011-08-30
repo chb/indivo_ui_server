@@ -27,6 +27,7 @@ class ErrorStr:
                        'Password reset failed': _("There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support."),
                'Carenet name is already taken': _("This carenet name is already taken, please chose a different one"),
                            'multiple accounts': _("There was a problem resetting your password. Please contact support."),
+                                'Socket Error': _("The server is currently unavailable. Please try again in a few minutes."),
             'Socket Error: Connection refused': _("The server is currently unavailable. Please try again in a few minutes.")
     }
     

@@ -67,12 +67,18 @@ def tokens_get_from_server(request, username, password):
     
     return True
 
+
 def index(request):
     if tokens_p(request):
         # get the realname here. we already have it in the js account model
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
-        res = api.account_info(account_id = account_id)
+        try:
+            res = api.account_info(account_id = account_id)
+        except:
+            res = None
+        
+        # got account info from the server
         if res and res.response:
             
             # success
@@ -86,7 +92,7 @@ def index(request):
             # error
             err_msg = res.response.get('response_data', '500: Unknown Error')
             return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(err_msg), 'RETURN_URL': '/', 'SETTINGS': settings})
-            
+    
     return HttpResponseRedirect(reverse(login))
 
 
@@ -137,6 +143,9 @@ def login(request, status):
             params['ERROR'] = ErrorStr('Name or password missing')      # checked before; highly unlikely to ever arrive here
         else:
             params['ERROR'] = ErrorStr(e.strerror)
+        return utils.render_template(LOGIN_PAGE, params)
+    except Exception as e:
+        params['ERROR'] = ErrorStr(e.value)                             # get rid of the damn IUtilsError things!
         return utils.render_template(LOGIN_PAGE, params)
     
     return HttpResponseRedirect(return_url or '/')
