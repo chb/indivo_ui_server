@@ -252,12 +252,12 @@ $.Controller.extend('UI.Controllers.PHA',
 				$('#carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
 					if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
-						$(elem).addClass('has_app');
+						$(elem).addClass('highlight');
 					}
 				});
 			},
 			'mouseout': function(event) {
-				$('#carenets').find('.carenet').removeClass('has_app');
+				$('#carenets').find('.carenet').removeClass('highlight');
 			}
 		})
 		

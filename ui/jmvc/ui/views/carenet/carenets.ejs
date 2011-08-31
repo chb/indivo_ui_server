@@ -1,6 +1,7 @@
 {% load i18n %}
 <% $(carenets).each(function(i, carenet) { %>
 <div class="carenet square" <%= carenet %>>
+	<div class="carenet_remove"></div>
 	<div class="carenet_border">
 		<div class="carenet_content">
 		<% if (carenet.accounts && carenet.accounts.length > 0) {

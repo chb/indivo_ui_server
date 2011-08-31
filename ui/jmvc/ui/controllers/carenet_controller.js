@@ -97,12 +97,6 @@ $.Controller.extend('UI.Controllers.Carenet',
 					}
 				}
 			}
-			
-			////// DEBUG
-			////// DELETING CARENETS WITHOUT ACCOUNTS
-			else {
-			//	carenet.remove();
-			}
 		}
 		
 		// got all carenets, update UI
@@ -170,7 +164,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
 						var account_arr = $(elem).model().accounts;
 						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
-							$(elem).addClass('has_app');
+							$(elem).addClass('highlight');
 							
 							// also highlight the dragged account in the list
 							$(elem).find('.account').each(function(j, node) {
@@ -186,7 +180,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			},
 			'mouseout': function(event) {
 				$('#carenets').find('.account').removeClass('highlight');
-				$('#carenets').find('.carenet').removeClass('has_app');
+				$('#carenets').find('.carenet').removeClass('highlight');
 			}
 		});
 	},
@@ -465,8 +459,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 		
 		// did create the new carenet
 		if (new_carenet && new_carenet.carenet_id) {
+			this.carenets.push(new_carenet);
+			
 			carenet_view.model(new_carenet);
 			carenet_view.removeClass('new');
+			carenet_view.find('.carenet_remove_disabled').addClass('carenet_remove').removeClass('carenet_remove_disabled');
+			this.setupCarenetView(carenet_view);
 			carenet_view.find('a.carenet_name').click();
 			
 			var create_view = $(this.view('new_carenet'));
@@ -500,6 +498,100 @@ $.Controller.extend('UI.Controllers.Carenet',
 			callback(null, 'error', errXHR);
 		}
 	},
+	
+	deleteCarenet: function(carenet_view) {
+		if (carenet_view) {
+			var carenet = carenet_view.model();
+			
+			// ask to really delete
+			if (carenet) {
+				carenet_view.addClass('highlight');
+				if (confirm("{% trans 'Delete this carenet?\n\nThis action cannot be undone' %}")) {
+					carenet_view.find('.carenet_remove').addClass('carenet_remove_disabled').removeClass('carenet_remove');
+					carenet_view.find('.carenet_border').append('<div class="spinner_cover"></div>');
+					
+					// delete!
+					carenet.delete(this.callback('didDeleteCarenet', carenet, carenet_view), this.callback('didNotDeleteCarenet', carenet, carenet_view));
+				}
+				carenet_view.removeClass('highlight');
+			}
+			else {
+				console.log('deleteCarenet: carenet_view has no model!');
+			}
+		}
+		else {
+			console.log('deleteCarenet: carenet_view was null!');
+		}
+	},
+	didDeleteCarenet: function(carenet, carenet_view, data, textStatus, xhr) {
+		if (carenet_view) {
+			var clone = this.carenets.slice(0);
+			for (var i = 0; i < clone.length; i++) {
+				if (clone[i].carenet_id == carenet.carenet_id) {
+					this.carenets.splice(i, 1);
+					break;
+				}
+			}
+			
+			// for all accounts in this carenet, show warning when account is in no other carenet
+			if (carenet.accounts.length > 0) {
+				for (var i = 0; i < carenet.accounts.length; i++) {
+					var acc = carenet.accounts[i];
+					var found = false;
+					
+					// is this account in another carenet? Loop through all accounts of all carenets
+					for (var j = 0; j < this.carenets.length; j++) {
+						var carenet_acc = this.carenets[j].accounts;
+						if (carenet_acc && carenet_acc.length > 0) {
+							for (var k = 0; k < carenet_acc.length; k++) {
+								var c_acc = carenet_acc[k];
+								if (c_acc.account_id == acc.account_id) {
+									found = true;
+									break;
+								}
+							}
+						}
+						if (found) {
+							break;
+						}
+					}
+					
+					// no, it's not! warn the user
+					if (!found) {
+						acc.in_no_carenet = true;
+						$('#known_accounts').find('.account').each(function(i, node) {
+							var known_acc = $(node).model();
+							if (known_acc && known_acc.account_id == acc.account_id) {
+								$(node).find('.error_area').fadeIn('fast');
+							}
+						});
+					}
+				}
+			}
+			
+			// fade out the carenet
+			carenet_view.fadeOut('fast', function() { $(this).remove(); });
+		}
+	},
+	didNotDeleteCarenet: function(carenet, carenet_view, errXHR) {
+		try {
+			if (errXHR.responseText.length > 0) {
+				alert(errXHR.responseText);
+			}
+			else {
+				throw('No response text');
+			}
+		}
+		catch (exc) {
+			console.log('didNotDeleteCarenet:', exc);
+			alert('{% trans "There was an error deleting the carenet, please try again" %}');
+		}
+		
+		// restore UI
+		carenet_view.find('.spinner_cover').remove();
+		carenet_view.find('.carenet_remove_disabled').addClass('carenet_remove').removeClass('carenet_remove_disabled');
+	},
+	
 	
 	changeCarenetName: function(form) {
 		$('body').unbind('click');
@@ -547,13 +639,14 @@ $.Controller.extend('UI.Controllers.Carenet',
 	
 	
 	/**
-	 * Utilities
+	 * View Setup
 	 */
 	setupCarenetView: function(carenet_view) {
 		if (carenet_view) {
 			var self = this;
 			
 			// setup jQuery droppable
+			carenet_view.droppable('destroy');
 			carenet_view.droppable({
 				accept: function(draggable) {
 					var carenet = $(this).model();
@@ -587,8 +680,13 @@ $.Controller.extend('UI.Controllers.Carenet',
 				}
 			});
 			
+			// setup delete button
+			carenet_view.find('.carenet_remove').first().unbind('click').click(function(event) {
+				self.deleteCarenet($(this).parent());
+			});
+			
 			// setup carenet name editing
-			carenet_view.find('a.carenet_name').first().click(function(event) {
+			carenet_view.find('a.carenet_name').first().unbind('click').click(function(event) {
 				var name_view = $(this);
 				event.stopPropagation();
 				name_view.parent().find('b').hide();

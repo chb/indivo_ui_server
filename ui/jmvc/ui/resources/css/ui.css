@@ -627,6 +627,14 @@ input.account_name { width: 95%; }
 	width: 202px; height: 208px; margin: 8px 48px 36px 0;
 }
 
+.carenet_remove, .carenet_remove_disabled {
+	position: absolute; top: -16px; right: -16px; width: 36px; height: 36px;
+	display: none; z-index: 2; cursor: pointer;
+	background: url("/jmvc/ui/resources/images/jquery_tools/close.png") center center no-repeat;
+}
+.carenet:hover .carenet_remove { display: block; }
+
+
 .carenet_border {
 	width: 126px; height: 126px; margin: 0;
 	border: 1px solid rgb(204,204,204); border-color: rgba(0,0,0,0.2);
@@ -657,15 +665,20 @@ input.account_name { width: 95%; }
 .carenet.new .carenet_border {
 	border-style: dashed;		/* drawn solid in Firefox 5 and lower */
 }
+.carenet.square .carenet_border .spinner_cover {
+	top: -1px; left: -1px; right: -1px; bottom: -1px;
+	border: 1px solid transparent;
+}
 
-.has_app .carenet_border {
+
+.carenet.highlight .carenet_border {
 	border-color: rgb(178,178,178); border-color: rgba(0,0,0,0.3);
 	background-color: rgb(216,216,216); background-color: rgba(0,0,0,0.15);
 	background: -webkit-gradient(radial, center center, 50, center center, 90, from(rgba(0,0,0,0.05)), to(rgba(0,0,0,0.2)));
 	background: -webkit-radial-gradient(circle, rgba(0,0,0,0.05) 50px, rgba(0,0,0,0.25));
 	background: -moz-radial-gradient(circle, rgba(0,0,0,0.05) 50px, rgba(0,0,0,0.25));
 }
-.has_app.square .carenet_border {
+.carenet.highlight.square .carenet_border {
 	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.05)), to(rgba(0,0,0,0.2))) no-repeat;
 	background: -webkit-linear-gradient(top, rgba(0,0,0,0.05), rgba(0,0,0,0.2)) no-repeat;
 	background: -moz-linear-gradient(top, rgba(0,0,0,0.05), rgba(0,0,0,0.2)) no-repeat;
@@ -681,7 +694,7 @@ input.account_name { width: 95%; }
 	background: -moz-linear-gradient(top, rgba(0,0,0,0.05), rgba(0,0,0,0.2)) no-repeat;
     -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
 }
-.has_app .carenet_border {
+.carenet.highlight .carenet_border {
     -webkit-box-shadow: 0 0 16px rgb(58,180,255); -moz-box-shadow: 0 0 16px rgb(58,180,255); box-shadow: 0 0 16px rgb(58,180,255);
 }
 
@@ -761,12 +774,20 @@ h4 img { vertical-align: -5%; margin-right: 0.75em; }
 
 .poof {
 	position: absolute; top: 0; left: 0; width: 50px; height: 50px; overflow: hidden;
-	background: url(/jmvc/ui/resources/images/poof.png) top center no-repeat transparent;
+	background: url("/jmvc/ui/resources/images/poof.png") top center no-repeat transparent;
 }
 
 .error_area {
 	margin-top: 0.5em; color: #800;
 }
+
+.spinner_cover {
+	position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 3;
+	background: url("/jmvc/ui/resources/images/spinner-small.gif") center center no-repeat white;
+	background-color: rgba(255,255,255,0.75);
+	-webkit-border-radius: inherit; -moz-border-radius: inherit; border-radius: inherit;
+}
+
 
 
 /***********  Overrides of jquery UI ***********/

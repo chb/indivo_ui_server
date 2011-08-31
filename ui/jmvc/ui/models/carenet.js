@@ -31,11 +31,10 @@ $.Model.extend('UI.Models.Carenet',
 	 name
  */
 {
-	remove: function(callback, error) {
+	delete: function(callback, error) {
         $.ajax({
 			type: 'delete',
 			url: '/carenets/' + this.carenet_id,
-			dataType: 'json',
 			success: callback,
 			error: error
 		});
