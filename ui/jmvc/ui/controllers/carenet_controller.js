@@ -124,7 +124,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		$('#known_accounts').find('.account').not('.new')
 		.bind('selectstart', function () { return false; })		// needed for WebKit (unless we upgrade jQuery UI to 1.8.6+)
 		.draggable({
-			distance: 8,
+			distance: 4,
 			revert: 'invalid',
 			revertDuration: 300,
 			helper: 'clone',
@@ -297,23 +297,31 @@ $.Controller.extend('UI.Controllers.Carenet',
 		carenet_view.addClass('expanded');
 		
 		// create the view at drop position
-		var carenet_content = carenet_view.find('.carenet_content').first();
+		var new_acc_view = $(this.view('carenet_account', {'account': account}));
+		var carenet_content = carenet_view.find('.carenet_content_scroller').first();
 		var pos_parent = carenet_content.offset();
 		var pos_acc = dragged_view.offset();
 		var cur_coords = {'top': pos_acc.top - pos_parent.top, 'left': pos_acc.left - pos_parent.left};
-		var new_acc_view = $(this.view('carenet_account', {'account': account}));
-		this.setupCarenetAccount(new_acc_view);
 		
-		// add the view and animate to final position
+		// add the view
 		dragged_view.remove();
 		carenet_content.find('p.hint').remove();
-		var children = carenet_content.children();
-		var coords = {'top': 0, 'left': 0};
-		if (children.length > 0) {
-			// TODO: coords = ...
-		}
 		carenet_content.append(new_acc_view);
+		new_acc_view.addClass('highlight');
+		window.setTimeout(function() { new_acc_view.removeClass('highlight'); }, 1500);
+		this.setupCarenetAccount(new_acc_view);
+		
+		// animate to final position
+		var coords = {'top': 0, 'left': 0};
+		// TODO: coords = ...
 		new_acc_view.animate({'left': coords.left, 'top': coords.top}, 'fast');
+		
+		// scroll into view
+		var vis_height = carenet_content.get(0).offsetHeight;
+		var full_height = carenet_content.get(0).scrollHeight;
+		if (full_height > vis_height) {
+			carenet_content.scrollTop(full_height - vis_height);
+		}
 		
 		// dropped on new carenet, create it first
 		var carenet = carenet_view.model();
@@ -373,17 +381,17 @@ $.Controller.extend('UI.Controllers.Carenet',
 		}
 	},
 	
-	removeAccountFromCarenet: function(account, dragged_view) {
-		dragged_view.draggable('destroy');
-		
-		// tell the server
-		var carenet_view = dragged_view.parentsUntil('.carenet').last().parent();
+	removeAccountFromCarenet: function(account_view, dragged_view) {
+		var carenet_view = dragged_view.closest('.carenet');
 		var carenet = carenet_view.model();
 		
+		// tell the server
 		if (carenet) {
+			dragged_view.append('<div class="spinner_cover"></div>');
 			carenet_view.addClass('expanded');
 			carenet_view.find('.carenet_num_items').first().text('~');
-			carenet.remove_account(account.account_id, this.callback('didRemoveAccountFromCarenet', account, dragged_view, carenet_view));
+			var account = account_view.model();
+			carenet.remove_account(account.account_id, this.callback('didRemoveAccountFromCarenet', account, account_view, carenet_view));
 		}
 		else {
 			dragged_view.remove();
@@ -670,12 +678,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 					ui.helper.removeClass('draggable_will_transfer');
 				},
 				
-				// add or transpfer account on drop
+				// add or transfer account on drop
 				drop: function(event, ui) {
 					self.addAccountToCarenet(ui.draggable.model(), ui.helper, $(this));
 					
 					if (ui.helper.hasClass('draggable_will_remove')) {
-						self.removeAccountFromCarenet(ui.draggable.model(), ui.helper);
+						self.removeAccountFromCarenet(ui.draggable, ui.helper);
 					}
 				}
 			});
@@ -692,9 +700,15 @@ $.Controller.extend('UI.Controllers.Carenet',
 				name_view.parent().find('b').hide();
 				
 				// insert an input field on link click
+				var rand_form_id = 'carenet_name_form_' + Math.round(100000000 * Math.random());
 				var field = $('<input type="name" name="carenet_name" value="' + name_view.text() + '" />');
+				var cancel = $('<button class="small" type="reset">Cancel</button>').click(function(event) {
+					var form = $('#' + rand_form_id);
+					form.siblings().show();
+					form.remove();
+				});
 				var submit = $('<button type="submit">Save</button>');
-				var form = $('<form/>', {'method': 'get', 'action': 'javascript:;'}).append(field).append(submit);
+				var form = $('<form/>', {'id': rand_form_id, 'method': 'get', 'action': 'javascript:;'}).append(field).append(cancel).append(submit);
 				form.submit(function() {
 					var form = $(this);
 					form.find('button').attr('disabled', 'disabled');
@@ -724,6 +738,14 @@ $.Controller.extend('UI.Controllers.Carenet',
 		if (account_view) {
 			var self = this;
 			
+			// hack needed to insert the draggable into the parent's parent-node (could not figure out a suitable 'appendTo' filter...)
+			var drag_parent = account_view.closest('.carenet_content');
+			var rand_id = drag_parent.attr('id');
+			if (!rand_id) {
+				rand_id = 'draggable_parent_' + Math.round(100000000 * Math.random());
+				drag_parent.attr('id', rand_id);
+			}
+			
 			//** show account info on hover
 			account_view.bind('mouseover', function(event) {
 				try {
@@ -742,62 +764,66 @@ $.Controller.extend('UI.Controllers.Carenet',
 				}
 			})
 			
-			//** setup action on mouse up (can't use "stop" of draggable as this will first revert the item)
-			.bind('mouseup', function(event) {
-				var view = $(this);
-				
-				// remove from carenet
-				if (view.hasClass('draggable_will_remove')) {
-					view.draggable('destroy');
-					var account = view.model();
-					self.removeAccountFromCarenet(account, view);
-				}
-			})
-			
 			//** setup dragging
 			.bind('selectstart', function () { return false; })		// needed for WebKit (unless we upgrade jQuery UI to 1.8.6+)
 			.draggable({
-				distance: 8,
+				distance: 4,
 				revert: true,
 				revertDuration: 300,
+				helper: 'clone',
+				appendTo: '#' + rand_id,
+				cursorAt: {top: 21},
 				containment: '#app_content',
 				start: function(event, ui) {
-					var view = ui.helper;
-					view.addClass('account_dragged');
-					var carenet_view = view.parentsUntil('.carenet').last().parent();
+					var acc_view = $(this);
+					acc_view.addClass('account_being_dragged');
+					ui.helper.addClass('account_dragged');
+					var carenet_view = ui.helper.closest('.carenet');
 					carenet_view.addClass('expanded');
 					
 					// indicate (im)possible targets
-					var account_id = $(this).model().account_id;
+					var account = acc_view.model();
+					var account_id = account.account_id;
 					$('#carenets').find('.carenet').not('.expanded').not('.new').each(function(i, elem) {
 						var account_arr = $(elem).model().accounts;
 						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
 							$(elem).css('opacity', 0.4);
 						}
 					});
+					
+					// setup action on mouse up (can't use "stop" of draggable as this will first revert the item)
+					ui.helper.bind('mouseup', function(event) {
+						var dragged = $(this);
+						
+						// remove from carenet if dragged outside
+						if (dragged.hasClass('draggable_will_remove')) {
+							self.removeAccountFromCarenet(acc_view, dragged);
+						}
+					})
 				},
 				drag: function(event, ui) {
 					var view = ui.helper;
-					var par = view.parent();
+					var par = ui.helper.parent();
 					var parpos = par.position();
 					var parsize = {'width': par.outerWidth(true), 'height': par.outerWidth(true)};
-					var x = parseInt(view.css('left')) + view.outerWidth(true) / 2;
-					var y = parseInt(view.css('top')) + view.outerHeight(true) / 2;
+					var x = parseInt(ui.helper.css('left')) + ui.helper.outerWidth(true) / 2;
+					var y = parseInt(ui.helper.css('top')) + ui.helper.outerHeight(true) / 2;
 					var minx = - parpos.left;
 					var maxx = parsize.width + parpos.left;
 					var miny = - parpos.top;
 					var maxy = parsize.height;
 					
 					if (x < minx || x > maxx || y < miny || y > maxy) {
-						view.addClass('draggable_will_remove');
+						ui.helper.addClass('draggable_will_remove');
 					}
 					else {
-						view.removeClass('draggable_will_remove');
+						ui.helper.removeClass('draggable_will_remove');
 					}
 				},
 				stop: function(event, ui) {
 					var view = ui.helper;
-					view.removeClass('account_dragged');
+					$(this).removeClass('account_being_dragged');
+					ui.helper.removeClass('account_dragged');
 					
 					// revert UI (note: this may be called AFTER another 'start' if the user very quickly drags another app since this is only called once the move-back animation finished)
 					$('#carenets').find('.carenet').each(function(i, elem) {
@@ -805,8 +831,8 @@ $.Controller.extend('UI.Controllers.Carenet',
 					});
 					$('#known_accounts').find('.accounts').not('.new').removeClass('highlight');
 					
-					if (!view.hasClass('draggable_will_remove')) {
-						view.parentsUntil('.carenet').last().parent().removeClass('expanded');
+					if (!ui.helper.hasClass('draggable_will_remove')) {
+						ui.helper.closest('.carenet').removeClass('expanded');
 					}
 				}
 			});

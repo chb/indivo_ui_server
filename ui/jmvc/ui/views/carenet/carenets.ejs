@@ -4,11 +4,13 @@
 	<div class="carenet_remove"></div>
 	<div class="carenet_border">
 		<div class="carenet_content">
-		<% if (carenet.accounts && carenet.accounts.length > 0) {
-			_(carenet.accounts).each(function(acc, i) { %>
+		<% if (carenet.accounts && carenet.accounts.length > 0) { %>
+			<div class="carenet_content_scroller">
+			<% _(carenet.accounts).each(function(acc, i) { %>
 				<%= controller.view('carenet_account', {'account': acc}) %>
-			<% });
-		} else { %>
+			<% }); %>
+			</div>
+		<% } else { %>
 			<p class="hint">{% trans "No accounts" %}</p>
 		<% } %>
 		</div>

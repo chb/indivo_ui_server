@@ -492,11 +492,7 @@ input.account_name { width: 95%; }
 .account .error_area { font-size: 0.8em; }
 
 .carenet .account {
-	position: relative; float: none; display: block; cursor: move;
-	width: auto; min-height: 0; margin: 0; padding: 0 8px;
-	border: none; -webkit-border-radius: 0; -moz-border-radius: 0; border-radius: 0;
-	border-bottom: 1px solid rgb(204,204,204); border-color: rgba(0,0,0,0.2);
-	background-color: transparent;
+	float: none; display: block; min-height: 0; margin: 0; cursor: move;
 	-webkit-transition-property: margin, padding, border-radius;
 	-moz-transition-property: margin, padding, border-radius;
 	-o-transition-property: margin, padding, border-radius;
@@ -504,20 +500,30 @@ input.account_name { width: 95%; }
 	-webkit-transition-duration: 0.2s; -o-transition-duration: 0.2s; -moz-transition-duration: 0.2s; transition-duration: 0.2s;
 	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
 }
-.carenet .account:hover {
+.carenet_content_scroller .account {
+	width: auto; padding: 0 8px;
+	border: none; -webkit-border-radius: 0; -moz-border-radius: 0; border-radius: 0;
+	border-bottom: 1px solid rgb(204,204,204); border-color: rgba(0,0,0,0.2);
+	background-color: transparent;
+}
+.carenet_content_scroller .account:hover {
 	background-color: rgb(212,212,212); background-color: rgba(0,0,0,0.1);
 }
-.carenet .account.highlight {
+.carenet_content_scroller .account.highlight {
 	z-index: 2; background-color: white;
 	border-bottom-color: white;
 	-webkit-box-shadow: 0 1px 4px rgba(0,0,0,0.3); -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.3); box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
+.account_being_dragged {
+	opacity: 0.5;
+}
 .account_dragged {
-	min-height: 20px; z-index: 5;
+	min-width: 185px; z-index: 5;
 	color: black; text-shadow: 0 0 2px white;
 	border-color: transparent;
-	background-color: rgb(153,153,153); background-color: rgba(153,153,153,0.5);
+	-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px;
+	background-color: rgb(153,153,153); background-color: rgba(0,0,0,0.3);
 	-webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;
 }
 .account_dragged .error_area { display: none; }
@@ -590,7 +596,7 @@ input.account_name { width: 95%; }
 	background-color: rgb(255,50,0); background-color: rgba(255,50,0,0.5);
 }
 .draggable_will_transfer, .draggable_will_transfer:hover, .carenet .account.draggable_will_transfer {
-	background-color: rgb(204,204,204); background-color: rgba(0,0,0,0.2);
+	background-color: rgb(204,204,204); background-color: rgba(64,128,0,0.5);
 }
 .app_info {
 	display: none; z-index: 3;
@@ -767,6 +773,12 @@ input.account_name { width: 95%; }
 .carenet_content p.hint {
 	text-align: center; color: rgb(128,128,128); color: rgba(0,0,0,0.5);
 }
+
+.carenet_content_scroller {
+	position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+	overflow: auto;
+}
+
 
 h4 img { vertical-align: -5%; margin-right: 0.75em; }
 .drag_instructions { margin: 3em 2em; text-align: center; }
