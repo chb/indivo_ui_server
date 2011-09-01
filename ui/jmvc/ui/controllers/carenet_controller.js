@@ -162,6 +162,8 @@ $.Controller.extend('UI.Controllers.Carenet',
 				if (account) {
 					var account_id = account.account_id;
 					$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
+						
+						// get accounts of this carenet
 						var account_arr = $(elem).model().accounts;
 						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
 							$(elem).addClass('highlight');
@@ -171,6 +173,14 @@ $.Controller.extend('UI.Controllers.Carenet',
 								var acc = $(node).model();
 								if (acc && acc.account_id == account_id) {
 									$(node).addClass('highlight');
+									
+									// scroll visible
+									if (node.offsetTop < node.parentNode.scrollTop) {
+										node.parentNode.scrollTop = node.offsetTop;
+									}
+									else if (node.offsetTop + node.offsetHeight > node.parentNode.offsetHeight + node.parentNode.scrollTop) {
+										node.parentNode.scrollTop = node.offsetTop + node.offsetHeight - node.parentNode.offsetHeight;
+									}
 									return;
 								}
 							});

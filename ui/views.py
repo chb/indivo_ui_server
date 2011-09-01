@@ -81,8 +81,6 @@ def index(request):
         
         # got account info from the server
         if res and res.response:
-            
-            # success
             if 200 == res.response.get('response_status', 0):
                 e = ET.fromstring(res.response.get('response_data', '<xml/>'))
                 fullname = e.findtext('fullName')
