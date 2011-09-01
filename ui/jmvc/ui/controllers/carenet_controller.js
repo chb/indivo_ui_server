@@ -337,7 +337,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		var carenet = carenet_view.model();
 		if (!carenet) {
 			var self = this;
-			this.createCarenet('New Carenet', carenet_view, function(new_carenet, textStatus, xhr) {
+			this.createCarenet('{% trans "New carenet" %}', carenet_view, function(new_carenet, textStatus, xhr) {
 				if ('success' == textStatus) {
 					
 					// on success, add the account to the newly created carenet
@@ -385,6 +385,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			
 			// update view
 			carenet_view.find('.carenet_num_items').first().text(carenet.accounts.length);
+			carenet_view.find('p.hint').remove();
 			$('#known_accounts').find('.account').not('.new').removeClass('highlight');
 			
 			window.setTimeout(function() { carenet_view.removeClass('expanded'); }, 600);
@@ -482,9 +483,16 @@ $.Controller.extend('UI.Controllers.Carenet',
 			carenet_view.model(new_carenet);
 			carenet_view.removeClass('new');
 			carenet_view.find('.carenet_remove_disabled').addClass('carenet_remove').removeClass('carenet_remove_disabled');
+			carenet_view.find('.carenet_num_items').first().text(new_carenet.accounts.length);
 			this.setupCarenetView(carenet_view);
-			carenet_view.find('a.carenet_name').click();
 			
+			// jump to name edit mode if the carenet has the standard name (or no name)
+			console.log('{% trans "New carenet" %}', new_carenet.name);
+			if (!new_carenet.name || '{% trans "New carenet" %}' == new_carenet.name) {
+				carenet_view.find('a.carenet_name').click();
+			}
+			
+			// insert the "Create Carenet" carenet
 			var create_view = $(this.view('new_carenet'));
 			$('#carenets').children().last().before(create_view);
 			this.setupCarenetView(create_view);
@@ -612,27 +620,25 @@ $.Controller.extend('UI.Controllers.Carenet',
 	
 	
 	changeCarenetName: function(form) {
-		$('body').unbind('click');
-		
 		var new_name = form.find('input').first().val();
 		var carenet_view = form.parentsUntil('.carenet').last().parent();
 		var carenet = carenet_view.model();
-		var callback = this.callback('didChangeCarenetName', form, new_name);
 		
 		// rename existing carenet
 		if (carenet) {
-			carenet.rename(new_name, callback, this.callback('didNotChangeCarenetName', form, new_name));
+			carenet.rename(new_name, this.callback('didChangeCarenetName', form, new_name), this.callback('didNotChangeCarenetName', form, new_name));
 		}
 		
 		// "rename" new carenet by creating it
 		else {
-			this.createCarenet(new_name, carenet_view, callback);
+			this.createCarenet(new_name, carenet_view, this.callback('didChangeCarenetName', form, new_name));
 		}
 	},
 	didChangeCarenetName: function(name_form, new_name, data, textStatus, xhr) {
-		name_form.parent().find('b').show();
+		$('body').unbind('click');
 		
 		// revert the form to a link
+		name_form.parent().find('b').show();
 		name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
 		name_form.remove();
 	},
@@ -709,7 +715,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				event.stopPropagation();
 				name_view.parent().find('b').hide();
 				
-				// insert an input field on link click
+				// insert an input field in a form on link click
 				var rand_form_id = 'carenet_name_form_' + Math.round(100000000 * Math.random());
 				var field = $('<input type="name" name="carenet_name" value="' + name_view.text() + '" />');
 				var cancel = $('<button class="small" type="reset">Cancel</button>').click(function(event) {
