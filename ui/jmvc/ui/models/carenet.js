@@ -51,7 +51,7 @@ $.Model.extend('UI.Models.Carenet',
 			success: function(data, textStatus, xhr) {
 				self.name = data.name;
 				if (callback) {
-					callback(data, textStatus, xhr);
+					callback(self, textStatus, xhr);
 				}
 			},
 			error: error

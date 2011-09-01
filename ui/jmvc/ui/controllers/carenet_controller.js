@@ -626,23 +626,28 @@ $.Controller.extend('UI.Controllers.Carenet',
 		
 		// rename existing carenet
 		if (carenet) {
-			carenet.rename(new_name, this.callback('didChangeCarenetName', carenet, form), this.callback('didNotChangeCarenetName', carenet, form));
+			carenet.rename(new_name, this.callback('didChangeCarenetName', form), this.callback('didNotChangeCarenetName', form));
 		}
 		
 		// "rename" new carenet by creating it
 		else {
-			this.createCarenet(new_name, carenet_view, this.callback('didChangeCarenetName', carenet, form));
+			this.createCarenet(new_name, carenet_view, this.callback('didChangeCarenetName', form));
 		}
 	},
-	didChangeCarenetName: function(carenet, name_form, data, textStatus, xhr) {
-		$('body').unbind('click');
-		
-		// revert the form to a link
-		name_form.siblings().show();
-		name_form.parent().find('.carenet_name').text(carenet.name);
-		name_form.remove();
+	didChangeCarenetName: function(name_form, carenet, textStatus, xhr) {
+		if (carenet) {
+			$('body').unbind('click');
+			
+			// revert the form to a link
+			var siblings = name_form.siblings();
+			name_form.remove();
+			siblings.filter('.carenet_name').text(carenet.name);
+			if (siblings.filter('form').length < 1) {
+				siblings.show();						// it's possible we arrive here via "didCreateCarenet" which might have added a new "change name" form. So only show siblings if this is NOT the case
+			}
+		}
 	},
-	didNotChangeCarenetName: function(carenet, name_form, xhr, textStatus, status) {
+	didNotChangeCarenetName: function(name_form, carenet, xhr, textStatus, status) {
 		var msg = (xhr && xhr.responseText) ? xhr.responseText : status;
 		if (msg) {
 			alert("There was an error changing the name, please try again\n\n" + msg);
