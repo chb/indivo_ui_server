@@ -20,7 +20,8 @@ $.Model.extend('UI.Models.Carenet',
 			'record_id': rec_id,
 			'carenet_id': json.carenet_id,
 			'name': json.name,
-			'accounts': json.accounts
+			'accounts': json.accounts,
+			'has_default_name': json.has_default_name
 		});
 	}
 },
@@ -41,12 +42,18 @@ $.Model.extend('UI.Models.Carenet',
     },
 	
     rename: function(new_name, callback, error) {
+    	var self = this;
         $.ajax({
 			type: 'post',
 			url: '/carenets/' + this.carenet_id + '/rename',
 			data: {'name': new_name},
 			dataType: 'json',
-			success: callback,
+			success: function(data, textStatus, xhr) {
+				self.name = data.name;
+				if (callback) {
+					callback(data, textStatus, xhr);
+				}
+			},
 			error: error
 		});
     },

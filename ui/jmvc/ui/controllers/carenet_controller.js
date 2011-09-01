@@ -483,12 +483,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 			carenet_view.model(new_carenet);
 			carenet_view.removeClass('new');
 			carenet_view.find('.carenet_remove_disabled').addClass('carenet_remove').removeClass('carenet_remove_disabled');
-			carenet_view.find('.carenet_num_items').first().text(new_carenet.accounts.length);
+			carenet_view.find('.carenet_name').text(new_carenet.name);
+			carenet_view.find('.carenet_num_items').text(new_carenet.accounts.length);
 			this.setupCarenetView(carenet_view);
 			
 			// jump to name edit mode if the carenet has the standard name (or no name)
-			console.log('{% trans "New carenet" %}', new_carenet.name);
-			if (!new_carenet.name || '{% trans "New carenet" %}' == new_carenet.name) {
+			if (!new_carenet.name || new_carenet.has_default_name) {
 				carenet_view.find('a.carenet_name').click();
 			}
 			
@@ -621,28 +621,28 @@ $.Controller.extend('UI.Controllers.Carenet',
 	
 	changeCarenetName: function(form) {
 		var new_name = form.find('input').first().val();
-		var carenet_view = form.parentsUntil('.carenet').last().parent();
+		var carenet_view = form.closest('.carenet');
 		var carenet = carenet_view.model();
 		
 		// rename existing carenet
 		if (carenet) {
-			carenet.rename(new_name, this.callback('didChangeCarenetName', form, new_name), this.callback('didNotChangeCarenetName', form, new_name));
+			carenet.rename(new_name, this.callback('didChangeCarenetName', carenet, form), this.callback('didNotChangeCarenetName', carenet, form));
 		}
 		
 		// "rename" new carenet by creating it
 		else {
-			this.createCarenet(new_name, carenet_view, this.callback('didChangeCarenetName', form, new_name));
+			this.createCarenet(new_name, carenet_view, this.callback('didChangeCarenetName', carenet, form));
 		}
 	},
-	didChangeCarenetName: function(name_form, new_name, data, textStatus, xhr) {
+	didChangeCarenetName: function(carenet, name_form, data, textStatus, xhr) {
 		$('body').unbind('click');
 		
 		// revert the form to a link
-		name_form.parent().find('b').show();
-		name_form.parent().find('a').text(new_name).show();		// would be cleaner to fetch the new name from the 'data' xml
+		name_form.siblings().show();
+		name_form.parent().find('.carenet_name').text(carenet.name);
 		name_form.remove();
 	},
-	didNotChangeCarenetName: function(name_form, new_name, xhr, textStatus, status) {
+	didNotChangeCarenetName: function(carenet, name_form, xhr, textStatus, status) {
 		var msg = (xhr && xhr.responseText) ? xhr.responseText : status;
 		if (msg) {
 			alert("There was an error changing the name, please try again\n\n" + msg);
