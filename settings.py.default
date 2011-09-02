@@ -28,6 +28,14 @@ CONSUMER_KEY='chrome'
 CONSUMER_SECRET='chrome'
 ROOT_URLCONF = 'urls'
 
+#  allow to signup via web?
+REGISTRATION = {
+	'enable': True,						# True or False
+	'set_primary_secret': 1,			# 0 or 1. If 0, administrators will have to approve accounts. If set to 1, make sure the server has SEND_MAIL enabled!
+	'set_secondary_secret': 1,			# 0 or 1. Can only be 1 if primary is also 1
+	'min_password_length': 8
+}
+
 #  quick and dirty private labeling (optional)
 # BRANDING = {
 #   'short_name': 'gpp',
