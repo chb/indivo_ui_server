@@ -236,7 +236,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		// mark our apps in all_apps
 		for (var i = 0; i < this.all_apps.length; i++) {
 			var app = this.all_apps[i];
-			app.enabled = (_(my_apps).detect(function(a) { return a.id === app.id; }));
+			app.enabled = (_(my_apps).any(function(a) { return a.id === app.id; }));
 		}
 		
 		// show
@@ -305,8 +305,9 @@ $.Controller.extend('UI.Controllers.PHA',
 			}
 		});
 		
-		// disable dragging disabled apps (must be done in the aftermath)
+		// disable dragging disabled apps (to be enabled when the app is enabled) and remove dragging from autonomous apps (easier than not setting it up to begin with)
 		app_div.find('.app.disabled').draggable('option', 'disabled', true);
+		app_div.find('.app.autonomous').draggable('destroy');
 		
 		this.record.get_carenets(null, this.callback('didGetCarenets'));
 	},

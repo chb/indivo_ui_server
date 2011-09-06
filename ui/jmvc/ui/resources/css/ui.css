@@ -538,7 +538,7 @@ input.account_name { width: 95%; }
 }
 .app {
 	float: left; position: relative; z-index: 2; cursor: move;
-	width: 100px; min-height: 45px; margin: 10px 10px 0 0; padding: 50px 0 10px;
+	min-width: 100px; min-height: 45px; margin: 10px 10px 0 0; padding: 50px 0 10px;
 	font-size: 0.8em; text-align: center;
 	border: 1px solid transparent;
 	-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px;
@@ -554,8 +554,9 @@ input.account_name { width: 95%; }
 	background-color: rgb(224,224,224); background-color: rgba(0,0,0,0.1);
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.9); -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.9); box-shadow: 0 1px 0 rgba(255,255,255,0.9);
 }
-.app.disabled { cursor: default; }
+.app.disabled, .app.autonomous { cursor: default; }
 .app.disabled:hover { background-color: rgba(0,0,0,0.05); }
+.app .app_name { white-space: nowrap; margin: 0 0.5em; }
 .app.disabled .app_name { opacity: 0.5; }
 .app.ui-state-disabled { opacity: 1; }
 

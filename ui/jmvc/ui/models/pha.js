@@ -11,6 +11,7 @@ $.Model.extend('UI.Models.PHA',
 	single_callback: function(callback) {
 		var ajax_callback = function(result) {
 			var pha = result.App;
+			pha.autonomous = ('True' == pha.autonomous);
 			callback(new UI.Models.PHA({'id': pha['@id'], 'data': pha}));
 		};
 		return ajax_callback;
@@ -32,6 +33,7 @@ $.Model.extend('UI.Models.PHA',
 			}
 			
 			var pha_objs = $(phas).map(function(i, pha) {
+				pha.autonomous = ('True' == pha.autonomous);
 				return new UI.Models.PHA({'id': pha['@id'], 'data': pha});
 			});
 			callback(pha_objs);
