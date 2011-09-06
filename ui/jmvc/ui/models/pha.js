@@ -61,13 +61,14 @@ $.Model.extend('UI.Models.PHA',
 		$.getXML(url, this.single_callback(callback));
 	},
 	
-	enable_pha: function(record_id, pha, callback) {
+	enable_pha: function(record_id, pha, callback, error) {
 		var startURL = interpolate_url_template(pha.data.startURLTemplate, {'record_id' : record_id, 'carenet_id': ''});
 		$.ajax({
 			type: 'get',
 			url: startURL,
 			dataType: 'json',			// the response does NOT get parsed - because of the redirect? Anyway, just parse data.responseText in the callback
-			complete: callback			// it seems that 'success' is not called, maybe because we're getting redirected?
+			success: callback,
+			error: error
 		});
 	},
 	

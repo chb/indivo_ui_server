@@ -1,7 +1,6 @@
 <% _(all_apps).each(function(app, i) {
-	if ('True' != app.data.autonomous) {
-		var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
-		var input_id = "app_" + app.id.replace(/-/g, '_'); %>
+	var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
+	var input_id = "app_" + app.id.replace(/-/g, '_'); %>
 	<div class="app <%= app.enabled ? '' : 'disabled' %>" style="background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png');" <%= app %>>
 		<b class="app_name"><%= app.data.name %></b>
 		<div class="app_info">
@@ -14,6 +13,5 @@
 			<label for="<%= input_id %>">Enable</label>
 		</div>
 	</div>
-	<% }
-}) %>
+<% }) %>
 <div style="clear: left;"> </div>

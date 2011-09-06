@@ -475,20 +475,33 @@ $.Controller.extend('UI.Controllers.PHA',
 	},
 	
 	enableApp: function(app, checkbox) {
-		UI.Models.PHA.enable_pha(this.record.record_id, app, this.callback('doEnableApp', app, checkbox));
+		UI.Models.PHA.enable_pha(this.record.record_id, app, this.callback('doEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
 	},
 	doEnableApp: function(app, checkbox, data, textStatus, xhr) {
-		if ('success' == textStatus) {
-			data = $.parseJSON(data.responseText);
-			
-			// enabled the correct app
-			if (data.app_id == app.id) {
-				if (confirm(data.title + (data.description && data.description.length > 0 ? "\n\n" + data.description : ''))) {
-					UI.Models.PHA.authorize_token(data.request_token, this.record.record_id, this.callback('didEnableApp', app, checkbox));
-					return;
-				}
+		data = $.parseJSON(data.responseText);
+		
+		// enabled the correct app
+		if (data.app_id == app.id) {
+			if (confirm(data.title + (data.description && data.description.length > 0 ? "\n\n" + data.description : ''))) {
+				UI.Models.PHA.authorize_token(data.request_token, this.record.record_id, this.callback('didEnableApp', app, checkbox));
+				return;
 			}
 		}
+	},
+	doNotEnableApp: function(app, checkbox, xhr, textStatus, error) {
+		try {
+			if (404 == xhr.status) {
+				error = '{% trans "This app is no longer available" %}' + ' (404)';
+			}
+			else if (0 == xhr.status) {
+				error = '{% trans "This app is not available" %}' + ' (No response)';
+			}
+			else {
+				error = (xhr.responseText && xhr.responseText.length > 0) ? xhr.responseText : error;
+			}
+		}
+		catch (exc) {}
+		alert(error);		// TODO: Do something more elegant than alerting
 		
 		checkbox.removeAttr('checked').removeAttr('disabled');
 	},
