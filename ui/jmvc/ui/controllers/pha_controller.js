@@ -477,13 +477,12 @@ $.Controller.extend('UI.Controllers.PHA',
 	enableApp: function(app, checkbox) {
 		UI.Models.PHA.enable_pha(this.record.record_id, app, this.callback('doEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
 	},
-	doEnableApp: function(app, checkbox, data, textStatus, xhr) {
-		data = $.parseJSON(data.responseText);
+	doEnableApp: function(app, checkbox, json_app, textStatus, xhr) {
 		
-		// enabled the correct app
-		if (data.app_id == app.id) {
-			if (confirm(data.title + (data.description && data.description.length > 0 ? "\n\n" + data.description : ''))) {
-				UI.Models.PHA.authorize_token(data.request_token, this.record.record_id, this.callback('didEnableApp', app, checkbox));
+		// did we enable the correct app?
+		if (json_app.app_id == app.id) {
+			if (confirm(json_app.title + (json_app.description && json_app.description.length > 0 ? "\n\n" + json_app.description : ''))) {
+				UI.Models.PHA.authorize_token(json_app.request_token, this.record.record_id, this.callback('didEnableApp', app, checkbox));
 				return;
 			}
 		}
