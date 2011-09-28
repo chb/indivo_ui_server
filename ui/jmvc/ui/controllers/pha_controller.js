@@ -490,6 +490,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		else {
 			alert("Internal Error: Did not call the correct app\nRequested: " + app.id + "\nReceived: " + json_app.app_id + "\n\nA probable error is that the start URL in server settings is not correct");
 		}
+		checkbox.removeAttr('checked').removeAttr('disabled');
 	},
 	doNotEnableApp: function(app, checkbox, xhr, textStatus, error) {
 		try {
