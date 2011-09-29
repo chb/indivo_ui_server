@@ -75,7 +75,7 @@ $.Model.extend('UI.Models.PHA',
 	},
 	
 	authorize_token: function(token, record_id, callback) {
-		var postURL = '/oauth/authorize';		// should we really POST directly to OAuth?
+		var postURL = '/oauth/authorize';
 		var dict = {
 			'oauth_token': token,
 			  'record_id': record_id

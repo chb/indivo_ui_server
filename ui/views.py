@@ -40,6 +40,7 @@ def get_api(request=None):
     
     return api
 
+
 def tokens_p(request):
     try:
         ########### FIXME CHECK SECURITY ######################
@@ -49,6 +50,7 @@ def tokens_p(request):
             return False
     except KeyError:
         return False
+
 
 def tokens_get_from_server(request, username, password):
     """
@@ -72,7 +74,7 @@ def tokens_get_from_server(request, username, password):
 def index(request):
     if tokens_p(request):
         # get the realname here. we already have it in the js account model
-        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        api = get_api()
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
         try:
             res = api.account_info(account_id = account_id)
@@ -146,7 +148,7 @@ def login(request, status):
     except Exception as e:
         params['ERROR'] = ErrorStr(e.value)                             # get rid of the damn IUtilsError things!
         return utils.render_template(LOGIN_PAGE, params)
-    
+    print 'LOGGED IN, GO TO %s' % (return_url or '/')
     return HttpResponseRedirect(return_url or '/')
 
 
@@ -695,8 +697,19 @@ def indivo_api_call_delete_record_app(request):
     
     return HttpResponse(str(status))
 
+
 def authorize(request):
     """
+    If we arrive here via GET:
+        For not yet approved apps:
+            Return JSON with some info data, ui_server will then have the user click "OK"
+        For already approved apps:
+            Silently approve and proceed
+    
+    If we arrive here via POST:
+        Approve the request token in 'oauth_token' for the record id in 'record_id' and redirect to:
+        after_auth?oauth_token=<access_token>&oauth_verifier=<oauth_verifier>
+    
     app_info (the response_data from the get_request_token_info call) looks something like:
     
     <RequestToken token="LNrHRM1OA6ExcSyq22O0">
@@ -719,12 +732,16 @@ def authorize(request):
     
     </RequestToken>
     """
+    
+    # if we don't have -- yeah, if we don't have what? -- then go to login
     if not tokens_p(request):
+        print 'REDIRECT TO LOGIN'
         url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
         return HttpResponseRedirect(url)
     
     api = get_api(request)
-    REQUEST_TOKEN = request.REQUEST['oauth_token']
+    REQUEST_TOKEN = request.REQUEST.get('oauth_token')
+    callback_url = request.REQUEST.get('oauth_callback')
     
     # process GETs (initial adding and a normal call for this app)
     if request.method == HTTP_METHOD_GET and request.GET.has_key('oauth_token'):
@@ -772,6 +789,17 @@ def authorize(request):
                 RECORDS = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
                 carenets = None
             
+            # HACK TO TEST MOBILE -- If callback is not None, approve for first record automatically and return
+            if callback_url is not None:
+                if record_id is None:
+                    record_id = RECORDS[0][0]
+                
+                token_field = '<input type="hidden" name="oauth_token" value="%s" />' % REQUEST_TOKEN
+                record_field = '<input type="hidden" name="record_id" value="%s" />' % record_id
+                callback_field = '<input type="hidden" name="oauth_callback" value="%s" />' % callback_url
+                return HttpResponse('<html><body><form method="post" action="/oauth/authorize"><h1>Authorize %s?</h1><h3>%s</h3>%s%s%s<button type="submit">Approve</button></form></body></html>' % (name, app_id, token_field, record_field, callback_field))
+            
+            # return JSON
             data = {      'app_id': app_id,
                             'name': name,
                            'title': _('Authorize "{{name}}"?').replace('{{name}}', name),
@@ -791,7 +819,7 @@ def authorize(request):
             return utils.render_template('ui/error', {'error_message': 'bad value for kind parameter'})
             #return HttpResponse('bad value for kind parameter')
     
-    # process POST
+    # process POST -- authorize the given token for the given record_id
     elif request.method == HTTP_METHOD_POST \
         and request.POST.has_key('oauth_token') \
         and request.POST.has_key('record_id'):
@@ -810,8 +838,7 @@ def authorize(request):
         if offline_capable == "0":
             offline_capable = False
         
-        location = _approve_and_redirect(request, request.POST['oauth_token'], request.POST['record_id'], offline_capable = offline_capable)
-        
+        location = _approve_and_redirect(request, REQUEST_TOKEN, request.POST['record_id'], offline_capable = offline_capable)
         approved_carenet_ids = request.POST.getlist('carenet_id')
         
         # go through the carenets and add the app to the record
@@ -822,9 +849,11 @@ def authorize(request):
     
     return HttpResponse('bad request method or missing param in request to authorize')
 
+
 def authorize_cancel(request):
     """docstring for authorize_cancel"""
     pass
+
 
 def _approve_and_redirect(request, request_token, record_id=None, carenet_id=None, offline_capable=False):
     """
@@ -836,14 +865,21 @@ def _approve_and_redirect(request, request_token, record_id=None, carenet_id=Non
         data['record_id'] = record_id
     if carenet_id:
         data['carenet_id'] = carenet_id
-    
     if offline_capable:
         data['offline'] = 1
     
+    print 'TRY TO APPROVE %s FOR %s' % (request_token, data.get('record_id'))
     result = api.approve_request_token(request_token=request_token, data=data)
-    # strip location= (note: has token and verifer)
-    location = urllib.unquote(result.response['prd'][9:])
-    return HttpResponseRedirect(location)
+    status = result.response.get('response_status', 0) if result and result.response else 0
+    if 200 == status:
+        # strip location= (note: has token and verifer)
+        location = urllib.unquote(result.response.get('prd')[9:])
+        print 'SUCCESS, REDIRECTING TO %s' % location
+        return HttpResponseRedirect(location)
+    if 403 == status:
+        return HttpResponseForbidden(result.response.get('prd'))
+    return HttpResponseBadRequest(result.response.get('prd'))
+
 
 def localize_jmvc_template(request, *args, **kwargs):
     """
