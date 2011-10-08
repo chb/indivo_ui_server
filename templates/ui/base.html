@@ -20,7 +20,8 @@
 			{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
 		{% else %}
 			{% trans "Indivohealth" %}
-		{% endif %}{% endblock %}
+		{% endif %}
+		{% endblock %}
 		{% block title_suffix %}{% endblock %}
 	</title>
 	
@@ -37,7 +38,7 @@
 				<img style="height: 150px; margin-bottom: -70px; margin-right: 20px;" src='{{ branding.logo_image_big_src }}' />
 			{% endif %}
 			<div id="front_site_name">
-				{% block welcome_prefix %}{% endblock %}
+				<span class="welcome_prefix">{% block welcome_prefix %}{% endblock %}</span>
 				{% block welcome %}
 					{% if branding %}
 						{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}

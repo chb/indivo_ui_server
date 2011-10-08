@@ -91,8 +91,8 @@ body{font:15px/1.6 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-sma
 html, body { min-height: 100%; margin: 0; }
 body {
 	margin: 16px;
-	font-size: 15px
-	line-height: 1.6em;
+	font-size: 15px;
+	line-height: 1.6;
 	background: rgb(254,252,247);
 	background:-webkit-gradient(linear, left top, left 15%, from(rgb(250,244,230)), to(rgb(254,252,247)));		/* WebKit legacy */
 	background:-webkit-linear-gradient(top, rgb(250,244,230), rgb(254,252,247) 15%, rgb(254,252,247) 85%, rgb(250,244,230));
@@ -298,10 +298,8 @@ blockquote.content { margin: 1em 0; }
 	margin-bottom: -7px;
 	margin-right: 2px;
 }
-#copyright { 
-	color: #999;
-	font-size: 0.8em;
-}
+#footer span { color: #ccc; padding: 0 2em; }
+#copyright { color: #999; font-size: 0.8em; }
 
 
 /*** App Selector ***/
