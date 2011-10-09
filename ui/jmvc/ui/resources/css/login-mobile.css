@@ -11,6 +11,7 @@ body {
 a, a:link { color: rgb(0,63,150); }
 a:hover { color: rgb(0,85,200); border: none; text-decoration: underline; }
 p { margin: 0; }
+label { margin-left: 0.5em; }
 
 #full_height { margin: 20px; }
 #main_box { margin: 0 auto; }
@@ -18,10 +19,9 @@ p { margin: 0; }
 .welcome_prefix { display: none; }
 #front_site_name { display: block; font-size: 2.2em; }
 
-.table_form {
-	margin-top: 0.5em;
-	font-size: 19px; line-height: 1.7;
-}
+.table_form { margin-top: 0.5em; font-size: 19px; line-height: 1.7; }
+.list_form { margin-top: 0.5em; font-size: 19px; line-height: 1.7; }
+
 #login_form input[type="text"], #login_form input[type="password"], #setup_form input[type="text"], #setup_form input[type="password"] {
 	width: 100%;
 }
@@ -29,6 +29,14 @@ p { margin: 0; }
 .table_form button[type="submit"] { min-width: 34%; font-size: 18px; margin-bottom: 10px; }
 
 .row { width: 280px; margin: 0 auto 0.25em; }
+.list_form .row { width: auto; max-width: 280px; margin: 0 auto; padding: 0.2em 0.8em; background-color: white; border: 1px solid #999; border-bottom-width: 0; }
+.list_form .row:first-child {
+	-webkit-border-radius: 6px 6px 0 0; -moz-border-radius: 6px 6px 0 0; border-radius: 6px 6px 0 0;
+}
+.list_form .row:last-child {
+	border-bottom-width: 1px;
+	-webkit-border-radius: 0 0 6px 6px; -moz-border-radius: 0 0 6px 6px; border-radius: 0 0 6px 6px;
+}
 .cell:first-child { color: #666; }
 .moreinfo {
 	font-size: 15px; font-weight: normal; color: #666;

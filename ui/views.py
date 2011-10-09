@@ -698,9 +698,14 @@ def indivo_api_call_delete_record_app(request):
     return HttpResponse(str(status))
 
 
+##
+##  Authorization
+##
 def authorize(request):
     """
     If we arrive here via GET:
+        If user has no valid token:
+            Redirect to login with return_url set to the request URL
         For not yet approved apps:
             Return JSON with some info data, ui_server will then have the user click "OK"
         For already approved apps:
@@ -733,9 +738,8 @@ def authorize(request):
     </RequestToken>
     """
     
-    # if we don't have -- yeah, if we don't have what? -- then go to login
+    # if we don't have a valid token then go to login
     if not tokens_p(request):
-        print 'REDIRECT TO LOGIN'
         url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
         return HttpResponseRedirect(url)
     
@@ -789,15 +793,11 @@ def authorize(request):
                 RECORDS = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
                 carenets = None
             
-            # HACK TO TEST MOBILE -- If callback is not None, approve for first record automatically and return
+            # MOBILE AUTH: If callback is not None, show form to approve records
             if callback_url is not None:
-                if record_id is None:
-                    record_id = RECORDS[0][0]
-                
-                token_field = '<input type="hidden" name="oauth_token" value="%s" />' % REQUEST_TOKEN
-                record_field = '<input type="hidden" name="record_id" value="%s" />' % record_id
-                callback_field = '<input type="hidden" name="oauth_callback" value="%s" />' % callback_url
-                return HttpResponse('<html><body><form method="post" action="/oauth/authorize"><h1>Authorize %s?</h1><h3>%s</h3>%s%s%s<button type="submit">Approve</button></form></body></html>' % (name, app_id, token_field, record_field, callback_field))
+                records_xml = api.read_records(account_id = urllib.unquote(request.session['account_id'])).response['response_data']
+                RECORDS = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
+                return utils.render_template('ui/authorize_records', {'REQUEST_TOKEN': REQUEST_TOKEN, 'CALLBACK_URL': callback_url, 'RECORD_LIST': RECORDS})
             
             # return JSON
             data = {      'app_id': app_id,
@@ -822,7 +822,7 @@ def authorize(request):
     # process POST -- authorize the given token for the given record_id
     elif request.method == HTTP_METHOD_POST \
         and request.POST.has_key('oauth_token') \
-        and request.POST.has_key('record_id'):
+        and (request.POST.has_key('record_id') or request.POST.has_key('num_records')):
         
         app_info = api.get_request_token_info(request_token=REQUEST_TOKEN).response['response_data']
         e = ET.fromstring(app_info)
@@ -838,12 +838,34 @@ def authorize(request):
         if offline_capable == "0":
             offline_capable = False
         
-        location = _approve_and_redirect(request, REQUEST_TOKEN, request.POST['record_id'], offline_capable = offline_capable)
+        # authenticate for a single record (is the case when called from the standard UI)
+        if request.POST.has_key('record_id'):
+            location = _approve_and_redirect(request, REQUEST_TOKEN, request.POST['record_id'], offline_capable = offline_capable)
+        
+        # if we got multiple records, authenticate for each of them (most likely authorizing from mobile)
+        else:
+            n_max = request.POST.get('num_records')
+            RECORDS = []
+            for i in range(int(n_max)):
+                record_id = request.POST.get('record_%d' % i)
+                if record_id:
+                    location = _approve_and_redirect(request, REQUEST_TOKEN, record_id, offline_capable = offline_capable)
+                    
+                    # successfully approved, fetch record info
+                    if isinstance(location, HttpResponseRedirect):
+                        record_xml = api.read_record(record_id = record_id).response['response_data']
+                        record_node = ET.fromstring(record_xml)
+                        RECORDS.append('%s+%s' % (record_node.attrib['id'], record_node.attrib['label']))
+        
         approved_carenet_ids = request.POST.getlist('carenet_id')
         
         # go through the carenets and add the app to the record
         for approved_carenet_id in approved_carenet_ids:
             api.post_carenet_app(carenet_id = approved_carenet_id, app_id = app_id)
+        
+        # if we got multiple records, supply them in the response
+        if RECORDS and len(RECORDS) > 0 and isinstance(location, HttpResponseRedirect):
+            location['Location'] = '%s&records=%s' % (location['Location'], ';'.join(RECORDS))
         
         return location
     
