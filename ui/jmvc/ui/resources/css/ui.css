@@ -294,11 +294,11 @@ blockquote.content { margin: 1em 0; }
 
 #footer a { color: #666; }
 #footer a img {
-	width: 24px; height: 24px;
-	margin-bottom: -7px;
+	width: 32px; height: 32px;
+	margin-bottom: -12px;
 	margin-right: 2px;
 }
-#footer span { color: #ccc; padding: 0 2em; }
+#footer b { color: #ccc; padding: 0 2em; }
 #copyright { color: #999; font-size: 0.8em; }
 
 
