@@ -1,0 +1,26 @@
+{% extends "ui/base.html" %}
+{% load i18n %}
+
+{% block title_suffix %}{% trans "Records" %}{% endblock %}
+{% block welcome %}{% trans "Select Record" %}{% endblock %}
+
+{% block main %}
+	<!-- Login Form -->
+	<div class="list_form">
+		{% for id, name in RECORD_LIST %}
+		<a class="row" href="{{CALLBACK_URL}}?account_id={{ACCOUNT_ID}}&record_id={{id}}&record_label={{name}}">
+			{{name}}
+		</a>
+		{% empty %}
+		<div class="login_message">
+			{% trans "This account has no records" %}
+		</div>
+		{% endfor %}
+	</div>
+	
+	<div class="main_action_button">
+		<p class="moreinfo">
+			<a href="/login" onclick="history.back(); return false;">{% trans "Back to login" %}</a>
+		</p>
+	</div>
+{% endblock %}

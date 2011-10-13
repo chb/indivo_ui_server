@@ -42,6 +42,7 @@ urlpatterns = patterns(
     (r'^indivoapi/', indivo_api_call_get),
 
     # oauth
+    (r'^oauth/record_select$', record_select),
     (r'^oauth/authorize$', authorize),
 
     # widgets

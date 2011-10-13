@@ -29,6 +29,7 @@ p { margin: 0; }
 .table_form button[type="submit"] { min-width: 34%; font-size: 18px; margin-bottom: 10px; }
 
 .row { display: table-row; }
+a.row { display: block; font-size: 1.2em; }
 .cell { display: table-cell; padding: 0.25em; }
 .cell:first-child { width: 39%; padding-left: 0; padding-right: 0.8em; text-align: right; color: #666; }
 .cell:last-child { padding-right: 0; }
