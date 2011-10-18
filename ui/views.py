@@ -110,14 +110,17 @@ def login(request, status):
         return_url = request.POST['return_url']
     elif request.GET.has_key('return_url'):
         return_url = request.GET['return_url']
-    if return_url:
+    if return_url and 'None' != return_url:
         request.session['return_url'] = return_url
-    print "At login with return_url %s" % return_url
+    else:
+        return_url = None
     
     # set up the template
     FORM_USERNAME = 'username'
     FORM_PASSWORD = 'password'
-    params = {'SETTINGS': settings, 'RETURN_URL': return_url}
+    params = {'SETTINGS': settings}
+    if return_url:
+        params['RETURN_URL'] = return_url
     
     if 'did_logout' == status:
         params['MESSAGE'] = _("You were logged out")
@@ -155,7 +158,7 @@ def login(request, status):
         params['ERROR'] = ErrorStr(e.value)                             # get rid of the damn IUtilsError things!
         return utils.render_template(LOGIN_PAGE, params)
     
-    return HttpResponseRedirect(return_url)
+    return HttpResponseRedirect(return_url or '/')
 
 
 def logout(request):
