@@ -50,7 +50,7 @@ a.row { display: block; font-size: 1.2em; }
 .main_action_button { margin-top: 1.5em; }
 .red { color: rgb(200,50,0); }
 .green { color: rgb(121,160,0); }
-.faded { color: ; color: rgba(0,0,0,0.3); }
+.faded { color: rgb(178,178,178); color: rgba(0,0,0,0.3); }
 
 #footer {
 	position: absolute; bottom: 0; left: 0; width: 100%;

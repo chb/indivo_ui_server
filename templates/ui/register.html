@@ -55,7 +55,7 @@
 				<div class="main_action_button">
 					<button id="submit" type="submit" name="submit" tabindex="3">{% trans "Register" %}</button>
 					<p class="moreinfo">
-						<a href="/login" onclick="history.back(); return false;">{% trans "Back to login" %}</a>
+						<a href="/login">{% trans "Back to login" %}</a>
 					</p>
 				</div>
 			</div>
@@ -64,7 +64,7 @@
 	{% else %}
 	<div class="login_error">{% trans "Online registration is not available" %}</div>
 	<p class="moreinfo">
-		<a href="/login" onclick="history.back(); return false;">{% trans "Back to login" %}</a>
+		<a href="/login">{% trans "Back to login" %}</a>
 	</p>
 	{% endif %}{% endif %}
 	</div>

@@ -91,8 +91,9 @@ def index(request):
                                                    'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
                                                          'HIDE_SHARING': settings.HIDE_SHARING })
             # error
+            return_url = request.session.get('return_url', '/')
             err_msg = res.response.get('response_data', '500: Unknown Error')
-            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(err_msg), 'RETURN_URL': '/', 'SETTINGS': settings})
+            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(err_msg), 'RETURN_URL': return_url, 'SETTINGS': settings})
     
     return HttpResponseRedirect(reverse(login))
 
@@ -102,14 +103,22 @@ def login(request, status):
     clear tokens in session, show a login form, get tokens from indivo_server, then redirect to index
     FIXME: make note that account will be disabled after 3 failed logins!!!
     """
-    # generate a new session
+    # generate a new session but don't forget return_url
+    return_url = request.session.get('return_url')
     request.session.flush()
+    if request.POST.has_key('return_url'):
+        return_url = request.POST['return_url']
+    elif request.GET.has_key('return_url'):
+        return_url = request.GET['return_url']
+    if return_url:
+        request.session['return_url'] = return_url
+    print "At login with return_url %s" % return_url
     
     # set up the template
     FORM_USERNAME = 'username'
     FORM_PASSWORD = 'password'
-    FORM_RETURN_URL = 'return_url'
-    params = {'SETTINGS': settings}
+    params = {'SETTINGS': settings, 'RETURN_URL': return_url}
+    
     if 'did_logout' == status:
         params['MESSAGE'] = _("You were logged out")
     elif 'changed' == status:
@@ -117,12 +126,9 @@ def login(request, status):
     
     # process form vars
     if request.method == HTTP_METHOD_GET:
-        params['RETURN_URL'] = request.GET.get(FORM_RETURN_URL, '/')
         return utils.render_template(LOGIN_PAGE, params)
     
     if request.method == HTTP_METHOD_POST:
-        return_url = request.POST.get(FORM_RETURN_URL, '/')
-        params['RETURN_URL'] = return_url
         if request.POST.has_key(FORM_USERNAME) and request.POST.has_key(FORM_PASSWORD):
             username = request.POST[FORM_USERNAME].lower().strip()
             password = request.POST[FORM_PASSWORD]
@@ -148,13 +154,18 @@ def login(request, status):
     except Exception as e:
         params['ERROR'] = ErrorStr(e.value)                             # get rid of the damn IUtilsError things!
         return utils.render_template(LOGIN_PAGE, params)
-    print 'LOGGED IN, GO TO %s' % (return_url or '/')
-    return HttpResponseRedirect(return_url or '/')
+    
+    return HttpResponseRedirect(return_url)
 
 
 def logout(request):
+    return_url = request.session.get('return_url')
     request.session.flush()
-    return HttpResponseRedirect('/login/did_logout')
+    
+    # we need to keep track of return_url because if we did logout on a mobile device, we don't want a subsequent login to load
+    # the UI interface but to return us to record selection or wherever our return_url points
+    goto = '/login/did_logout?return_url=%s' % return_url if return_url else '/login/did_logout'
+    return HttpResponseRedirect(goto)
 
 
 def change_password(request):
@@ -905,13 +916,11 @@ def _approve_and_redirect(request, request_token, record_id=None, carenet_id=Non
     if offline_capable:
         data['offline'] = 1
     
-    print 'TRY TO APPROVE %s FOR %s' % (request_token, data.get('record_id'))
     result = api.approve_request_token(request_token=request_token, data=data)
     status = result.response.get('response_status', 0) if result and result.response else 0
     if 200 == status:
         # strip location= (note: has token and verifer)
         location = urllib.unquote(result.response.get('prd')[9:])
-        print 'SUCCESS, REDIRECTING TO %s' % location
         return HttpResponseRedirect(location)
     if 403 == status:
         return HttpResponseForbidden(result.response.get('prd'))
