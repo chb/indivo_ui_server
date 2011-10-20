@@ -35,6 +35,23 @@ $.Model.extend('UI.Models.Record',
 			  })
 			callback(r);
 		});
+	},
+	
+	/**
+	 * Creates a new record
+	 * @param {name} A name for the record
+	 * @param {callback} callback function upon success
+	 * @param {error} callback function upon failure
+	 */
+	create: function(name, callback, error) {
+		$.ajax({
+			type: 'post',
+			url: '/records/',
+			data: {'name': name},
+			dataType: 'json',
+			success: callback,
+			error: error
+		})
 	}
 },
 /* @Prototype */

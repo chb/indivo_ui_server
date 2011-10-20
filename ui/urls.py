@@ -31,6 +31,8 @@ urlpatterns = patterns(
     (r'^accounts/(?P<account_id>[^/]+)/name$', account_name),
     
     # record carenet handling
+    (r'^records/$', record_create),
+    (r'^record_create', record_create_form),
     (r'^records/(?P<record_id>[^/]+)/carenets/$', record_carenet_create),
     
     # carenet handling

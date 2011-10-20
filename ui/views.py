@@ -88,6 +88,7 @@ def index(request):
                 fullname = e.findtext('fullName')
                 return utils.render_template('ui/index', { 'ACCOUNT_ID': account_id,
                                                              'FULLNAME': fullname,
+                                                 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS,
                                                    'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
                                                          'HIDE_SHARING': settings.HIDE_SHARING })
             # error
@@ -228,7 +229,7 @@ def register(request):
                      'full_name': post.get('full_name'),
               'primary_secret_p': set_primary,
             'secondary_secret_p': settings.REGISTRATION.get('set_secondary_secret', 1)}
-        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        api = get_api()
         res = api.create_account(user_hash)
         
         # on success, forward to page according to the secrets that were or were not generated
@@ -358,13 +359,12 @@ def account_init(request, account_id, primary_secret):
                                            data = data)
         status = ret.response.get('response_status', 0)
         
-        # on success also create the first record if we have a full_name
+        # on success also create the first record if we have a full_name and is enabled in settings
         if 200 == status:
-            if account['fullName'] and len(account['fullName']) > 0:
-                record = {'full_name': account['fullName']}
-                res = api.create_record(record)
-                if 200 != res.get('response_status', 0):
-                    utils.log("account_init(): Error creating a record after initializing the account, failing silently. The error was: %s" % res.get('response_data'))
+            if settings.REGISTRATION['autocreate_record'] and account['fullName'] and len(account['fullName']) > 0:
+                res = _record_create(account_id, {'fullName': account['fullName'], 'email': account_id})
+                if 200 != res.status_code:
+                    utils.log("account_init(): Error creating a record after initializing the account, failing silently. The error was: %s" % res.content)
             move_to_setup = True
         elif 404 == status:
             return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
@@ -584,6 +584,91 @@ def account_name(request, account_id):
 ##
 ##  Record Carenet Handling
 ##
+def record_create_form(request):
+    """
+    GET+POST /record_create
+    If GETting or POSTing without a name, displays the record create template. If a name is in the POST variables, creates a record
+    and returns to "success_url". NOTE we cannot use "return_url" as that URL might already be occupied if the user did
+    arrive here from a mobile device.
+    """
+    
+    account_id = request.session.get('account_id')
+    if not account_id:
+        url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
+        return HttpResponseRedirect(url)
+    
+    success_url = request.POST.get('success_url', '')
+    params = {'SUCCESS_URL': success_url, 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS}
+    name = request.POST.get('name')
+    
+    # got a name, try to create
+    if name:
+        ret = record_create(request)
+        if 200 == ret.status_code:
+            return HttpResponseRedirect(success_url)
+        params['ERROR'] = ret.content
+    
+    return utils.render_template('ui/record_create', params)
+
+
+def record_create(request):
+    """
+    POST /records/
+    If POSTing without a name, displays the record create template. If a name is in the POST variables, creates a record
+    and returns to "success_url".
+    arrive here from a mobile device.
+    """
+    if not settings.ALLOW_ADDING_RECORDS:
+        return HttpResponseForbidden(ErrorStr('Adding records is disabled').str())
+    
+    if HTTP_METHOD_POST == request.method:
+        print request.session.items()
+        # make sure we know which account
+        account_id = request.session.get('account_id')
+        if not account_id:
+            return HttpResponseBadRequest(ErrorStr('Login required').str())
+        
+        # we have a name, try to create the record
+        name = request.POST.get('name')
+        if name:
+            return _record_create(account_id, {'givenName': name})
+        
+        # no name, show template
+        return HttpResponseBadRequest(ErrorStr('Record name required').str())
+    
+    return HttpResponseBadRequest()
+
+
+def _record_create(account_id, dataDict):
+    """
+    Returns an HttpResponse according to the result
+    """
+    api = get_api()
+    res = {}
+    try:
+        res = api.create_record(dataDict)
+        status = res.get('response_status', 0)
+    except IOError, e:
+        status = e.errno
+        res['response_data'] = e.strerror
+    
+    # success, parse XML and change owner to current user
+    if 200 == status:
+        tree = ET.fromstring(res.get('response_data', '<Record/>'))
+        if tree is not None:
+            record_id = tree.attrib.get('id')
+            res = api.set_record_owner(record_id=record_id, data=account_id).response
+            status = res.get('response_status', 0)
+            if 200 == status:
+                record = {'record_id': record_id, 'label': tree.attrib.get('label')}
+                return HttpResponse(simplejson.dumps(record))
+    
+    # failed
+    if 403 == status:
+        return HttpResponseForbidden()
+    return HttpResponseBadRequest(ErrorStr(res.get('response_data', 'Error creating record')).str())
+
+
 def record_carenet_create(request, record_id):
     """
     Create a new carenet for the given record. POST data must have a name, which must not yet exist for this record

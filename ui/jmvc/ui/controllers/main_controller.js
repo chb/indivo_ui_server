@@ -27,6 +27,9 @@ $.Controller.extend('UI.Controllers.MainController',
 	},
 	noRecords: function() {
 		$('#app_content_iframe').attr('src', 'about:blank').hide();
+		
+		// this will also be shown if adding records has been disabled, but signing up from the site automatically creates the first record,
+		// so this should not be a real issue. Better check here again, anyway.
 		$('#app_content').html('<div id="no_record_hint"><h2>{% trans "Start by creating a record for this account" %}</h2></div>').show();
 		$('#app_selector').append('<div id="app_selector_cover"> </div>');
 	},
