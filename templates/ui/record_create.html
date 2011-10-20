@@ -6,7 +6,7 @@
 {% block readyscript %}
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('#record_name').select();
+			$('#fullName').select();
 		});
 	</script>
 {% endblock %}
@@ -30,17 +30,24 @@
 		{% trans "Adding records has been disabled by the administrator" %}
 	</div>
 	{% else %}
-	<form id="record_create_form" class="table_form" method="post" action="/records/">
+	<form id="record_create_form" class="table_form" method="post" action="/record_create">
+		{% if SUCCESS_URL %}
+		<input type="hidden" name="success_url" value="{{ SUCCESS_URL }}" />
+		{% endif %}
 		<div class="row">
 			<div class="cell">{% trans "Record Name:" %}</div>
 			<div class="cell">
-				<input type="text" id="record_name" name="record_name" tabindex="1" value="{{ RECORD_NAME }}" />
+				<input type="text" id="fullName" name="fullName" tabindex="1" value="{{ RECORD_NAME }}" />
 				<!--p class="moreinfo">{% trans "You can change this name any time" %}</p-->
 				
 				<div style="margin-top: 1.5em;">
 					<button id="submit" type="submit" name="submit" tabindex="2">{% trans "Create Record" %}</button>
 					<p class="moreinfo">
-						<a href="/login">{% trans "Back to login" %}</a>
+						{% if not SUCCESS_URL %}
+						<a href="/">{% trans "Go to my account" %}</a>
+						<b>|</b>
+						{% endif %}
+						<a href="/logout">{% trans "Logout" %}</a>
 					</p>
 				</div>
 			</div>

@@ -36,6 +36,9 @@ a.row { display: block; font-size: 1.2em; }
 .moreinfo {
 	font-size: 12px; font-weight: normal; color: #666;
 }
+.moreinfo b {
+	color: #CCCCCC; padding: 0 1em;
+}
 .login_message {
 	margin: 30px auto 15px; padding: 0.6em 1em; font-size: 20px; text-align: center;
 	border: 2px solid rgb(159,200,0); -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;

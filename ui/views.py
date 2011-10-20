@@ -587,26 +587,26 @@ def account_name(request, account_id):
 def record_create_form(request):
     """
     GET+POST /record_create
-    If GETting or POSTing without a name, displays the record create template. If a name is in the POST variables, creates a record
-    and returns to "success_url". NOTE we cannot use "return_url" as that URL might already be occupied if the user did
-    arrive here from a mobile device.
+    GET: Returns a form
+    POST: Tries to create a record based on the supplied values and returns to the form or success_url, if the latter is provided
     """
-    
     account_id = request.session.get('account_id')
     if not account_id:
         url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
         return HttpResponseRedirect(url)
     
-    success_url = request.POST.get('success_url', '')
+    success_url = request.POST.get('success_url', request.GET.get('success_url', ''))
     params = {'SUCCESS_URL': success_url, 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS}
-    name = request.POST.get('name')
     
     # got a name, try to create
-    if name:
+    if HTTP_METHOD_POST == request.method:
         ret = record_create(request)
         if 200 == ret.status_code:
-            return HttpResponseRedirect(success_url)
-        params['ERROR'] = ret.content
+            if success_url:
+                return HttpResponseRedirect(success_url)
+            params['MESSAGE'] = _('Successfully created new record')
+        else:
+            params['ERROR'] = ErrorStr(ret.content).str()
     
     return utils.render_template('ui/record_create', params)
 
@@ -628,13 +628,8 @@ def record_create(request):
         if not account_id:
             return HttpResponseBadRequest(ErrorStr('Login required').str())
         
-        # we have a name, try to create the record
-        name = request.POST.get('name')
-        if name:
-            return _record_create(account_id, {'givenName': name})
-        
-        # no name, show template
-        return HttpResponseBadRequest(ErrorStr('Record name required').str())
+        # ok, let's try
+        return _record_create(account_id, request.POST)
     
     return HttpResponseBadRequest()
 
