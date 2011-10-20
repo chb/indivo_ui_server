@@ -9,6 +9,7 @@ from django.utils.translation import ugettext as _
 class ErrorStr:
     error_key = None
     errors = {
+                              'Login required': _("You need to login first"),
                     'Name or password missing': _("Either the username or password is missing. Please try again."),
                        'Incorrect credentials': _("Incorrect username or password. Please try again."),
                                     'disabled': _("This account has been disabled/locked."),
@@ -25,6 +26,8 @@ class ErrorStr:
                           'Wrong old password': _("The current password is wrong, please try again"),
                       'Password change failed': _("There was a problem updating your password. Please try again. If you are unable to set up your account please contact support."),
                        'Password reset failed': _("There was a problem resetting your password. Please try again. If you are unable to set up your account please contact support."),
+                  'Adding records is disabled': _("Adding records has been disabled by the administrator"),
+                        'Record name required': _("Please provide a name if you wish to create a record"),
                'Carenet name is already taken': _("This carenet name is already taken, please choose a different one"),
                            'multiple accounts': _("There was a problem resetting your password. Please contact support."),
                                 'Socket Error': _("The server is currently unavailable. Please try again in a few minutes."),
