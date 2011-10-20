@@ -33,7 +33,8 @@ REGISTRATION = {
 	'enable': True,						# True or False
 	'set_primary_secret': 1,			# 0 or 1. If 0, administrators will have to approve accounts. If set to 1, make sure the server has SEND_MAIL enabled!
 	'set_secondary_secret': 1,			# 0 or 1. Can only be 1 if primary is also 1
-	'min_password_length': 8
+	'min_password_length': 8,
+	'autocreate_record': True			# if True creates a first record based on account name and email automatically
 }
 
 # allow user to add records?

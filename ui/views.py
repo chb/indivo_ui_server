@@ -343,9 +343,9 @@ def account_init(request, account_id, primary_secret):
                                            data = data)
         status = ret.response.get('response_status', 0)
         
-        # on success also create the first record if we have a full_name
+        # on success also create the first record if we have a full_name and is enabled in settings
         if 200 == status:
-            if account['fullName'] and len(account['fullName']) > 0:
+            if settings.REGISTRATION['autocreate_record'] and account['fullName'] and len(account['fullName']) > 0:
                 res = _record_create(account_id, {'fullName': account['fullName'], 'email': account_id})
                 if 200 != res.status_code:
                     utils.log("account_init(): Error creating a record after initializing the account, failing silently. The error was: %s" % res.content)
