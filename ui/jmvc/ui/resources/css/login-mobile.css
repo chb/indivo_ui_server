@@ -20,7 +20,7 @@ label { margin-left: 0.5em; }
 #front_site_name { display: block; font-size: 2.2em; }
 
 .table_form { margin-top: 0.5em; font-size: 19px; line-height: 1.7; }
-.list_form { margin-top: 0.5em; font-size: 19px; line-height: 1.7; }
+.list_form { margin-top: 1em; font-size: 19px; line-height: 1.7; }
 
 #login_form input[type="text"], #login_form input[type="password"], #setup_form input[type="text"], #setup_form input[type="password"] {
 	width: 100%;
@@ -29,17 +29,20 @@ label { margin-left: 0.5em; }
 .table_form button[type="submit"] { min-width: 34%; font-size: 18px; margin-bottom: 10px; }
 
 .row { display: block; width: 280px; margin: 0 auto 0.25em; }
-.list_form .row { width: auto; max-width: 280px; margin: 0 auto; padding: 0.2em 0.8em; background-color: white; border: 1px solid #999; border-bottom-width: 0; }
+.list_form .row { width: auto; max-width: 380px; margin: 0 auto; padding: 0.2em 0.8em; background-color: white; border: 1px solid #999; border-bottom-width: 0; }
 .list_form .row:first-child {
-	-webkit-border-radius: 6px 6px 0 0; -moz-border-radius: 6px 6px 0 0; border-radius: 6px 6px 0 0;
+	-moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; border-top-left-radius: 6px;
+	-moz-border-radius-topright: 6px; -webkit-border-top-right-radius: 6px; border-top-right-radius: 6px;
 }
 .list_form .row:last-child {
 	border-bottom-width: 1px;
-	-webkit-border-radius: 0 0 6px 6px; -moz-border-radius: 0 0 6px 6px; border-radius: 0 0 6px 6px;
+	-moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px;
+	-moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px;
 }
 .cell:first-child { color: #666; }
+
 .moreinfo {
-	font-size: 15px; font-weight: normal; color: #666;
+	margin-top: 1em; font-size: 15px; font-weight: normal; color: #666;
 }
 .moreinfo b {
 	color: #CCCCCC; padding: 0 1em;

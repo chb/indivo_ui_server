@@ -104,17 +104,23 @@ def login(request, status):
     clear tokens in session, show a login form, get tokens from indivo_server, then redirect to index
     FIXME: make note that account will be disabled after 3 failed logins!!!
     """
-    # generate a new session but don't forget return_url
-    return_url = request.session.get('return_url')
+    
+    # carry over a callback_url and login_return_url should we still have one (calling /logout will clear these and redirect to callback_url)
+    callback_url = request.session.get('callback_url')
+    return_url = request.session.get('login_return_url');
     request.session.flush()
+    if callback_url:
+        request.session['callback_url'] = callback_url
+    
+    # generate a new session and get return_url
     if request.POST.has_key('return_url'):
         return_url = request.POST['return_url']
     elif request.GET.has_key('return_url'):
         return_url = request.GET['return_url']
-    if return_url and 'None' != return_url:
-        request.session['return_url'] = return_url
-    else:
-        return_url = None
+    
+    # save return_url
+    if return_url:
+        request.session['login_return_url'] = return_url
     
     # set up the template
     FORM_USERNAME = 'username'
@@ -159,17 +165,19 @@ def login(request, status):
         params['ERROR'] = ErrorStr(e.value)                             # get rid of the damn IUtilsError things!
         return utils.render_template(LOGIN_PAGE, params)
     
+    print 'RETURNING TO %s' % return_url
+    # we will now return to return_url and can thus delete the stored return url
+    if request.session.has_key('login_return_url'):
+        del request.session['login_return_url']
     return HttpResponseRedirect(return_url or '/')
 
 
 def logout(request):
-    return_url = request.session.get('return_url')
+    callback_url = request.session.get('callback_url')
     request.session.flush()
     
-    # we need to keep track of return_url because if we did logout on a mobile device, we don't want a subsequent login to load
-    # the UI interface but to return us to record selection or wherever our return_url points
-    goto = '/login/did_logout?return_url=%s' % return_url if return_url else '/login/did_logout'
-    return HttpResponseRedirect(goto)
+    # if we had a callback url stored, redirect to that one
+    return HttpResponseRedirect(callback_url or '/login/did_logout')
 
 
 def change_password(request):
@@ -584,26 +592,59 @@ def account_name(request, account_id):
 ##
 ##  Record Carenet Handling
 ##
+def record_select(request):
+    """
+    Displays an account's records when visiting:
+    http://localhost/oauth/record_select
+    Upon selecting a record, the callback URL is called with the record label and udid attached
+    """
+    #import pdb; pdb.set_trace()
+    api = get_api(request)
+    account_id = urllib.unquote(request.session.get('account_id', ''))
+    if account_id:
+        res = api.read_records(account_id = account_id)
+        status = res.response.get('response_status', 500)
+        if 404 == status:
+            return Http404(ErrorStr('Unknown account').str())
+        elif 403 == status:
+            return HttpResponseForbidden(ErrorStr('Permission Denied').str())
+        elif 200 != status:
+            return HttpResponseBadRequest(ErrorStr(res.response.get('response_data', 'Server Error')).str())
+        else:
+            records_xml = res.response.get('response_data', '<root/>')
+            records = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
+            callback_url = request.GET.get('callback_url')
+            if callback_url:
+                request.session['callback_url'] = callback_url
+            elif request.session.has_key('callback_url'):
+                callback_url = request.session['callback_url']
+            
+            return utils.render_template('ui/record_select', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'CALLBACK_URL': callback_url, 'RECORD_LIST': records})
+    
+    url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
+    return HttpResponseRedirect(url)
+
+
 def record_create_form(request):
     """
     GET+POST /record_create
     GET: Returns a form
-    POST: Tries to create a record based on the supplied values and returns to the form or success_url, if the latter is provided
+    POST: Tries to create a record based on the supplied values and returns to the form or on_select_url, if the latter is provided
     """
     account_id = request.session.get('account_id')
     if not account_id:
         url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
         return HttpResponseRedirect(url)
     
-    success_url = request.POST.get('success_url', request.GET.get('success_url', ''))
-    params = {'SUCCESS_URL': success_url, 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS}
+    on_select_url = request.POST.get('on_select_url', request.GET.get('on_select_url', ''))
+    params = {'ON_SELECT_URL': on_select_url, 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS}
     
     # got a name, try to create
     if HTTP_METHOD_POST == request.method:
         ret = record_create(request)
         if 200 == ret.status_code:
-            if success_url:
-                return HttpResponseRedirect(success_url)
+            if on_select_url:
+                return HttpResponseRedirect(on_select_url)
             params['MESSAGE'] = _('Successfully created new record')
         else:
             params['ERROR'] = ErrorStr(ret.content).str()
@@ -615,7 +656,7 @@ def record_create(request):
     """
     POST /records/
     If POSTing without a name, displays the record create template. If a name is in the POST variables, creates a record
-    and returns to "success_url".
+    and returns to "on_select_url".
     arrive here from a mobile device.
     """
     if not settings.ALLOW_ADDING_RECORDS:
@@ -795,34 +836,6 @@ def indivo_api_call_delete_record_app(request):
 ##
 ##  Authorization
 ##
-def record_select(request):
-    """
-    Displays an account's records when visiting:
-    http://localhost/oauth/record_select
-    Upon selecting a record, the callback URL is called with the record label and udid attached
-    """
-    #import pdb; pdb.set_trace()
-    api = get_api(request)
-    account_id = urllib.unquote(request.session.get('account_id', ''))
-    if account_id:
-        res = api.read_records(account_id = account_id)
-        status = res.response.get('response_status', 500)
-        if 404 == status:
-            return Http404(ErrorStr('Unknown account').str())
-        elif 403 == status:
-            return HttpResponseForbidden(ErrorStr('Permission Denied').str())
-        elif 200 != status:
-            return HttpResponseBadRequest(ErrorStr(res.response.get('response_data', 'Server Error')).str())
-        else:
-            records_xml = res.response.get('response_data', '<root/>')
-            records = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
-            callback_url = request.GET.get('callback_url')
-            return utils.render_template('ui/record_select', {'ACCOUNT_ID': account_id, 'CALLBACK_URL': callback_url, 'RECORD_LIST': records})
-    
-    url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
-    return HttpResponseRedirect(url)
-
-
 def authorize(request):
     """
     If we arrive here via GET:
@@ -921,6 +934,7 @@ def authorize(request):
             # render a template if we have a callback and thus assume the request does not come from chrome UI
             if callback_url is not None:
                 # what to do when we don't have a record_id at this point?
+                request.session['oauth_callback'] = callback_url
                 return utils.render_template('ui/authorize_record', {'REQUEST_TOKEN': request_token,
                                                                       'CALLBACK_URL': callback_url,
                                                                          'RECORD_ID': record_id,
