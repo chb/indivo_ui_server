@@ -1,6 +1,6 @@
 [submodule "indivo_client_py"]
 	path = indivo_client_py
-	url = git@github.com:chb/indivo_client_py.git
+	url = git://github.com/chb/indivo_client_py.git
 [submodule "ui/jmvc/steal"]
 	path = ui/jmvc/steal
 	url = http://github.com/jupiterjs/steal.git
@@ -9,16 +9,16 @@
 	url = http://github.com/jupiterjs/funcunit.git
 [submodule "apps/labs"]
 	path = apps/labs
-	url = git@github.com:chb/indivo_labs.git
+	url = git://github.com/chb/indivo_labs.git
 [submodule "apps/medications"]
 	path = apps/medications
-	url = git@github.com:chb/indivo_medications.git
+	url = git://github.com/chb/indivo_medications.git
 [submodule "apps/problems"]
 	path = apps/problems
-	url = git@github.com:chb/indivo_problems.git
+	url = git://github.com/chb/indivo_problems.git
 [submodule "apps/allergies"]
 	path = apps/allergies
-	url = git@github.com:chb/indivo_allergies.git
+	url = git://github.com/chb/indivo_allergies.git
 [submodule "ui/jmvc/jquery"]
 	path = ui/jmvc/jquery
 	url = http://github.com/jupiterjs/jquerymx.git
