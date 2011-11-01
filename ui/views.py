@@ -604,13 +604,15 @@ def record_select(request):
     if account_id:
         res = api.read_records(account_id = account_id)
         status = res.response.get('response_status', 500)
-        if 404 == status:
-            return Http404(ErrorStr('Unknown account').str())
-        elif 403 == status:
-            return HttpResponseForbidden(ErrorStr('Permission Denied').str())
+        go_to_login = False
+        if 404 == status:               # probably unknown account
+            go_to_login = True
+        elif 403 == status:             # maybe old credentials still around?
+            go_to_login = True
         elif 200 != status:
             return HttpResponseBadRequest(ErrorStr(res.response.get('response_data', 'Server Error')).str())
-        else:
+        
+        if not go_to_login:
             records_xml = res.response.get('response_data', '<root/>')
             records = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
             callback_url = request.GET.get('callback_url')
