@@ -32,7 +32,7 @@ $.Model.extend('UI.Models.Carenet',
 	 name
  */
 {
-	delete: function(callback, error) {
+	destroy: function(callback, error) {
         $.ajax({
 			type: 'delete',
 			url: '/carenets/' + this.carenet_id,

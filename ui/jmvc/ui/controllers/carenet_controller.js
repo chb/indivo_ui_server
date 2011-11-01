@@ -537,7 +537,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					carenet_view.find('.carenet_border').append('<div class="spinner_cover"></div>');
 					
 					// delete!
-					carenet.delete(this.callback('didDeleteCarenet', carenet, carenet_view), this.callback('didNotDeleteCarenet', carenet, carenet_view));
+					carenet.destroy(this.callback('didDeleteCarenet', carenet, carenet_view), this.callback('didNotDeleteCarenet', carenet, carenet_view));
 				}
 				carenet_view.removeClass('highlight');
 			}
