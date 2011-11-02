@@ -315,7 +315,7 @@ $.Controller.extend('UI.Controllers.PHA',
 	didGetCarenets: function(carenets) {		// got our carenets, now get the apps per carenet
 		this.carenets = carenets;
 		
-		self = this;
+		var self = this;
 		var waiting_for = carenets.length;
 		$(carenets).each(function(i, carenet) {
 			carenet.apps = [];
