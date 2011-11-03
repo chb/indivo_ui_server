@@ -414,7 +414,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 			//var p_off = parent.offset();		// '#app_content' is no offsetParent! Will this change? If so, subtract p_off from v_off
 			var v_off = dragged_view.offset();
 			
-			UI.Controllers.MainController.poof(dragged_view);
+			// use a clone of the draggable helper, and set the draggable revert 
+			// option to false.  This prevents a race condition where the draggable
+			// element gets removed, but the "stop" event still tries to get call
+			// data("draggable") on it.  
+			UI.Controllers.MainController.poof(dragged_view.clone().appendTo(dragged_view.parent()));
+			account_view.draggable( "option", "revert", false );
 		}
 	},
 	didRemoveAccountFromCarenet: function(account, account_view, carenet_view, data, textStatus, xhr) {

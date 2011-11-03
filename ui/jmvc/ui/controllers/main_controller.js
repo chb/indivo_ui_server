@@ -56,15 +56,36 @@ $.Controller.extend('UI.Controllers.MainController',
 			var all_poofs = UI.Controllers.MainController.poofViews.slice(0);		// copy array
 			for (var i = all_poofs.length; i > 0; i--) {				// iterate backwards as we're deleting items from the array by index
 				var poof = all_poofs[i-1];
-				var curr = poof.css('background-position').split(/\s+/);
-				if (curr.length > 1) {
-					var step = Math.floor(Math.abs(parseInt(curr[1]) / 50));
-					if (step < 4) {
-						poof.css('background-position', curr[0] + ' ' + ((step + 1) * -50) + 'px');
+				var curr = poof.css('background-position');
+				if (typeof curr != "undefined") {
+					curr = curr.split(/\s+/);
+					if (curr.length > 1) {
+						var step = Math.floor(Math.abs(parseInt(curr[1]) / 50));
+						if (step < 4) {
+							poof.css('background-position', curr[0] + ' ' + ((step + 1) * -50) + 'px');
+						}
+						else {
+							poof.fadeOut(25, function() { $(this).remove(); });
+							UI.Controllers.MainController.poofViews.splice(i-1, 1);
+						}
 					}
-					else {
-						poof.fadeOut(25, function() { $(this).remove(); });
-						UI.Controllers.MainController.poofViews.splice(i-1, 1);
+				}
+				else {
+					// IE needs to use background-position-y
+					curr = poof.css('background-position-y');
+					if (curr === "top") {
+						// interpret background-position-y of "top" as 0
+						curr = 0;
+					}
+					if (typeof curr !== "undefined") {
+						var step = Math.floor(Math.abs(parseInt(curr) / 50));
+						if (step < 4) {
+							poof.css('background-position-y', ((step + 1) * -50) + 'px');
+						}
+						else {
+							poof.fadeOut(25, function() { $(this).remove(); });
+							UI.Controllers.MainController.poofViews.splice(i-1, 1);
+						}
 					}
 				}
 			}
