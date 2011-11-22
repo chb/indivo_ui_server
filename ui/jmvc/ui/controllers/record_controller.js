@@ -10,107 +10,62 @@
 $.Controller.extend('UI.Controllers.Record',
 /* @Static */
 {
-	onDocument: true,
-	allRecords: {},
-	activeRecord: null,
+	/**
+	 * Create a new record
+	 */
+	createNewRecord: function(sender) {
+		alert("not implemented");
+	}
+},
+/* @Prototype */
+{
+	init: function() {
+		this.account = this.options.account;
+		this.allRecords = {};
+		
+		var self = this;
+				
+		var colors = ['rgb(250,250,250)', 'rgb(242,246,255)', 'rgb(244,255,242)', 'rgb(250,242,255)', 'rgb(254,255,242)', 'rgb(255,248,242)', 'rgb(255,242,242)', 'rgb(255,242,251)'];
+		
+		// create records list, assign colors and add tabs
+		this.account.get_records(function(records) {
+			
+			$(records).each(function(i, record) {
+				record.bgcolor = colors[i];
+				self.addTab(record, (0 == i));
+			})
+		
+			self.allRecords = records;
+			
+			// load the first record
+			if (self.allRecords.length > 0) {
+				UI.Controllers.MainController.hasRecords();
+				self.loadRecord(self.allRecords[0].record_id);
+			}
+			else {
+				UI.Controllers.MainController.noRecords();
+			}
+		});
+		
+	},
 	
 	loadRecord: function(record_id) {
-		this.activeRecord = UI.Controllers.Record.allRecords[record_id];
-		if (!this.activeRecord) {
+		var record = this.allRecords.match("record_id", record_id)[0];
+		if (!record) {
 			alert('Failed to load record "' + record_id + '": Not found');
 			return;
 		}
+		else {
+			this.account.attr("activeRecord", record);
+		}
 		
 		// show/hide carenet owned options
-		if (this.activeRecord.carenet_id) {
+		if (this.account.attr("activeRecord").carenet_id) {
 			$('#record_owned_options').hide();
 		}
 		else {
 			$('#record_owned_options').show();
 		}
-		
-		// load the record from the model and call the callback
-		UI.Models.Record.get(record_id, this.activeRecord.carenet_id, function(record) {
-			record.bgcolor = UI.Controllers.Record.activeRecord.bgcolor || '';
-			UI.Controllers.Record.activeRecord = record;
-			
-			// load record's apps
-			UI.Models.PHA.get_all(function(phas) {
-				var after_pha_callback = function(phas) {
-					
-					// remember selected app before clearing...
-					var selected_id = $('#app_selector .selected').attr('id');
-					$(document.documentElement).ui_main('clear_apps');	// New JMVC3 controller calling convention
-					
-					// ...add this record's apps...
-					$(phas).each(function(i, app){
-						$(document.documentElement).ui_main('add_app', {'pha': app, 'fire_p': false, 'carenet_id': record.carenet_id});
-					});
-					
-					// ...and try to re-select previous app, show healthfeed otherwise
-					var old_app = $('#' + selected_id);
-					if (old_app.is('*')) {
-						old_app.click();
-					}
-					else {
-						$('#healthfeed_li').click();
-					}
-				};
-				
-				// is this a carenet or a record? depending on which, init the appropriate apps
-				if (record.carenet_id) {
-					UI.Models.PHA.get_by_carenet(record.carenet_id, null, after_pha_callback);
-				}
-				else {
-					UI.Models.PHA.get_by_record(record.record_id, null, after_pha_callback);
-				}
-			});
-		});
-	},
-	
-	
-	/**
-	 * Create a new record
-	 */
-	createNewRecord: function(sender) {
-		
-	},
-},
-/* @Prototype */
-{
-	/**
-	 * ACCOUNT_ID comes in from django: we might want an extern here for Google Closure Complier
-	 * http://code.google.com/closure/compiler/docs/api-tutorial3.html#externs
-	 */
-	ready: function() {
-		var self = this;
-		
-		// inner function for strict ordering to make sure ACCOUNT.RECORDS is loaded
-		var _ready = function() {
-			var record_list = {};
-			COLORS = ['rgb(250,250,250)', 'rgb(242,246,255)', 'rgb(244,255,242)', 'rgb(250,242,255)', 'rgb(254,255,242)', 'rgb(255,248,242)', 'rgb(255,242,242)', 'rgb(255,242,251)'];
-			
-			// create records list, assign colors and add tabs
-			$(ACCOUNT.RECORDS).each(function(i, record) {
-				record_list[record.id] = record;
-				record.bgcolor = COLORS[i];
-				self.addTab(record, (0 == i));
-			})
-			UI.Controllers.Record.allRecords = record_list;
-			
-			// load the first record
-			if (ACCOUNT.RECORDS.length > 0) {
-				UI.Controllers.MainController.hasRecords();
-				UI.Controllers.Record.loadRecord(ACCOUNT.RECORDS[0].id);
-			}
-			else {
-				UI.Controllers.MainController.noRecords();
-			}
-		};
-		
-		// init the ACCOUNT model and call the inner function
-		ACCOUNT = new UI.Models.Account;
-		ACCOUNT.load(ACCOUNT_ID, _ready);
 	},
 	
 	
@@ -144,7 +99,7 @@ $.Controller.extend('UI.Controllers.Record',
 			$('#app_content').show();
 			
 			// fire!
-			UI.Controllers.Record.loadRecord(acc.id);
+			self.loadRecord(acc.record_id);
 		});
 		
 		// add tab

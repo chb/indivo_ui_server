@@ -7,7 +7,7 @@
 		<% if (carenet.accounts && carenet.accounts.length > 0) { %>
 			<div class="carenet_content_scroller">
 			<% _(carenet.accounts).each(function(acc, i) { %>
-				<%= controller.view('carenet_account', {'account': acc}) %>
+				<%== controller.view('carenet_account', {'account': acc}) %>
 			<% }); %>
 			</div>
 		<% } else { %>

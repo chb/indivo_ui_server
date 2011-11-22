@@ -5,88 +5,98 @@
 $.Model.extend('UI.Models.Carenet',
 /* @Static */
 {
-	from_xml_node: function(record_id, xml_node) {
-		return new UI.Models.Carenet({
-			'record_id': record_id,
-			'carenet_id': $(xml_node).attr('id'),
-			'name': $(xml_node).attr('name'),
-			'accounts': []
-		});
+	models: function(data) {
+		return this._super($(data).find("Carenet").toArray());
 	},
 	
-	from_json: function(record_id, json) {
-		var rec_id = record_id ? record_id : json.record_id;
-		return new UI.Models.Carenet({
-			'record_id': rec_id,
-			'carenet_id': json.carenet_id,
-			'name': json.name,
-			'accounts': json.accounts,
-			'has_default_name': json.has_default_name
-		});
+	model: function(data) {
+		// custom converter for this model
+		data = $(data);
+		return new this({
+			'id': data.attr("id"),
+			'name': data.attr("name"),
+			'mode': data.attr("explicit")
+		});	
 	}
 },
 /* @Prototype */
-/* magic attrs:
-	 record_id
-	 carenet_id
-	 name
- */
 {
-	destroy: function(callback, error) {
+	destroy: function(success, error) {
         $.ajax({
 			type: 'delete',
-			url: '/carenets/' + this.carenet_id,
-			success: callback,
+			url: 'indivoapi/carenets/' + this.id,
+			success: success,
 			error: error
 		});
     },
 	
-    rename: function(new_name, callback, error) {
+    rename: function(new_name, success, error) {
     	var self = this;
         $.ajax({
 			type: 'post',
-			url: '/carenets/' + this.carenet_id + '/rename',
+			url: 'indivoapi/carenets/' + this.id + '/rename',
 			data: {'name': new_name},
-			dataType: 'json',
+			dataType: 'carenet.models',  // single values are wrapped in a <Carenets> element
 			success: function(data, textStatus, xhr) {
-				self.name = data.name;
-				if (callback) {
-					callback(self, textStatus, xhr);
+				self.name = data[0].name;
+				if (success) {
+					success(self, textStatus, xhr);
 				}
 			},
 			error: error
 		});
     },
     
-	get_people: function(callback) {
-		indivo_api_call("GET", '/carenets/' + this.carenet_id + '/accounts/', null, function(result) {
-			var account_objects_list = $(result).find('CarenetAccount').map(function(i, account_xml_node) {
-				return UI.Models.Account.from_xml_node(account_xml_node);
-			})
-			callback(account_objects_list);
-		})
+	get_people: function(success, error) {
+		return $.ajax({
+			url: 'indivoapi/carenets/' + this.id + '/accounts/',
+			type: 'get',
+			dataType: 'carenet_account.models',
+			success: success,
+			error: error
+		});
 	},
 	
 	/*
 	 *	PHA handling
 	 */
-	add_pha: function(pha, callback) {
-		indivo_api_call("PUT", '/carenets/' + this.carenet_id + '/apps/' + encodeURIComponent(pha.id), null, callback);
+	add_pha: function(pha, success, error) {
+		return $.ajax({
+			url: 'indivoapi/carenets/' + this.id + '/apps/' + encodeURIComponent(pha.app_id),
+			type: 'put',
+			success: success,
+			error: error
+		});
 	},
 	
-	remove_pha: function(pha, callback) {
-		indivo_api_call("DELETE", '/carenets/' + this.carenet_id + '/apps/' + encodeURIComponent(pha.id), null, callback);
+	remove_pha: function(pha, success, error) {
+		return $.ajax({
+			url: 'indivoapi/carenets/' + this.id + '/apps/' + encodeURIComponent(pha.app_id),
+			type: 'delete',
+			success: success,
+			error: error
+		});
 	},
-	
 	
 	/*
 	 *	account handling
 	 */
-	add_account: function(account_id, callback) {
-		indivo_api_call("POST", '/carenets/' + this.carenet_id + '/accounts/', {'account_id' : account_id, 'write': 'true'}, callback);
+	add_account: function(account_id, success, error) {
+		return $.ajax({
+			url: 'indivoapi/carenets/' + this.id + '/accounts/',
+			type: 'post',
+			data: {'account_id' : account_id, 'write': 'true'},
+			success: success,
+			error: error
+		});
 	},
 	
-	remove_account: function(account_id, callback) {
-		indivo_api_call("DELETE", '/carenets/' + this.carenet_id + '/accounts/' + encodeURIComponent(account_id), null, callback);
+	remove_account: function(account_id, success, error) {
+		return $.ajax({
+			url: 'indivoapi/carenets/' + this.id + '/accounts/' + encodeURIComponent(account_id),
+			type: 'delete',
+			success: success,
+			error: error
+		});
 	}
 })

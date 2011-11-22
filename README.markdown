@@ -94,7 +94,10 @@ elements "above the fold" e.g. above 500 to 560 pixels.
 Production Javascript Compression
 ----------------------------------
 
-Note: this is for javascript only. Not CSS. See below.
+Note: We don't include CSS in this process since we want to prevent delayed 
+styling of our base shell. Also, in order to take advantage of the Django 
+translation feature currently in the ui, you should not compress unless you 
+only want a single language to be used. 
 
 JMVC3 has the ability to automatically concatenate and compress the
 multiple javascript files used by the UI into one highly cacheable
@@ -107,14 +110,12 @@ By doing this all the required JS files will be loaded and loaded
 in the correct order. This requires:
 
 - A non-login protected page that loads the UI's entire set of JS files
-- Removal of any conflicting JS files. For instance, we don't want to compress
-  jQuery into the same file twice.
 
 First, you ui.js file **MUST** include all the plugins, resources,
 models, and controllers that you want to compress including any
 additional libraries you have added.
 
-Next, edit the `/indivo_ui_server/templates/ui/login.html` file uncommenting this line:
+Next, edit the `/indivo_ui_server/templates/ui/base.html` file uncommenting this line:
 
     <script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script>
 
@@ -123,87 +124,64 @@ javascript files just like the UI server's main `index.html` file
 does. We normally don't do this since we only need the jQuery and
 underscore.js libraries on the login page.
 
-Then, in `header.html` comment out the `<script>` tags to prevent multiple inclusions.
-
-Next, from the commandline, run:
+Next, from the commandline, run: (Note: replace http://localhost with the location of your hosted UI)
 
     /indivo_ui_server/ui/jmvc/$ ./js steal/buildjs http://localhost -to ui
 
-You will see output like the following. You can safely ignore the
-warnings and the output below "BUILDING STYLES" since we are not
-using CSS compression:
+You will see output like the following:
+	Building to ui/
+	
+	BUILDING STYLES --------------- 
+	
+	no styles
+	
+	
+	BUILDING SCRIPTS --------------- 
+	steal.compress - Using Google Closure app
+	   ignoring steal/dev/dev.js
+	   ui/ui.js
+	   jquery/controller/controller.js
+	   jquery/controller/view/view.js
+	   jquery/controller/subscribe/subscribe.js
+	   jquery/view/ejs/ejs.js
+	   jquery/model/model.js
+	   jquery/model/list/list.js
+	   jquery/lang/observe/observe.js
+	   jquery/lang/observe/delegate/delegate.js
+	   jquery/class/class.js
+	   jquery/lang/string/string.js
+	   jquery/event/destroyed/destroyed.js
+	   jquery/jquery.js
+	   jquery/event/event.js
+	   jquery/view/view.js
+	   jquery/lang/openajax/openajax.js
+	   jquery/lang/string/rsplit/rsplit.js
+	   ui/resources/js/underscore-min.js
+	   ui/resources/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js
+	   ui/models/account.js
+	   ui/models/record.js
+	   ui/models/pha.js
+	   ui/models/message.js
+	   ui/models/carenet.js
+	   ui/models/carenetAccount.js
+	   ui/models/notification.js
+	   ui/controllers/main_controller.js
+	   ui/controllers/record_controller.js
+	   ui/controllers/healthfeed_controller.js
+	   ui/controllers/message_controller.js
+	   ui/controllers/carenet_controller.js
+	   ui/controllers/pha_controller.js
+	   ui/controllers/app_list_controller.js
+	
+	17283 MS
+	SCRIPT BUNDLE > ui/production.js
 
-    Building to ui/
-
-    BUILDING SCRIPTS ---------------
-    steal.compress - Using Google Closure app
-       /jmvc/steal/steal.js
-    tmp991925.js:1082: WARNING - Parse error. expected closing }
-         * @param {optional:String} content_type optional content type
-                           ^
-
-    tmp991925.js:1082: WARNING - Parse error. expecting a variable name in a @param tag
-         * @param {optional:String} content_type optional content type
-                           ^
-
-    0 error(s), 2 warning(s)
-       ignoring /jmvc/steal/dev/dev.js
-       /jmvc/ui/ui.js
-       /jmvc/jquery/controller/controller.js
-       /jmvc/jquery/class/class.js
-       /jmvc/jquery/jquery.js
-       /jmvc/jquery/lang/lang.js
-       /jmvc/jquery/event/destroyed/destroyed.js
-       /jmvc/jquery/event/event.js
-       /jmvc/jquery/controller/view/view.js
-       /jmvc/jquery/view/view.js
-       /jmvc/jquery/controller/subscribe/subscribe.js
-       /jmvc/jquery/lang/openajax/openajax.js
-       /jmvc/jquery/view/ejs/ejs.js
-       /jmvc/jquery/lang/rsplit/rsplit.js
-       /jmvc/jquery/model/model.js
-       /jmvc/jquery/dom/fixture/fixture.js
-       /jmvc/jquery/dom/dom.js
-       /jmvc/ui/resources/js/underscore-min.js
-       /jmvc/ui/resources/jquery-ui-1.7.2/js/jquery-ui-1.7.2.custom.min.js
-       /jmvc/ui/resources/js/jquery.tools.sans.tabs.min.js
-       /jmvc/ui/resources/js/xml2json.js
-       /jmvc/ui/resources/js/ObjTree.js
-       /jmvc/ui/resources/js/utils.js
-       /jmvc/ui/models/account.js
-       /jmvc/ui/models/record.js
-       /jmvc/ui/models/pha.js
-       /jmvc/ui/models/message.js
-       /jmvc/ui/models/carenet.js
-       /jmvc/ui/controllers/main_controller.js
-       /jmvc/ui/controllers/record_controller.js
-       /jmvc/ui/controllers/healthfeed_controller.js
-       /jmvc/ui/controllers/message_controller.js
-       /jmvc/ui/controllers/carenet_controller.js
-       /jmvc/ui/controllers/pha_controller.js
-
-    SCRIPT BUNDLE > ui/production.js
-
-    BUILDING STYLES --------------- 
-    text/css
-    /jmvc/ui/resources/css/ui.css
-    js: "steal/rhino/file.js", line 104: uncaught JavaScript runtime exception: ReferenceError: "File" is not defined.
-      at steal/rhino/file.js:104
-      at steal/build/styles/styles.js:22
-      at steal/build/build.js:280
-      at steal/build/styles/styles.js:16
-      at steal/build/build.js:121
-      at steal/buildjs:16
-      at steal/rhino/steal.js:26
-      at steal/buildjs:2
 
 You should see an updated `production.js` file. To use it:
 
-1. Comment out the `<script>` tag in `login.html`                      
-
-2. Uncomment the `<script>` tags in `header.html`
-3. In `index.html` change the `steal.js` parameters from `"ui,development"` to `"ui,production"` in the `<script>` tag
-4. Reload and enjoy the speed!
+1. Comment out the `<script>` tag in `base.html`                      
+2. In `index.html` change the `steal.js` parameters from `"ui,development"` to `"ui,production"` in the `<script>` tag
+3. Reload and enjoy the speed!
 
 
 Helpful Docs

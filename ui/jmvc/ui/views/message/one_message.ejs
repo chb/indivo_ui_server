@@ -4,7 +4,7 @@
   [<a class="message_list" href="#">{% trans "Back to message list" %}</a>]
 </div>
 
-<table class="one_message">
+<table class="one_message" id="<%= message.id %>">
   <tbody>
     <tr>
       <td>{% trans "from" %}</td><td><%= message.sender %></td>
@@ -41,5 +41,5 @@
 
 
 <div id="one_message_body">
-  <%= message.body %>
+  <%== message.body %>
 </div>

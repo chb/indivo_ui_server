@@ -2,9 +2,9 @@
 <% if (accounts.length > 0) {
 $(accounts).each(function(i, a) { %>
 	<div class="account" <%= a %>>
-		<div class="account_name"><%= a.fullName ? a.fullName : a.account_id %></div>
-		<div class="account_id"><%= a.account_id %></div>
-		<div class="error_area" <%= (a.in_no_carenet) ? '' : 'style="display: none;"' %>>{% trans "You must add this account to at least one carenet in order to to keep it in your accounts list" %}</div>
+		<div class="account_name"><%= a.fullName ? a.fullName : a.id %></div>
+		<div class="account_id"><%= a.id %></div>
+		<div class="error_area" <%== (a.in_no_carenet) ? '' : 'style="display: none;"' %>>{% trans "You must add this account to at least one carenet in order to to keep it in your accounts list" %}</div>
 	</div>
 <% });
 } %>

@@ -25,7 +25,6 @@
 $.Controller.extend('UI.Controllers.PHA',
 /* @Static */
 {
-	onDocument: true,
 	animDuration: 300,
 	viewAnimationState: {},
 	animateViewTo: function(view, x, y, delay) {
@@ -179,35 +178,27 @@ $.Controller.extend('UI.Controllers.PHA',
 },
 /* @Prototype */
 {
-	record: {},
-	all_apps: [],
-	my_apps: [],
-	carenets: [],
+	init: function() {
+		var record = {},
+			all_apps = [],
+			my_apps = [],
+			carenets = [];
 	
-	ready: function() {
-		
-	},
-	
-	
-	/**
-	 * Click on our tab item
-	 */
-	'click': function() {
-		$('#app_content').html(this.view('show', {'label': UI.Controllers.Record.activeRecord.label})).show();
-		$('#app_content_iframe').attr('src', 'about:blank').hide();
+		this.record = this.options.account.attr("activeRecord");
+		this.element.html($.View('//ui/views/pha/show', {'label': this.record.label}));
 		
 		//this.reloadRecord();
-		this.didReloadRecord(UI.Controllers.Record.activeRecord);
+		this.didReloadRecord(this.record);
 	},
 	
 	
 	/**
 	 * Chainload record info and information about the apps
 	 */
-	reloadRecord: function() {
-		var record = UI.Controllers.Record.activeRecord;
-		UI.Models.Record.get(record.record_id, record.carenet_id, this.callback('didReloadRecord'));
-	},
+	/*reloadRecord: function() {
+		//TODO: check to see if we still need this (TF)
+		UI.Models.Record.get(this.record.record_id, this.record.carenet_id, this.callback('didReloadRecord'));
+	},*/
 	
 	didReloadRecord: function(record) {			// reloaded record, get all apps
 		this.record = record;
@@ -236,7 +227,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		// mark our apps in all_apps
 		for (var i = 0; i < this.all_apps.length; i++) {
 			var app = this.all_apps[i];
-			app.enabled = (_(my_apps).any(function(a) { return a.id === app.id; }));
+			app.enabled = (_(my_apps).any(function(a) { return a.app_id === app.app_id; }));
 		}
 		
 		// show
@@ -248,10 +239,10 @@ $.Controller.extend('UI.Controllers.PHA',
 		// setup app hovering (so we see in which carenets the app already is)
 		app_div.find('.app').bind({
 			'mouseover': function(event) {
-				var app_id = $(this).model().id;
+				var app_id = $(this).model().app_id;
 				$('#carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
-					if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
+					if (app_arr && _(app_arr).detect(function(a) { return a.app_id === app_id; })) {
 						$(elem).addClass('highlight');
 					}
 				});
@@ -270,10 +261,10 @@ $.Controller.extend('UI.Controllers.PHA',
 			helper: 'clone',
 			containment: '#app_content',
 			start: function(event, ui) {
-				var app_id = $(this).model().id;
+				var app_id = $(this).model().app_id;
 				$('#carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
-					if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
+					if (app_arr && _(app_arr).detect(function(a) { return a.app_id === app_id; })) {
 						$(elem).css('opacity', 0.4);
 					}
 				});
@@ -290,7 +281,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			var app = checkbox.model();
 			
 			// enable
-			if (checkbox.attr('checked')) {
+			if (checkbox.prop('checked')) {
 				checkbox.attr('disabled', 'disabled');
 				self.enableApp(app, checkbox);
 			}
@@ -301,7 +292,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				self.disableApp(app, checkbox);
 			}
 			else {
-				checkbox.attr('checked', 'checked');
+				checkbox.prop('checked', true);
 			}
 		});
 		
@@ -319,10 +310,10 @@ $.Controller.extend('UI.Controllers.PHA',
 		var waiting_for = carenets.length;
 		$(carenets).each(function(i, carenet) {
 			carenet.apps = [];
-			UI.Models.PHA.get_by_carenet(carenet.carenet_id, null, function(carenet_apps) {
+			UI.Models.PHA.get_by_carenet(carenet.id, null, function(carenet_apps) {
 				_(carenet_apps).each(function(c_app) {
 					// if this _carenet_ pha is also in my_apps, remember it
-					if (_(self.my_apps).detect(function(p) { return p.id === c_app.id; })) {
+					if (_(self.my_apps).detect(function(p) { return p.app_id === c_app.app_id; })) {
 						carenet.apps.push(c_app);
 					}
 				});
@@ -344,7 +335,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			'all_apps': this.all_apps,
 			 'my_apps': this.my_apps,
 			  'record': this.record,
-			'carenets': this.carenets,
+			'carenets': this.carenets
 		};
 		nets.empty().html(this.view('carenets', params));
 		
@@ -365,7 +356,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				
 				var drag_mod = draggable.model();
 				if (drag_mod) {
-					return ! _(mod.apps).detect(function(a) { return a.id === drag_mod.id; });
+					return ! _(mod.apps).detect(function(a) { return a.app_id === drag_mod.app_id; });
 				}
 				return false;
 			},
@@ -432,11 +423,11 @@ $.Controller.extend('UI.Controllers.PHA',
 		
 		// remove app from carenet app array
 		var carenet = carenet_view.model();
-		var app_id = app_view.model().id;
+		var app_id = app_view.model().app_id;
 		if (carenet && carenet.apps && carenet.apps.length > 0) {
 			for (var i = 0; i < carenet.apps.length; i++) {
 				var app = carenet.apps[i];
-				if (app.id == app_id) {
+				if (app.app_id == app_id) {
 					carenet.apps.splice(i, 1);
 					break;
 				}
@@ -481,16 +472,16 @@ $.Controller.extend('UI.Controllers.PHA',
 	doEnableApp: function(app, checkbox, json_app, textStatus, xhr) {
 		
 		// did we enable the correct app?
-		if (json_app.app_id == app.id) {
+		if (json_app.app_id == app.app_id) {
 			if (confirm(json_app.title + (json_app.description && json_app.description.length > 0 ? "\n\n" + json_app.description : ''))) {
 				UI.Models.PHA.authorize_token(json_app.request_token, this.record.record_id, this.callback('didEnableApp', app, checkbox));
 				return;
 			}
 		}
 		else {
-			alert("Internal Error: Did not call the correct app\nRequested: " + app.id + "\nReceived: " + json_app.app_id + "\n\nA probable error is that the start URL in server settings is not correct");
+			alert("Internal Error: Did not call the correct app\nRequested: " + app.app_id + "\nReceived: " + json_app.app_id + "\n\nA probable error is that the start URL in server settings is not correct");
 		}
-		checkbox.removeAttr('checked').removeAttr('disabled');
+		checkbox.prop('checked', false).removeAttr('disabled');
 	},
 	doNotEnableApp: function(app, checkbox, xhr, textStatus, error) {
 		try {
@@ -507,62 +498,66 @@ $.Controller.extend('UI.Controllers.PHA',
 		catch (exc) {}
 		alert(error);		// TODO: Do something more elegant than alerting
 		
-		checkbox.removeAttr('checked').removeAttr('disabled');
+		checkbox.prop('checked', false).removeAttr('disabled');
 	},
 	didEnableApp: function(app, checkbox, data, textStatus) {
 		if ('success' == textStatus) {
 			
 			// add to app tabs
-			var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
+			/*var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
 			var icon = '<img class="app_tab_img" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />';
 			var params = {'pha': app,
 				       'fire_p': false,
 				    'record_id': this.record.record_id,					// TODO: supply only record_id OR carenet_id
 				   'carenet_id': this.record.carenet_id
 			};
-			$(document.documentElement).ui_main('add_app', params);
+			$(document.documentElement).ui_main('add_app', params);*/
+			
+			UI.ENABLED_APPS.push(app);
 			
 			// add to array and update status
 			this.my_apps.push(app);
 			var u_apps = _(this.my_apps);
 			for (var i = 0; i < this.all_apps.length; i++) {
 				var this_app = this.all_apps[i];
-				this_app.enabled = (u_apps.detect(function(a) { return a.id === app.id; }));
+				this_app.enabled = (u_apps.detect(function(a) { return a.app_id === app.app_id; }));
 			}
 			checkbox.parentsUntil('.app').last().parent().removeClass('disabled').draggable('option', 'disabled', false);
 		}
 		
 		// failed
 		else {
-			checkbox.removeAttr('checked');
+			checkbox.prop('checked', false);
 		}
 		
 		checkbox.removeAttr('disabled');
 	},
 	
 	disableApp: function(app, checkbox) {
-		UI.Models.PHA.delete_pha(this.record.record_id, app.id, this.callback('didDisableApp', app, checkbox));
+		UI.Models.PHA.delete_pha(this.record.record_id, app.app_id, this.callback('didDisableApp', app, checkbox));
 	},
 	didDisableApp: function(app, checkbox, data, textStatus, xhr) {
 		checkbox.removeAttr('disabled');
 		
 		// remove from array
 		for (var i = 0; i < this.my_apps.length; i++) {
-			if (this.my_apps[i] == app.id) {
+			if (this.my_apps[i] == app.app_id) {
 				this.my_apps.splice(i, 1);
 				break;
 			}
 		}
 		
 		// remove from app tabs
-		var li_id = app.id.replace(/\W+/g, '_');
-		$('#' + li_id).fadeOut('fast', function() { $(this).remove(); });
+		/*var li_id = app.app_id.replace(/\W+/g, '_');
+		$('#' + li_id).fadeOut('fast', function() { $(this).remove(); });*/
+		var appToRemove = UI.ENABLED_APPS.match("app_id", app.app_id)[0];
+		UI.ENABLED_APPS.remove(appToRemove.id);
 		
 		// update view
 		var my_apps = _(this.my_apps);
 		for (var i = 0; i < this.all_apps.length; i++) {
 			var this_app = this.all_apps[i];
-			this_app.enabled = (my_apps.detect(function(a) { return a.id === app.id; }));
+			this_app.enabled = (my_apps.detect(function(a) { return a.app_id === app.app_id; }));
 		}
 		checkbox.parentsUntil('.app').last().parent().addClass('disabled').draggable('option', 'disabled', true);
 		
@@ -572,7 +567,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			var carenet_view = $(this);
 			carenet_view.find('.carenet_app').each(function(i) {
 				var view = $(this);
-				if (view.model().id == app.id) {
+				if (view.model().app_id == app.app_id) {
 					carenet_view.addClass('expanded');
 					setTimeout(function() { UI.Controllers.MainController.poof(view); }, 200);
 					setTimeout(function() { self.didRemoveAppFromCarenet(view, carenet_view); }, 450);
@@ -629,9 +624,9 @@ $.Controller.extend('UI.Controllers.PHA',
 			
 			//** show app info on hover
 			app_view.bind('mouseover', function(event) {
-				var self_id = $(this).model().id;
+				var self_id = $(this).model().app_id;
 				$('#apps').find('.app').each(function(i) {
-					if ($(this).model().id == self_id) {
+					if ($(this).model().app_id == self_id) {
 						$(this).addClass('app_showinfo');
 					}
 				});
@@ -687,10 +682,10 @@ $.Controller.extend('UI.Controllers.PHA',
 					carenet_view.addClass('expanded');
 					
 					// indicate (im)possible targets
-					var app_id = view.model().id;
+					var app_id = view.model().app_id;
 					$('#carenets').find('.carenet').not('.expanded').each(function(i, elem) {
 						var app_arr = $(elem).model().apps;
-						if (app_arr && _(app_arr).detect(function(a) { return a.id === app_id; })) {
+						if (app_arr && _(app_arr).detect(function(a) { return a.app_id === app_id; })) {
 							$(elem).css('opacity', 0.4);
 						}
 					});
@@ -739,8 +734,6 @@ $.Controller.extend('UI.Controllers.PHA',
 		}
 	}
 });
-
-
 
 function deg2rad(deg) {
 	return deg * 0.017453;
