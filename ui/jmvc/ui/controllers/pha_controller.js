@@ -197,7 +197,7 @@ $.Controller.extend('UI.Controllers.PHA',
 	 */
 	/*reloadRecord: function() {
 		//TODO: check to see if we still need this (TF)
-		UI.Models.Record.get(this.record.record_id, this.record.carenet_id, this.callback('didReloadRecord'));
+		UI.Models.Record.get(this.record.id, this.record.carenet_id, this.callback('didReloadRecord'));
 	},*/
 	
 	didReloadRecord: function(record) {			// reloaded record, get all apps
@@ -212,8 +212,8 @@ $.Controller.extend('UI.Controllers.PHA',
 		if (this.record.carenet_id) {
 			UI.Models.PHA.get_by_carenet(this.record.carenet_id, null, this.callback('didGetMyApps'));
 		}
-		else if (this.record.record_id) {
-			UI.Models.PHA.get_by_record(this.record.record_id, null, this.callback('didGetMyApps'));
+		else if (this.record.id) {
+			UI.Models.PHA.get_by_record(this.record.id, null, this.callback('didGetMyApps'));
 		}
 		else {
 			alert("didGetAllApps()\n\nError, we got invalid record info, cannot continue");
@@ -467,14 +467,14 @@ $.Controller.extend('UI.Controllers.PHA',
 	},
 	
 	enableApp: function(app, checkbox) {
-		UI.Models.PHA.enable_pha(this.record.record_id, app, this.callback('doEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
+		UI.Models.PHA.enable_pha(this.record.id, app, this.callback('doEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
 	},
 	doEnableApp: function(app, checkbox, json_app, textStatus, xhr) {
 		
 		// did we enable the correct app?
 		if (json_app.app_id == app.app_id) {
 			if (confirm(json_app.title + (json_app.description && json_app.description.length > 0 ? "\n\n" + json_app.description : ''))) {
-				UI.Models.PHA.authorize_token(json_app.request_token, this.record.record_id, this.callback('didEnableApp', app, checkbox));
+				UI.Models.PHA.authorize_token(json_app.request_token, this.record.id, this.callback('didEnableApp', app, checkbox));
 				return;
 			}
 		}
@@ -508,7 +508,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			var icon = '<img class="app_tab_img" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />';
 			var params = {'pha': app,
 				       'fire_p': false,
-				    'record_id': this.record.record_id,					// TODO: supply only record_id OR carenet_id
+				    'record_id': this.record.id,					// TODO: supply only record_id OR carenet_id
 				   'carenet_id': this.record.carenet_id
 			};
 			$(document.documentElement).ui_main('add_app', params);*/
@@ -534,7 +534,7 @@ $.Controller.extend('UI.Controllers.PHA',
 	},
 	
 	disableApp: function(app, checkbox) {
-		UI.Models.PHA.delete_pha(this.record.record_id, app.app_id, this.callback('didDisableApp', app, checkbox));
+		UI.Models.PHA.delete_pha(this.record.id, app.app_id, this.callback('didDisableApp', app, checkbox));
 	},
 	didDisableApp: function(app, checkbox, data, textStatus, xhr) {
 		checkbox.removeAttr('disabled');

@@ -28,7 +28,8 @@ $.Controller.extend('UI.Controllers.Message',
 			self.messages = messages;
 			// manually pass messages to view
 			self.element.html($.View('//ui/views/message/show.ejs', {
-				'messages' : messages
+				'messages': messages,
+				'account': self.account 
 			}))
 		});
 	},
@@ -41,7 +42,8 @@ $.Controller.extend('UI.Controllers.Message',
 
 			// render one message template
 			self.element.html($.View('//ui/views/message/one_message.ejs', {
-				'message' : message
+				'message': message,
+				'account': self.account
 			}))
 		});
 	},

@@ -87,7 +87,7 @@ $.Controller.extend('UI.Controllers.AppList',
 			// app with a UI
 			if(app.ui) {
 				var startURL = app.getStartURL({
-					'record_id': self.account.attr("activeRecord").carenet_id ? '' : self.account.attr("activeRecord").record_id,
+					'record_id': self.account.attr("activeRecord").carenet_id ? '' : self.account.attr("activeRecord").id,
 					'carenet_id': self.account.attr("activeRecord").carenet_id || ''
 				});
 				$('#active_app_tabs').append($.View("//ui/views/pha/app_tab", {isBackgroundApp:false, app:app, startURL:startURL}));
@@ -122,7 +122,7 @@ $.Controller.extend('UI.Controllers.AppList',
 			if(record.carenet_id) {
 				UI.Models.PHA.get_by_carenet(record.carenet_id, null, this.callback('set_enabled_apps'));
 			} else {
-				UI.Models.PHA.get_by_record(record.record_id, null, this.callback('set_enabled_apps'));
+				UI.Models.PHA.get_by_record(record.id, null, this.callback('set_enabled_apps'));
 			}
 		}
 	},

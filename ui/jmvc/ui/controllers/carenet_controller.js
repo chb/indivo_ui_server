@@ -31,7 +31,7 @@ $.Controller.extend('UI.Controllers.Carenet',
      */
     reloadRecord: function() {
     	//TODO: still needed? TF
-		UI.Models.Record.get(this.record.record_id, this.record.carenet_id, this.callback('didReloadRecord'));
+		UI.Models.Record.get(this.record.id, this.record.carenet_id, this.callback('didReloadRecord'));
 	},
 	
     didReloadRecord: function(record) {

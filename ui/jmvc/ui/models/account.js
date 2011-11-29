@@ -51,15 +51,43 @@ $.Model.extend('UI.Models.Account',
 		});
 	},
 	
+	
+	/**
+	 * Retrieve records associated with this Account.
+	 */ 
 	get_records: function(success, error) {
+		var self = this;
 		return $.ajax({
 			url : this.base_url() + '/records/',
 			type : 'get',
 			dataType : 'record.models',
-			success : success,
+			success : function(records) {
+				// store off cached copy for record label resolution
+				self.records = records;
+				if(success) {
+					success(records);
+				}
+			},
 			error : error
 		});
+	},
 
+	get_record_label: function(record_id) {
+		var self = this;
+		if (!this.records) {
+			this.get_records(function(){
+				var record = self.records.get(record_id)[0];
+				return (record) ? record.label : null;
+			});		
+		}
+		else {
+			var record = self.records.get(record_id)[0];
+			return (record) ? record.label : null;
+		}
+	},
+	
+	has_record: function(record_id) {
+		return (this.records.get(record_id).length > 0) ? true : false; 
 	},
 	
 	get_healthfeed: function(success, error) {

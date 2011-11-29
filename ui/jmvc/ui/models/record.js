@@ -13,7 +13,7 @@ $.Model.extend('UI.Models.Record',
 		// custom converter for this model
 		data = $(data);
 		return new this({
-			'record_id': data.attr("id"),
+			'id': data.attr("id"),
 			'label': data.attr("label")
 		});	
 	},
@@ -35,7 +35,7 @@ $.Model.extend('UI.Models.Record',
 {
 	//TODO: why is document_id here? (TF)
 	get_carenets: function(document_id, success, error) {
-		var base_url = 'indivoapi/records/' + encodeURIComponent(this.record_id);
+		var base_url = 'indivoapi/records/' + encodeURIComponent(this.id);
 		var url = '/carenets/';
 		if (document_id != null) url = '/documents/' + document_id + '/carenets/';
 
@@ -51,7 +51,7 @@ $.Model.extend('UI.Models.Record',
 	create_carenet: function(name, callback, error) {
 		$.ajax({
 			type: 'post',
-			url: '/records/' + this.record_id + '/carenets/',
+			url: '/records/' + this.id + '/carenets/',
 			data: {'name': name},
 			dataType: 'carenet.model',
 			success: callback,

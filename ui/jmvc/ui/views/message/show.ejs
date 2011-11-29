@@ -23,7 +23,7 @@
         ">
         <td><%= messages[i].received_at.substring(0,16) %></td>
         <td><%= messages[i].sender %></td>
-        <td><%= messages[i].record_label %></td>
+        <td><%= account.get_record_label(messages[i].record_id) || account.fullName %></td>
         <td><a href="#" id ="<%= messages[i].id %>" class="message_subject"><%= messages[i].subject %></a></td>
       </tr>
       <% } %>

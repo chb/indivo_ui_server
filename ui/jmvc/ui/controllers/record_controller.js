@@ -21,46 +21,31 @@ $.Controller.extend('UI.Controllers.Record',
 {
 	init: function() {
 		this.account = this.options.account;
-		this.allRecords = {};
+		this.colorMap = {};
+		var self = this, 
+			colors = ['rgb(250,250,250)', 'rgb(242,246,255)', 'rgb(244,255,242)', 'rgb(250,242,255)', 'rgb(254,255,242)', 'rgb(255,248,242)', 'rgb(255,242,242)', 'rgb(255,242,251)']; //TODO: greater than 8 records will cause errors
 		
-		var self = this;
-				
-		var colors = ['rgb(250,250,250)', 'rgb(242,246,255)', 'rgb(244,255,242)', 'rgb(250,242,255)', 'rgb(254,255,242)', 'rgb(255,248,242)', 'rgb(255,242,242)', 'rgb(255,242,251)'];
-		
-		// create records list, assign colors and add tabs
+		// load records, assign colors and add tabs
 		this.account.get_records(function(records) {
-			
-			$(records).each(function(i, record) {
-				record.bgcolor = colors[i];
-				self.addTab(record, (0 == i));
-			})
-		
-			self.allRecords = records;
-			
-			// load the first record
-			if (self.allRecords.length > 0) {
-				UI.Controllers.MainController.hasRecords();
-				self.loadRecord(self.allRecords[0].record_id);
+			for (var i=0; i< records.length; i++) {
+				self.colorMap[records[i].id] = colors[i];
+				self.addTab(records[i], (0 == i));
 			}
-			else {
+			// load the first record
+			if(records.length > 0) {
+				UI.Controllers.MainController.hasRecords();
+				self.loadRecord(records[0].id);
+			} else {
 				UI.Controllers.MainController.noRecords();
 			}
 		});
-		
 	},
-	
-	loadRecord: function(record_id) {
-		var record = this.allRecords.match("record_id", record_id)[0];
-		if (!record) {
-			alert('Failed to load record "' + record_id + '": Not found');
-			return;
-		}
-		else {
-			this.account.attr("activeRecord", record);
-		}
+
+	loadRecord: function(record) {
+		this.account.attr("activeRecord", record);
 		
 		// show/hide carenet owned options
-		if (this.account.attr("activeRecord").carenet_id) {
+		if (record.carenet_id) {
 			$('#record_owned_options').hide();
 		}
 		else {
@@ -68,41 +53,32 @@ $.Controller.extend('UI.Controllers.Record',
 		}
 	},
 	
-	
+	".record_tab click": function(el, ev) {
+		var record = $(el).model();
+
+		// tab functionality
+		$('#record_tabs').find('a').removeClass('selected');
+		$(el).addClass('selected');
+
+		// set background color
+		$('#app_selector .selected, #app_content, #app_content_iframe').animate({
+			backgroundColor : this.colorMap[record.id]
+		}, 1000);
+
+		// make sure the iframe is hidden and the div is shown
+		$('#app_content_iframe').attr('src', 'about:blank').hide();
+		$('#app_content').show();
+
+		// fire!
+		this.loadRecord(record);
+	},
+
 	/**
-	 * Adds a record tab
+	 * Add a record tab
 	 */
-	addTab: function(account, selected) {
-		var a = $('<a class="record_tab" href="javascript:void(0);" />').text(account.label);
-		a.css('background-color', account.bgcolor);
-		if (selected) {
-			a.addClass('selected');
-		}
-		a.data('account', account);
-		
-		// add click event
-		var self = this;
-		a.click(function(event) {
-			var acc = $(this).data('account');
-			
-			// tab functionality
-			$('#record_tabs').find('a').removeClass('selected');
-			$(this).addClass('selected');
-			
-			// set background color
-			$('#app_selector .selected, #app_content, #app_content_iframe').animate({
-				backgroundColor: acc.bgcolor
-			}, 1000);
-			
-			// make sure the iframe is hidden and the div is shown
-			$('#app_content_iframe').attr('src', 'about:blank').hide();
-			$('#app_content').show();
-			
-			// fire!
-			self.loadRecord(acc.record_id);
-		});
-		
-		// add tab
-		$('#record_tabs').append(a);
+	addTab: function(record, selected) {
+		// TODO: replace with a listener for changes to a List of Records on the Account when JMVC merges Observable into Model 
+		// append tab to existing list
+		$('#record_tabs').append($.View("//ui/views/record/show_tab", {record:record, selected:selected, color:this.colorMap[record.id]}));
 	}
 });

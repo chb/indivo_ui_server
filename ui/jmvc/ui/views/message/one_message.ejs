@@ -10,7 +10,7 @@
       <td>{% trans "from" %}</td><td><%= message.sender %></td>
     <tr>
     <tr>
-      <td>{% trans "to" %}</td><td><%= message.record_label %></td>
+      <td>{% trans "to" %}</td><td><%= account.get_record_label(message.record_id) || account.fullName %></td>
     <tr>
     <tr>
       <td>{% trans "subject" %}</td><td><%= message.subject %></td>
