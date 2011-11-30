@@ -308,6 +308,9 @@ $.Controller.extend('UI.Controllers.PHA',
 		
 		var self = this;
 		var waiting_for = carenets.length;
+		if (waiting_for < 1) {
+			this.didLoadCarenets();
+		}
 		$(carenets).each(function(i, carenet) {
 			carenet.apps = [];
 			UI.Models.PHA.get_by_carenet(carenet.id, null, function(carenet_apps) {
