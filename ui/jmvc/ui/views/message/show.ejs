@@ -19,7 +19,7 @@
   <tbody>
     <% for (var i=0; i<messages.length; i++) { %>
       <tr class="<%=(i%2)===0?'odd':'even'%>
-                 <%= typeof(messages[i].read_at) === 'undefined' ? 'unread' : '' %>
+                 <%= (!messages[i].read_at) ? 'unread' : '' %>
         ">
         <td><%= messages[i].received_at.substring(0,16) %></td>
         <td><%= messages[i].sender %></td>
