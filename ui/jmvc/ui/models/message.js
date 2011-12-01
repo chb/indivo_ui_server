@@ -7,6 +7,22 @@
 $.Model.extend('UI.Models.Message',
 /* @Static */
 {
+	attributes: {
+		received_at: 'date',
+		read_at: 'date',
+		archived_at: 'date'
+	},
+	
+	convert : {
+		date : function(raw){
+			var converted = null;
+			if (raw && raw !== "") {
+				converted = new Date(raw);
+			}
+			return converted;
+		}
+	},
+	
 	models: function(data) {
 		return this._super($(data).find("Message").toArray());
 	},
@@ -36,5 +52,4 @@ $.Model.extend('UI.Models.Message',
 },
 /* @Prototype */
 {
-  
 })

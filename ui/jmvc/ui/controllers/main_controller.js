@@ -112,7 +112,7 @@ $.Controller.extend('UI.Controllers.MainController',
 	update_inbox_tab: function(account) {
 		account.get_inbox(function(messages) {
 			var n_unread = _(messages).select(function(m) {
-				if( typeof (m.read_at) === 'undefined' || m.read_at === "")
+				if(!m.read_at)
 					return m;
 			}).length;
 			// alter img src

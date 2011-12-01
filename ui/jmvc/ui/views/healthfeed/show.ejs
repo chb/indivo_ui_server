@@ -20,9 +20,8 @@
     <div class="details" style="font-style: italic; font-size: .85em; color: #777; margin: -1em 0 0 1.5em">
       &nbsp;&ndash; {% trans "sent by" %} <%= notifications[i].sender %> {% trans "about" %}
       <a class="goto_record" href="#"><%= notifications[i].record.label %>&rsquo;s {% trans "record" %}</a>
-      {% trans "on" %}
       <span class="created_at">
-        <%= notifications[i].received_at.substring(0,16) %>
+       - <%= UI.UTILS.dateTimeToPrettyString(notifications[i].received_at) %>
       </span>
     </div>
   </div>

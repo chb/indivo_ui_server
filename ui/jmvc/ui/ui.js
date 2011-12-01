@@ -12,6 +12,8 @@ steal(
   // Resources
   "./resources/js/underscore-min.js",
   "./resources/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js",
+  "./resources/js/date.js",
+  "./resources/js/utils.js",
   // Models
   './models/account',
   './models/record',

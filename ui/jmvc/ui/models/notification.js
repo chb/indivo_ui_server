@@ -4,6 +4,20 @@
 $.Model.extend('UI.Models.Notification',
 /* @Static */
 {
+	attributes: {
+		received_at: 'date'
+	},
+	
+	convert : {
+		date : function(raw){
+			var converted = null;
+			if (raw && raw !== "") {
+				converted = new Date(raw);
+			}
+			return converted;
+		}
+	},
+	
 	models: function(data) {
 		return this._super($(data).find("Notification").toArray());
 	},
