@@ -34,7 +34,7 @@ $.Controller.extend('UI.Controllers.Record',
 			// load the first record
 			if(records.length > 0) {
 				UI.Controllers.MainController.hasRecords();
-				self.loadRecord(records[0].id);
+				self.loadRecord(records[0]);
 			} else {
 				UI.Controllers.MainController.noRecords();
 			}
