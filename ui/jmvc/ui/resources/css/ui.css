@@ -154,16 +154,39 @@ table.light tbody td:last-child { border-right:none; }
 tr.odd { background: #fff; }
 tr.unread { font-weight: bold; }
 
+/* Messages */
+
 table.one_message { margin-top: -64px; width: 100%; }
 table.one_message tbody td { border: none; padding: 0.125em .25em;}
 table.one_message tbody td:first-child { width: 5%; text-align: right; color: #aaa;}
 table.one_message tbody td:last-child { width: 95%; }
+.one_message .attachment_accept { 
+	cursor: pointer;
+}
 
 #one_message_body {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family:"Andale Mono", Consolas, monospace;
   border-top: 1px dotted #ccc;
+  font-family:"Andale Mono", Consolas, monospace;
+  padding-top: 10px;
+  word-wrap: break-word;
+}
+
+#one_message_body ul, 
+#one_message_body ol {
+	margin-left: 15px;
+}
+
+#one_message_body li {
+	list-style: inside;
+}
+
+#one_message_body a {
+	color: #00E
+}
+
+#one_message_body a:hover {
+	border: none;
+	text-decoration: underline;
 }
 
 a { 
