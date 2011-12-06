@@ -1,7 +1,7 @@
 /**
  * @tag models, home
  */
-$.Model.extend('UI.Models.Notification',
+UI.Models.IndivoBase.extend('UI.Models.Notification',
 /* @Static */
 {
 	attributes: {

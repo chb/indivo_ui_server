@@ -1,7 +1,7 @@
 /**
  * @tag models, home
  */
-$.Model.extend('UI.Models.Account',
+UI.Models.IndivoBase.extend('UI.Models.Account',
 /* @Static */
 {
 	models: function(data) {
@@ -23,7 +23,7 @@ $.Model.extend('UI.Models.Account',
 	},
 	
 	findOne: function(account_id, success, error) {
-		var url = 'indivoapi/accounts/'+ account_id;
+		var url = this.apiBase() + 'accounts/'+ account_id;
 		
 		return $.ajax({
 			url: url,
@@ -36,7 +36,9 @@ $.Model.extend('UI.Models.Account',
 },
 /* @Prototype */
 {
-	base_url: function() { return 'indivoapi/accounts/'+this.id; },
+	baseURL: function() {
+		return this.Class.apiBase() + 'accounts/' + this.id;
+	},
 	
 	// Relies on the UI server to use its credentials to retrieve the name attached to an account
 	get_name: function(callback) {
@@ -58,7 +60,7 @@ $.Model.extend('UI.Models.Account',
 	get_records: function(success, error) {
 		var self = this;
 		return $.ajax({
-			url : this.base_url() + '/records/',
+			url : this.baseURL() + '/records/',
 			type : 'get',
 			dataType : 'record.models',
 			success : function(records) {
@@ -92,7 +94,7 @@ $.Model.extend('UI.Models.Account',
 	
 	get_healthfeed: function(success, error) {
 		return $.ajax({
-			url : this.base_url() + '/notifications/',
+			url : this.baseURL() + '/notifications/',
 			type : 'get',
 			dataType : 'notification.models',
 			success : success,
@@ -102,7 +104,7 @@ $.Model.extend('UI.Models.Account',
 	
 	get_inbox: function(success, error) {
 		return $.ajax({
-			url : this.base_url() + '/inbox/',
+			url : this.baseURL() + '/inbox/',
 			type : 'get',
 			dataType : 'message.models',
 			success : success,
@@ -112,7 +114,7 @@ $.Model.extend('UI.Models.Account',
 	
 	get_message: function(message_id, success, error) {
 		return $.ajax({
-			url : this.base_url() + '/inbox/' + encodeURIComponent(message_id),
+			url : this.baseURL() + '/inbox/' + encodeURIComponent(message_id),
 			type : 'get',
 			dataType : 'message.model',
 			success : success,
@@ -122,7 +124,7 @@ $.Model.extend('UI.Models.Account',
 	
 	accept_attachment: function(message_id, attachment_num, success, error) {
 		return $.ajax({
-			url : this.base_url() + '/inbox/' + message_id + '/attachments/' + attachment_num + '/accept',
+			url : this.baseURL() + '/inbox/' + message_id + '/attachments/' + attachment_num + '/accept',
 			type : 'post',
 			success : success,
 			error : error

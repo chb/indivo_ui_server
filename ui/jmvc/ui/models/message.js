@@ -4,7 +4,7 @@
  * Wraps backend message services.
  * 
  */
-$.Model.extend('UI.Models.Message',
+UI.Models.IndivoBase.extend('UI.Models.Message',
 /* @Static */
 {
 	attributes: {

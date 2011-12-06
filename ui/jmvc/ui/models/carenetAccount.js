@@ -1,7 +1,7 @@
 /**
  * @tag models, home
  */
-$.Model.extend('UI.Models.CarenetAccount',
+UI.Models.IndivoBase.extend('UI.Models.CarenetAccount',
 /* @Static */
 {
 	models: function(data) {

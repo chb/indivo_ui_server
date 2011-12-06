@@ -5,7 +5,7 @@
  * @author Ben Adida (ben.adida@childrens.harvard.edu)
  *
  */
-$.Model.extend('UI.Models.PHA',
+UI.Models.IndivoBase.extend('UI.Models.PHA',
 /* @Static */
 {
 	models: function(data) {
@@ -28,7 +28,7 @@ $.Model.extend('UI.Models.PHA',
 	},
 	
 	get_by_record: function(record_id, type, success, error) {
-		var url = 'indivoapi/records/' + encodeURIComponent(record_id) + '/apps/';
+		var url = this.apiBase() + 'records/' + encodeURIComponent(record_id) + '/apps/';
 		if (type) { url += "?type=" + encodeURIComponent(type); }
 		return $.ajax({
 			url: url,
@@ -40,7 +40,7 @@ $.Model.extend('UI.Models.PHA',
 	},
 	
 	get_by_carenet: function(carenet_id, type, success, error) {
-		var url = 'indivoapi/carenets/' + encodeURIComponent(carenet_id) + '/apps/';
+		var url = this.apiBase() + 'carenets/' + encodeURIComponent(carenet_id) + '/apps/';
 		if(type) {
 			url += "?type=" + encodeURIComponent(type);
 		}
@@ -55,7 +55,7 @@ $.Model.extend('UI.Models.PHA',
 
 	get_all: function(success, error) {
 		return $.ajax({
-			url : 'indivoapi/apps/',
+			url : this.apiBase() + 'apps/',
 			type : 'get',
 			dataType : 'pha.models',
 			success : success,
@@ -64,7 +64,7 @@ $.Model.extend('UI.Models.PHA',
 	},
 	
 	get: function(record_id, pha_id, success, error) {
-		var url = 'indivoapi/records/' + encodeURIComponent(record_id) + '/apps/' + encodeURIComponent(pha_id);
+		var url = this.apiBase() + 'records/' + encodeURIComponent(record_id) + '/apps/' + encodeURIComponent(pha_id);
 		return $.ajax({
 			url : url,
 			type : 'get',
@@ -74,6 +74,7 @@ $.Model.extend('UI.Models.PHA',
 		});
 	},
 	
+	//TODO: move to Record/Carenet
 	enable_pha: function(record_id, pha, success, error) {
 		var startURL = this.interpolate_url_template(pha.startURLTemplate, {'record_id' : record_id, 'carenet_id': ''});
 		$.ajax({
@@ -99,9 +100,10 @@ $.Model.extend('UI.Models.PHA',
 		});
 	},
 	
+	//TODO: move to Record
 	delete_pha: function(record_id, pha_id, success, error) {
 		return $.ajax({
-			url : 'indivoapi/records/' + encodeURIComponent(record_id) + '/apps/' + encodeURIComponent(pha_id),
+			url : this.apiBase() + 'records/' + encodeURIComponent(record_id) + '/apps/' + encodeURIComponent(pha_id),
 			type : 'delete',
 			success : success,
 			error : error
@@ -120,7 +122,6 @@ $.Model.extend('UI.Models.PHA',
 
 /* @Prototype */
 {
-	
 	setup: function(attributes) {
 		// TODO: move to utils? (TF)
 		// we add in a surrogate id here since the one used by Indivo contains characters that are not compatible with the way JMVC ties

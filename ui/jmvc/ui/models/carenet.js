@@ -2,7 +2,7 @@
  * @tag models, home
  * Wraps backend carenet services.
  */
-$.Model.extend('UI.Models.Carenet',
+UI.Models.IndivoBase.extend('UI.Models.Carenet',
 /* @Static */
 {
 	models: function(data) {
@@ -21,10 +21,14 @@ $.Model.extend('UI.Models.Carenet',
 },
 /* @Prototype */
 {
+	baseURL: function() {
+		return this.Class.apiBase() + 'carenets/' + this.id;	
+	},
+	
 	destroy: function(success, error) {
         $.ajax({
 			type: 'delete',
-			url: 'indivoapi/carenets/' + this.id,
+			url: this.baseURL(),
 			success: success,
 			error: error
 		});
@@ -34,7 +38,7 @@ $.Model.extend('UI.Models.Carenet',
     	var self = this;
         $.ajax({
 			type: 'post',
-			url: 'indivoapi/carenets/' + this.id + '/rename',
+			url: this.baseURL() + '/rename',
 			data: {'name': new_name},
 			dataType: 'carenet.models',  // single values are wrapped in a <Carenets> element
 			success: function(data, textStatus, xhr) {
@@ -49,7 +53,7 @@ $.Model.extend('UI.Models.Carenet',
     
 	get_people: function(success, error) {
 		return $.ajax({
-			url: 'indivoapi/carenets/' + this.id + '/accounts/',
+			url: this.baseURL() + '/accounts/',
 			type: 'get',
 			dataType: 'carenet_account.models',
 			success: success,
@@ -62,7 +66,7 @@ $.Model.extend('UI.Models.Carenet',
 	 */
 	add_pha: function(pha, success, error) {
 		return $.ajax({
-			url: 'indivoapi/carenets/' + this.id + '/apps/' + encodeURIComponent(pha.app_id),
+			url: this.baseURL() + '/apps/' + encodeURIComponent(pha.app_id),
 			type: 'put',
 			success: success,
 			error: error
@@ -71,7 +75,7 @@ $.Model.extend('UI.Models.Carenet',
 	
 	remove_pha: function(pha, success, error) {
 		return $.ajax({
-			url: 'indivoapi/carenets/' + this.id + '/apps/' + encodeURIComponent(pha.app_id),
+			url: this.baseURL() + '/apps/' + encodeURIComponent(pha.app_id),
 			type: 'delete',
 			success: success,
 			error: error
@@ -83,7 +87,7 @@ $.Model.extend('UI.Models.Carenet',
 	 */
 	add_account: function(account_id, success, error) {
 		return $.ajax({
-			url: 'indivoapi/carenets/' + this.id + '/accounts/',
+			url: this.baseURL() + '/accounts/',
 			type: 'post',
 			data: {'account_id' : account_id, 'write': 'true'},
 			success: success,
@@ -93,7 +97,7 @@ $.Model.extend('UI.Models.Carenet',
 	
 	remove_account: function(account_id, success, error) {
 		return $.ajax({
-			url: 'indivoapi/carenets/' + this.id + '/accounts/' + encodeURIComponent(account_id),
+			url: this.baseURL() + '/accounts/' + encodeURIComponent(account_id),
 			type: 'delete',
 			success: success,
 			error: error

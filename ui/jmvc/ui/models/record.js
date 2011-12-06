@@ -2,7 +2,7 @@
  * @tag models, home
  * Wraps backend record services.
  */
-$.Model.extend('UI.Models.Record',
+UI.Models.IndivoBase.extend('UI.Models.Record',
 /* @Static */
 {
 	models: function(data) {
@@ -19,7 +19,7 @@ $.Model.extend('UI.Models.Record',
 	},
 	
 	findOne: function(id, success, error) {
-		var url = 'indivoapi/records/' + encodeURIComponent(id);
+		var url = this.apiBase() + 'records/' + encodeURIComponent(id);
 		
 		return $.ajax({
 			url: url,
@@ -33,14 +33,17 @@ $.Model.extend('UI.Models.Record',
 },
 /* @Prototype */
 {
+	baseURL: function() {
+		return this.Class.apiBase() + 'records/' + encodeURIComponent(this.id);	
+	},
+	
 	//TODO: why is document_id here? (TF)
 	get_carenets: function(document_id, success, error) {
-		var base_url = 'indivoapi/records/' + encodeURIComponent(this.id);
 		var url = '/carenets/';
 		if (document_id != null) url = '/documents/' + document_id + '/carenets/';
 
 		return $.ajax({
-			url: base_url + url,
+			url: this.baseURL() + url,
 			type: 'get',
 			dataType: 'carenet.models',
 			success: success,
@@ -48,6 +51,7 @@ $.Model.extend('UI.Models.Record',
 		});
 	},
 
+	//TODO: move to Static
 	create_carenet: function(name, callback, error) {
 		$.ajax({
 			type: 'post',
