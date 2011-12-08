@@ -503,7 +503,6 @@ blockquote.content { margin: 1em 0; }
 	width: 180px;
 }
 .account_name { white-space: nowrap; }
-.account.new .account_name { line-height: 43px; }
 input.account_name { width: 95%; }
 .account.new .account_name img { vertical-align: -12%; margin-right: 0.5em; }
 .account_id { font-size: 0.8em; white-space: nowrap; color: rgb(128,128,128); color: rgba(0,0,0,0.5); }
