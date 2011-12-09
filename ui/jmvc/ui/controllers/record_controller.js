@@ -21,14 +21,13 @@ $.Controller.extend('UI.Controllers.Record',
 {
 	init: function() {
 		this.account = this.options.account;
-		this.colorMap = {};
 		var self = this, 
 			colors = ['rgb(250,250,250)', 'rgb(242,246,255)', 'rgb(244,255,242)', 'rgb(250,242,255)', 'rgb(254,255,242)', 'rgb(255,248,242)', 'rgb(255,242,242)', 'rgb(255,242,251)']; //TODO: greater than 8 records will cause errors
 		
 		// load records, assign colors and add tabs
 		this.account.get_records(function(records) {
 			for (var i=0; i< records.length; i++) {
-				self.colorMap[records[i].id] = colors[i];
+				records[i].bgcolor = colors[i];
 				self.addTab(records[i], (0 == i));
 			}
 			// load the first record
@@ -62,7 +61,7 @@ $.Controller.extend('UI.Controllers.Record',
 
 		// set background color
 		$('#app_selector .selected, #app_content, #app_content_iframe').animate({
-			backgroundColor : this.colorMap[record.id]
+			backgroundColor : record.bgcolor
 		}, 1000);
 
 		// make sure the iframe is hidden and the div is shown
@@ -79,6 +78,6 @@ $.Controller.extend('UI.Controllers.Record',
 	addTab: function(record, selected) {
 		// TODO: replace with a listener for changes to a List of Records on the Account when JMVC merges Observable into Model 
 		// append tab to existing list
-		$('#record_tabs').append($.View("//ui/views/record/show_tab", {record:record, selected:selected, color:this.colorMap[record.id]}));
+		$('#record_tabs').append($.View("//ui/views/record/show_tab", {record:record, selected:selected, color:record.bgcolor}));
 	}
 });
