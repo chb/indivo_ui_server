@@ -5,20 +5,7 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 		<!-- note we don't use the standard header here, so we don't double include stuff -->
 		<link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
-		<!--[if IE]>
-			<style>
-			</style>
-		<![endif]-->
-
-		<!-- <script type="text/javascript" src="/jmvc/resources/firebug-lite/build/firebug-lite.js#startOpened"></script> -->
-
-		<script type="text/javascript">
-			var ACCOUNT_ID = "{{ ACCOUNT_ID }}";
-			var FULLNAME = "{{ FULLNAME }}";
-		</script>
-		<!-- development or production NOTE: steal path is at the top-level jmvc dir -->
-		<script compress="true" type="text/javascript" src="/jmvc/steal/steal.js?ui,development"></script>
-
+		
 		{% if branding %}
 			<title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
 		{% else %}
@@ -63,10 +50,10 @@
 		<div id="app_container">
 			<div id="app_selector">
 				<ul id="active_app_tabs">
-					<li id="healthfeed_li">
+					<li id="healthfeed_li" data-controller="healthfeed" data-appType="internal">
 						<img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/healthfeed.png" alt="" />{% trans "Healthfeed" %}
 					</li>
-					<li id="inbox_li">
+					<li id="inbox_li" data-controller="message" data-appType="internal">
 						<img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/inbox.png" alt="" />{% trans "Inbox" %}
 					</li>
 				</ul>
@@ -75,18 +62,18 @@
 				
 				<ul id="record_owned_options">
 				{% if not HIDE_SHARING %}
-					<li id="carenet">
+					<li id="carenet" data-controller="carenet" data-appType="internal">
 						<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/groupevent.png" alt="" />{% trans "Sharing" %}
 					</li>
 				{% endif %}
-					<li id="pha">
+					<li id="pha" data-controller="pha" data-appType="internal">
 						<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/settings.png" alt="" />{% trans "App Settings" %}
 					</li>
 				</ul>
 			</div>
 			
 			<div id="app_content" class="app_content_pane"></div>
-			<iframe id="app_content_iframe" class="app_content_pane" src="" style="display: none"></iframe>
+			<iframe id="app_content_iframe" class="app_content_pane" src="" style="display: none" frameBorder="no"></iframe>
 		</div>
 		
 		<!-- used for jquery tools overlay -->
@@ -98,4 +85,12 @@
 			{% include 'ui/footer.html' %}
 		{% endif %}
 	</body>
+	
+	<!-- development or production NOTE: steal path is at the top-level jmvc dir -->
+	<script compress="true" type="text/javascript" src="/jmvc/steal/steal.js"></script>
+	<script type="text/javascript">
+		var ACCOUNT_ID = "{{ ACCOUNT_ID }}";
+		var FULLNAME = "{{ FULLNAME }}";
+		steal('ui');
+	</script>
 </html>

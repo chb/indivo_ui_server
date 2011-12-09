@@ -1,6 +1,5 @@
 *~
 *.pyc
-sessions/*
 log/
 settings.py
 *.log

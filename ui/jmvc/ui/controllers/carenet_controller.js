@@ -10,58 +10,35 @@
  */
 $.Controller.extend('UI.Controllers.Carenet',
 /* @Static */
-{ 
-	onDocument: true,
-	record: {},
-	accounts: [],
-	carenets: [],
-	
-	/**
-	 * Show and manipulate carenets for this record
-	 */
-	
-	remove_carenet: function(carenet_id, carenet_name) {
-		if (confirm('Are you sure you want to remove the ' + carenet_name + ' carenet?')) {
-			UI.Models.Record.get(UI.Controllers.Record.activeRecord.record_id, null, function(record) {
-				record.remove_carenet(carenet_id);
-			})
-		}
-		return false;
-	},
-	
-	remove_account: function(carenet_id, account_id) {
-		var carenet = this.get_carenet(carenet_id);
-		if (confirm('Are you sure you want to remove ' + account_id + ' ?')) { carenet.remove_account(account_id); }
-		return false;
-	}
+{
 },
 /* @Prototype */
 {
-	/**
-	 * Click on our tab item
-	 */
-    'click': function() {
-    	$('#app_content').html(this.view('show', {'label': UI.Controllers.Record.activeRecord.label})).show();
-		$('#app_content_iframe').attr('src', 'about:blank').hide();
+	
+	init: function() {
+		this.record = this.options.account.attr("activeRecord");
+		this.accounts = [];
+		this.carenets = [];
 		
+		this.element.html($.View('//ui/views/carenet/show', {'label': this.record.label}));
+
     	//this.reloadRecord();
-    	this.didReloadRecord(UI.Controllers.Record.activeRecord);
-    },
-    
-    
+    	this.didReloadRecord(this.record);
+	},
+	
     /**
      * Reload the record, then load carenets
      */
     reloadRecord: function() {
-		var record = UI.Controllers.Record.activeRecord;
-		UI.Models.Record.get(record.record_id, record.carenet_id, this.callback('didReloadRecord'));
+    	//TODO: still needed? TF
+		UI.Models.Record.get(this.record.id, this.record.carenet_id, this.callback('didReloadRecord'));
 	},
 	
     didReloadRecord: function(record) {
-    	this.record = record;
+    	//this.record = record;
     	this.accounts = [];
     	this.carenets = [];
-    	UI.Controllers.Record.activeRecord.get_carenets(null, this.callback('didLoadCarenets'));
+    	this.record.get_carenets(null, this.callback('didLoadCarenets'));
     },
     
     didLoadCarenets: function(carenets) {
@@ -92,10 +69,13 @@ $.Controller.extend('UI.Controllers.Carenet',
 			if (c_accounts && c_accounts.length > 0) {
 				carenet.accounts = c_accounts;
 				for (var i = 0; i < c_accounts.length; i++) {		// can't use "concat" here as this wraps the accounts into some jquery element, stupidly :P
-					if (!_(this.accounts).detect(function(a) { return a.account_id === c_accounts[i].account_id; })) {
+					if (!_(this.accounts).detect(function(a) { return a.id === c_accounts[i].id; })) {
 						this.accounts.push(c_accounts[i]);
 					}
 				}
+			}
+			else {
+				carenet.accounts = []
 			}
 		}
 		
@@ -134,7 +114,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				
 				// indicate (im)possible targets
 				var account = $(this).model();
-				var account_id = account ? account.account_id : 0;
+				var account_id = account ? account.id : 0;
 				$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
 					if (!account_id) {
 						$(elem).css('opacity', 0.4);
@@ -143,7 +123,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 						var carenet = $(elem).model();
 						if (carenet) {
 							var account_arr = carenet.accounts;
-							if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+							if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.id === account_id; })) {
 								$(elem).css('opacity', 0.4);
 							}
 						}
@@ -160,18 +140,18 @@ $.Controller.extend('UI.Controllers.Carenet',
 			'mouseover': function(event) {
 				var account = $(this).model();
 				if (account) {
-					var account_id = account.account_id;
+					var account_id = account.id;
 					$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
 						
 						// get accounts of this carenet
 						var account_arr = $(elem).model().accounts;
-						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.id === account_id; })) {
 							$(elem).addClass('highlight');
 							
 							// also highlight the dragged account in the list
 							$(elem).find('.account').each(function(j, node) {
 								var acc = $(node).model();
-								if (acc && acc.account_id == account_id) {
+								if (acc && acc.id == account_id) {
 									$(node).addClass('highlight');
 									
 									// scroll visible
@@ -250,7 +230,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			for (var i = 0; i < known_accounts.length; i++) {
 				var node = $(known_accounts[i]);
 				var account = node.model();
-				if (account && account.account_id == acc_id) {
+				if (account && account.id == acc_id) {
 					node.addClass('highlight');
 					window.setTimeout(function() { node.removeClass('highlight'); }, 1500);
 					return false;
@@ -287,7 +267,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 	 */
 	getAccountName: function(account_id) {
 		if (account_id) {
-			var new_account = new UI.Models.Account({'account_id': account_id});
+			var new_account = new UI.Models.Account({'id': account_id});
 			new_account.get_name(this.callback('didGetAccountName', new_account));
 		}
 	},
@@ -342,7 +322,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					
 					// on success, add the account to the newly created carenet
 					carenet_view.find('.carenet_num_items').first().text('~');
-					new_carenet.add_account(account.account_id, self.callback('didAddAccountToCarenet', account, carenet_view));
+					new_carenet.add_account(account.id, self.callback('didAddAccountToCarenet', account, carenet_view));
 				}
 				else {
 					// if we end up here after dragging an account from another carenet, that
@@ -357,7 +337,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		// add account to existing carenet
 		else {
 			carenet_view.find('.carenet_num_items').first().text('~');
-			carenet.add_account(account.account_id, this.callback('didAddAccountToCarenet', account, carenet_view));
+			carenet.add_account(account.id, this.callback('didAddAccountToCarenet', account, carenet_view));
 		}
 	},
 	didAddAccountToCarenet: function(account, carenet_view, data, textStatus, xhr) {
@@ -375,7 +355,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				if (account.in_no_carenet) {
 					$('#known_accounts').find('.account').each(function(i, node) {
 						var acc = $(node).model();
-						if (acc && acc.account_id == account.account_id) {
+						if (acc && acc.id == account.id) {
 							$(node).find('.error_area').fadeOut('fast');
 							return;
 						}
@@ -402,7 +382,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			carenet_view.addClass('expanded');
 			carenet_view.find('.carenet_num_items').first().text('~');
 			var account = account_view.model();
-			carenet.remove_account(account.account_id, this.callback('didRemoveAccountFromCarenet', account, account_view, carenet_view));
+			carenet.remove_account(account.id, this.callback('didRemoveAccountFromCarenet', account, account_view, carenet_view));
 		}
 		else {
 			dragged_view.remove();
@@ -414,7 +394,12 @@ $.Controller.extend('UI.Controllers.Carenet',
 			//var p_off = parent.offset();		// '#app_content' is no offsetParent! Will this change? If so, subtract p_off from v_off
 			var v_off = dragged_view.offset();
 			
-			UI.Controllers.MainController.poof(dragged_view);
+			// use a clone of the draggable helper, and set the draggable revert 
+			// option to false.  This prevents a race condition where the draggable
+			// element gets removed, but the "stop" event still tries to get call
+			// data("draggable") on it.  
+			UI.Controllers.MainController.poof(dragged_view.clone().appendTo(dragged_view.parent()));
+			account_view.draggable( "option", "revert", false );
 		}
 	},
 	didRemoveAccountFromCarenet: function(account, account_view, carenet_view, data, textStatus, xhr) {
@@ -422,11 +407,11 @@ $.Controller.extend('UI.Controllers.Carenet',
 			
 			// remove from accounts array
 			var carenet = carenet_view.model();
-			var acc_id = account.account_id;
+			var acc_id = account.id;
 			if (carenet && carenet.accounts && carenet.accounts.length > 0) {
 				for (var i = 0; i < carenet.accounts.length; i++) {
 					var acc = carenet.accounts[i];
-					if (acc.account_id == acc_id) {
+					if (acc.id == acc_id) {
 						carenet.accounts.splice(i, 1);
 						break;
 					}
@@ -445,7 +430,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			var found = false;
 			$('#carenets').find('.account').each(function(i, node) {
 				var acc = $(node).model();
-				if (acc && acc.account_id == acc_id) {
+				if (acc && acc.id == acc_id) {
 					found = true;
 					return;
 				}
@@ -454,7 +439,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				account.in_no_carenet = true;
 				$('#known_accounts').find('.account').each(function(i, node) {
 					var acc = $(node).model();
-					if (acc && acc.account_id == acc_id) {
+					if (acc && acc.id == acc_id) {
 						$(node).find('.error_area').fadeIn('fast');
 					}
 				});
@@ -477,7 +462,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		var new_carenet = UI.Models.Carenet.from_json(null, json);
 		
 		// did create the new carenet
-		if (new_carenet && new_carenet.carenet_id) {
+		if (new_carenet && new_carenet.id) {
 			this.carenets.push(new_carenet);
 			
 			carenet_view.model(new_carenet);
@@ -537,7 +522,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					carenet_view.find('.carenet_border').append('<div class="spinner_cover"></div>');
 					
 					// delete!
-					carenet.delete(this.callback('didDeleteCarenet', carenet, carenet_view), this.callback('didNotDeleteCarenet', carenet, carenet_view));
+					carenet.destroy(this.callback('didDeleteCarenet', carenet, carenet_view), this.callback('didNotDeleteCarenet', carenet, carenet_view));
 				}
 				carenet_view.removeClass('highlight');
 			}
@@ -553,7 +538,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		if (carenet_view) {
 			var clone = this.carenets.slice(0);
 			for (var i = 0; i < clone.length; i++) {
-				if (clone[i].carenet_id == carenet.carenet_id) {
+				if (clone[i].id == carenet.id) {
 					this.carenets.splice(i, 1);
 					break;
 				}
@@ -571,7 +556,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 						if (carenet_acc && carenet_acc.length > 0) {
 							for (var k = 0; k < carenet_acc.length; k++) {
 								var c_acc = carenet_acc[k];
-								if (c_acc.account_id == acc.account_id) {
+								if (c_acc.id == acc.id) {
 									found = true;
 									break;
 								}
@@ -587,7 +572,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 						acc.in_no_carenet = true;
 						$('#known_accounts').find('.account').each(function(i, node) {
 							var known_acc = $(node).model();
-							if (known_acc && known_acc.account_id == acc.account_id) {
+							if (known_acc && known_acc.id == acc.id) {
 								$(node).find('.error_area').fadeIn('fast');
 							}
 						});
@@ -659,7 +644,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 		var carenets = $('#carenets').find('.carenet');
 		for (var i = 0; i < carenets.length; i++) {
 			var node = $(carenets[i]);
-			if (node.model() && node.model().carenet_id == carenet.carenet_id) {
+			if (node.model() && node.model().id == carenet.id) {
 				return node;
 			}
 		}
@@ -687,7 +672,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					}
 					var dragged_acc = draggable.model();
 					if (dragged_acc) {
-						return ! _(carenet.accounts).detect(function(a) { return a.account_id === dragged_acc.account_id; });
+						return ! _(carenet.accounts).detect(function(a) { return a.id === dragged_acc.id; });
 					}
 					return false;
 				},
@@ -770,9 +755,9 @@ $.Controller.extend('UI.Controllers.Carenet',
 			//** show account info on hover
 			account_view.bind('mouseover', function(event) {
 				try {
-					var self_id = $(this).model().account_id;
+					var self_id = $(this).model().id;
 					$('#known_accounts').find('.account').not('.new').each(function(i) {
-						if ($(this).model().account_id == self_id) {
+						if ($(this).model().id == self_id) {
 							$(this).addClass('highlight');
 						}
 					});
@@ -804,10 +789,10 @@ $.Controller.extend('UI.Controllers.Carenet',
 					
 					// indicate (im)possible targets
 					var account = acc_view.model();
-					var account_id = account.account_id;
+					var account_id = account.id;
 					$('#carenets').find('.carenet').not('.expanded').not('.new').each(function(i, elem) {
 						var account_arr = $(elem).model().accounts;
-						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.account_id === account_id; })) {
+						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.id === account_id; })) {
 							$(elem).css('opacity', 0.4);
 						}
 					});

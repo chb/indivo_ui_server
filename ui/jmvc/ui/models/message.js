@@ -4,46 +4,52 @@
  * Wraps backend message services.
  * 
  */
-$.Model.extend('UI.Models.Message',
+UI.Models.IndivoBase.extend('UI.Models.Message',
 /* @Static */
-{},
+{
+	attributes: {
+		received_at: 'date',
+		read_at: 'date',
+		archived_at: 'date'
+	},
+	
+	convert : {
+		date : function(raw){
+			var converted = null;
+			if (raw && raw !== "") {
+				converted = new Date(raw);
+			}
+			return converted;
+		}
+	},
+	
+	models: function(data) {
+		return this._super($(data).find("Message").toArray());
+	},
+	
+	model: function(data) {
+		// custom converter for this model
+		data = $(data);
+		var message = new this({
+			'id': data.attr("id"),
+			'sender': data.find("sender").text(),
+			'received_at': data.find("received_at").text(),
+			'read_at': data.find("read_at").text(),
+			'archived_at': data.find("archived_at").text(),
+			'subject': data.find("subject").text(),
+			'body': data.find("body").text(),
+			'severity': data.find("severity").text(),
+			'record_id': data.find("record_id").text(),
+			'sender': data.find("sender").text(),
+			'attachments': []
+		});
+		data.find("attachment").each(function(i, attachment){
+			attachment = $(attachment);
+			message.attachments.push({"num":attachment.attr("num"), "type":attachment.attr("type"), "size":attachment.attr("size")})
+		});
+		return message;			
+	}
+},
 /* @Prototype */
 {
-  init: function(args){
-    var xml_el = args.xml_el;
-    this.account = args.account;
-    this.id = xml_el['@id'];
-    this.sender = xml_el['sender'];
-    this.received_at = xml_el['received_at'];
-    this.read_at = xml_el['read_at'];
-    this.archived_at = xml_el['archived_at'];
-    this.severity = xml_el['severity'];
-    this.subject = xml_el['subject'];
-    this.body = xml_el['body'];
-
-    if (xml_el['record']) { this.about_record_id = xml_el['record']['@id']; }
-    else { this.about_record_id = null; }
-
-    var _this = this;
-    var record = _.detect(ACCOUNT.RECORDS, function(record){ return record.id === _this.about_record_id; });
-    this.record_label = record.label;
-
-    // attachments
-    this.attachments = [];
-    if (!xml_el['attachment']){ return; }
-    else {
-      var attachments = xml_el['attachment'];
-      if (!attachments.length) { attachments = [attachments]; }
-      $(attachments).each(function(i, attachment) {
-        _this.attachments[i] = {'type': attachment['@type'], 'size': attachment['@size'], 'num': attachment['@num']};
-      });
-    }
-  },
-
-  accept_attachment: function(attachment_num, callback) {
-    indivo_api_call("POST",
-                    this.account.base_url() + '/inbox/' + this.id + '/attachments/' + attachment_num + '/accept',
-                    null,
-                    callback);
-  }
 })

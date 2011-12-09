@@ -1,4 +1,4 @@
-@import url("/jmvc/ui/resources/jquery-ui-1.7.2/css/smoothness/jquery-ui-1.7.custom.css");
+@import url("/jmvc/ui/resources/jquery-ui-1.8.16.custom/css/smoothness/jquery-ui-1.8.16.custom.css");
 
 /********************************
 
@@ -154,16 +154,39 @@ table.light tbody td:last-child { border-right:none; }
 tr.odd { background: #fff; }
 tr.unread { font-weight: bold; }
 
+/* Messages */
+
 table.one_message { margin-top: -64px; width: 100%; }
 table.one_message tbody td { border: none; padding: 0.125em .25em;}
 table.one_message tbody td:first-child { width: 5%; text-align: right; color: #aaa;}
 table.one_message tbody td:last-child { width: 95%; }
+.one_message .attachment_accept { 
+	cursor: pointer;
+}
 
 #one_message_body {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family:"Andale Mono", Consolas, monospace;
   border-top: 1px dotted #ccc;
+  font-family:"Andale Mono", Consolas, monospace;
+  padding-top: 10px;
+  word-wrap: break-word;
+}
+
+#one_message_body ul, 
+#one_message_body ol {
+	margin-left: 15px;
+}
+
+#one_message_body li {
+	list-style: inside;
+}
+
+#one_message_body a {
+	color: #00E
+}
+
+#one_message_body a:hover {
+	border: none;
+	text-decoration: underline;
 }
 
 a { 
@@ -478,8 +501,9 @@ blockquote.content { margin: 1em 0; }
 	width: 180px;
 }
 .account_name { white-space: nowrap; }
-.account.new .account_name { line-height: 43px; }
 input.account_name { width: 95%; }
+.account.new .account_name { line-height: 43px; }
+.account.new input.account_name { line-height: 1.5; }
 .account.new .account_name img { vertical-align: -12%; margin-right: 0.5em; }
 .account_id { font-size: 0.8em; white-space: nowrap; color: rgb(128,128,128); color: rgba(0,0,0,0.5); }
 .account_buttons { margin: 0.5em 0 0.25em; text-align: right; }

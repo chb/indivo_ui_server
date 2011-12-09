@@ -4,19 +4,19 @@
   [<a class="message_list" href="#">{% trans "Back to message list" %}</a>]
 </div>
 
-<table class="one_message">
+<table class="one_message" id="<%= message.id %>">
   <tbody>
     <tr>
       <td>{% trans "from" %}</td><td><%= message.sender %></td>
     <tr>
     <tr>
-      <td>{% trans "to" %}</td><td><%= message.record_label %></td>
+      <td>{% trans "to" %}</td><td><%= account.get_record_label(message.record_id) || account.fullName %></td>
     <tr>
     <tr>
       <td>{% trans "subject" %}</td><td><%= message.subject %></td>
     <tr>
     <tr>
-      <td>{% trans "on" %}</td><td><%= message.received_at.substring(0,16) %></td>
+      <td>{% trans "received" %}</td><td><%= UI.UTILS.dateTimeToPrettyString(message.received_at) %></td>
     </tr>
     <% if (message.attachments.length > 0) { %>
       <% $(message.attachments).each(function(i, attachment) { %>
@@ -41,5 +41,5 @@
 
 
 <div id="one_message_body">
-  <%= message.body %>
+  <%== message.body %>
 </div>
