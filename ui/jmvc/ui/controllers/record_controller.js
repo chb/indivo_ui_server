@@ -54,22 +54,23 @@ $.Controller.extend('UI.Controllers.Record',
 	
 	".record_tab click": function(el, ev) {
 		var record = $(el).model();
-
-		// tab functionality
-		$('#record_tabs').find('a').removeClass('selected');
-		$(el).addClass('selected');
-
-		// set background color
-		$('#app_selector .selected, #app_content, #app_content_iframe').animate({
-			backgroundColor : record ? record.bgcolor : 'rgb(250,250,250)'
-		}, 1000);
-
-		// make sure the iframe is hidden and the div is shown
-		$('#app_content_iframe').attr('src', 'about:blank').hide();
-		$('#app_content').show();
-
-		// fire!
-		this.loadRecord(record);
+		if (record) {
+			// tab functionality
+			$('#record_tabs').find('a').removeClass('selected');
+			$(el).addClass('selected');
+			
+			// set background color
+			$('#app_selector .selected, #app_content, #app_content_iframe').animate({
+				backgroundColor : record.bgcolor
+			}, 1000);
+			
+			// make sure the iframe is hidden and the div is shown
+			$('#app_content_iframe').attr('src', 'about:blank').hide();
+			$('#app_content').show();
+			
+			// fire!
+			this.loadRecord(record);
+		}
 	},
 
 	/**
