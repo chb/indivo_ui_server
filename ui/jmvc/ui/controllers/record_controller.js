@@ -61,7 +61,7 @@ $.Controller.extend('UI.Controllers.Record',
 
 		// set background color
 		$('#app_selector .selected, #app_content, #app_content_iframe').animate({
-			backgroundColor : record.bgcolor
+			backgroundColor : record ? record.bgcolor : 'rgb(250,250,250)'
 		}, 1000);
 
 		// make sure the iframe is hidden and the div is shown
@@ -78,6 +78,6 @@ $.Controller.extend('UI.Controllers.Record',
 	addTab: function(record, selected) {
 		// TODO: replace with a listener for changes to a List of Records on the Account when JMVC merges Observable into Model 
 		// append tab to existing list
-		$('#record_tabs').append($.View("//ui/views/record/show_tab", {record:record, selected:selected, color:record.bgcolor}));
+		$('#record_tabs').append($.View("//ui/views/record/show_tab", {record:record, selected:selected, color:record ? record.bgcolor : 'rgb(250,250,250)'}));
 	}
 });
