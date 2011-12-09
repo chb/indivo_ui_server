@@ -504,6 +504,8 @@ blockquote.content { margin: 1em 0; }
 }
 .account_name { white-space: nowrap; }
 input.account_name { width: 95%; }
+.account.new .account_name { line-height: 43px; }
+.account.new input.account_name { line-height: 1.5; }
 .account.new .account_name img { vertical-align: -12%; margin-right: 0.5em; }
 .account_id { font-size: 0.8em; white-space: nowrap; color: rgb(128,128,128); color: rgba(0,0,0,0.5); }
 .account_buttons { margin: 0.5em 0 0.25em; text-align: right; }
