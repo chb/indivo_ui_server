@@ -103,6 +103,13 @@ $.Controller.extend('UI.Controllers.MainController',
 		this.messageCheck = this.options.messageCheck;
 		this.messageCheckDelay = this.options.messageCheckDelay;
 		
+		$('body').ajaxComplete(function(e, xhr, settings) {
+			if(xhr.status === 401) {
+				// logout user if we receive any unauthorized responses
+				window.location.href = '/logout';
+			}
+		});
+
 		// setup periodic new message check 
 		(function inboxUpdater(){
 			if(self.messageCheck) {

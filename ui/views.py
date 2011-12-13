@@ -655,7 +655,9 @@ def indivo_api_call_get(request):
         utils.log('indivo_api_call_get: ' + request.path)
     if not tokens_p(request):
         utils.log('indivo_api_call_get: No oauth_token or oauth_token_secret.. sending to login')
-        return HttpResponseRedirect('/login')
+        res = HttpResponse("Unauthorized")
+        res.status_code = 401
+        return res
     
     # update the IndivoClient object with the tokens stored in the django session
     api = get_api(request)
