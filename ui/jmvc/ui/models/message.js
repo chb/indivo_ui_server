@@ -17,7 +17,7 @@ UI.Models.IndivoBase.extend('UI.Models.Message',
 		date : function(raw){
 			var converted = null;
 			if (raw && raw !== "") {
-				converted = new Date(raw);
+				converted = Date.parse(raw);
 			}
 			return converted;
 		}

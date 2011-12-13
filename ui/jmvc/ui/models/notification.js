@@ -12,7 +12,7 @@ UI.Models.IndivoBase.extend('UI.Models.Notification',
 		date : function(raw){
 			var converted = null;
 			if (raw && raw !== "") {
-				converted = new Date(raw);
+				converted = Date.parse(raw);
 			}
 			return converted;
 		}
