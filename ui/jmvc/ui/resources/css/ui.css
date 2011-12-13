@@ -155,7 +155,11 @@ tr.odd { background: #fff; }
 tr.unread { font-weight: bold; }
 
 /* Messages */
-
+.ui_message .paperclip {
+	float: right;
+	height: 20px;
+	width: 20px;
+}
 table.one_message { margin-top: -64px; width: 100%; }
 table.one_message tbody td { border: none; padding: 0.125em .25em;}
 table.one_message tbody td:first-child { width: 5%; text-align: right; color: #aaa;}
