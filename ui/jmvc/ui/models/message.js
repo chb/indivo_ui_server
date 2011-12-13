@@ -30,6 +30,10 @@ UI.Models.IndivoBase.extend('UI.Models.Message',
 	model: function(data) {
 		// custom converter for this model
 		data = $(data);
+		if (!data.attr("id")) {
+			// Message might not be root
+			data = data.find("Message");
+		}
 		var message = new this({
 			'id': data.attr("id"),
 			'sender': data.find("sender").text(),
@@ -45,7 +49,11 @@ UI.Models.IndivoBase.extend('UI.Models.Message',
 		});
 		data.find("attachment").each(function(i, attachment){
 			attachment = $(attachment);
-			message.attachments.push({"num":attachment.attr("num"), "type":attachment.attr("type"), "size":attachment.attr("size")})
+			message.attachments.push({'num':attachment.attr("num"), 
+				'type':attachment.attr("type"), 
+				'size':attachment.attr("size"), 
+				'doc_id':attachment.attr("doc_id")
+			})
 		});
 		return message;			
 	}

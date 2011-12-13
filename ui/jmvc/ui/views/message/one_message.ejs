@@ -31,7 +31,12 @@
             &middot;
             <%=attachment.type%>
             &middot;
-            [<a class="attachment_accept" id="attachment_<%= attachment.num %>">{% trans "Accept into Record" %}</a>]
+            <% if (attachment.doc_id) { %>
+            	[{% trans "Accepted into Record" %}]
+            <% } else { %>
+            	[<a class="attachment_accept" id="attachment_<%= attachment.num %>">{% trans "Accept into Record" %}</a>]
+            <% } %>
+            
           </td>
         </tr>
       <% }); %>
