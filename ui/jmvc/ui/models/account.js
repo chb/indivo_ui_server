@@ -75,6 +75,9 @@ UI.Models.IndivoBase.extend('UI.Models.Account',
 	},
 
 	get_record_label: function(record_id) {
+		if (!record_id) {
+			return null;
+		}
 		var self = this;
 		if (!this.records) {
 			this.get_records(function(){
