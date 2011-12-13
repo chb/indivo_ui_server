@@ -155,6 +155,23 @@ tr.odd { background: #fff; }
 tr.unread { font-weight: bold; }
 
 /* Messages */
+.message {
+	cursor: pointer;
+}
+
+.message .marker {
+	background-color: #CCC;
+	display: inline-block;
+	height: 1em;
+	margin-right: 4px;
+	visibility: hidden;
+	width: 3px;
+}
+
+.message:hover .marker {
+	visibility: visible;
+}
+
 .ui_message .paperclip {
 	float: right;
 	height: 20px;

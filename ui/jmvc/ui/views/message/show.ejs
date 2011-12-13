@@ -18,14 +18,14 @@
   </thead>
   <tbody>
     <% for (var i=0; i<messages.length; i++) { %>
-      <tr class="<%=(i%2)===0?'odd':'even'%>
+      <tr <%= messages[i] %> class="<%=(i%2)===0?'odd':'even'%>
                  <%= (!messages[i].read_at) ? 'unread' : '' %>
         ">
-        <td><%= UI.UTILS.dateTimeToPrettyString(messages[i].received_at) %></td>
+        <td><div class="marker"> </div><%= UI.UTILS.dateTimeToPrettyString(messages[i].received_at) %></td>
         <td><%= messages[i].sender %></td>
         <td><%= account.get_record_label(messages[i].record_id) || account.fullName %></td>
         <td>
-        	<a href="#" id ="<%= messages[i].id %>" class="message_subject"><%= messages[i].subject %></a>
+        	<%= messages[i].subject %>
         	<% if (messages[i].attachments && messages[i].attachments.length > 0) { %>
         		<img class="icon paperclip" src="/jmvc/ui/resources/images/paperclip.png" alt="attachment" title="attachment">
         	<% } %>

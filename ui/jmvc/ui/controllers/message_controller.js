@@ -47,9 +47,9 @@ $.Controller.extend('UI.Controllers.Message',
 			}))
 		});
 	},
-	".message_subject click": function(el, ev) {
+	".message click": function(el, ev) {
 		this.showMessage({
-			message_id : ev.target.id
+			message_id : el.model().id
 		});
 	},
 	".message_list click": function(el, ev) {
