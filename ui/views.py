@@ -653,7 +653,6 @@ def indivo_api_call_get(request):
     """
     if DEBUG:
         utils.log('indivo_api_call_get: ' + request.path)
-    
     if not tokens_p(request):
         utils.log('indivo_api_call_get: No oauth_token or oauth_token_secret.. sending to login')
         return HttpResponseRedirect('/login')
