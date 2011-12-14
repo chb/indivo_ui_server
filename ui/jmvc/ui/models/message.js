@@ -13,16 +13,6 @@ UI.Models.IndivoBase.extend('UI.Models.Message',
 		archived_at: 'date'
 	},
 	
-	convert : {
-		date : function(raw){
-			var converted = null;
-			if (raw && raw !== "") {
-				converted = Date.parse(raw);
-			}
-			return converted;
-		}
-	},
-	
 	models: function(data) {
 		return this._super($(data).find("Message").toArray());
 	},
