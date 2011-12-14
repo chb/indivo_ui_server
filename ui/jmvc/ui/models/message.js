@@ -33,7 +33,7 @@ UI.Models.IndivoBase.extend('UI.Models.Message',
 			'subject': data.find("subject").text(),
 			'body': data.find("body").text(),
 			'severity': data.find("severity").text(),
-			'record_id': data.find("record_id").text(),
+			'record_id': data.find("record").attr("id"),
 			'sender': data.find("sender").text(),
 			'attachments': []
 		});

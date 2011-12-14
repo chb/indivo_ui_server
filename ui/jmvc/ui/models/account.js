@@ -75,19 +75,19 @@ UI.Models.IndivoBase.extend('UI.Models.Account',
 	},
 
 	get_record_label: function(record_id) {
-		if (!record_id) {
-			return null;
-		}
-		var self = this;
-		if (!this.records) {
-			this.get_records(function(){
+		if(record_id != null && record_id !== "") {
+			var self = this;
+			if(!this.records) {
+				this.get_records(function() {
+					var record = self.records.get(record_id)[0];
+					return (record) ? record.label : null;
+				});
+			} else {
 				var record = self.records.get(record_id)[0];
 				return (record) ? record.label : null;
-			});		
-		}
-		else {
-			var record = self.records.get(record_id)[0];
-			return (record) ? record.label : null;
+			}
+		} else {
+			return null;
 		}
 	},
 	

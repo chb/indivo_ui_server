@@ -155,8 +155,34 @@ tr.odd { background: #fff; }
 tr.unread { font-weight: bold; }
 
 /* Messages */
+
+.messages {
+	table-layout: fixed;
+}
+
+.messages .from {
+	width: 300px;	
+}
+
+.messages .about {
+	width: 130px;	
+}
+
+.messages .date {
+	width: 110px;	
+}
+
+.messages .attachment {
+	width: 32px;	
+}
+
 .message {
 	cursor: pointer;
+}
+
+.message td {
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .message .marker {
