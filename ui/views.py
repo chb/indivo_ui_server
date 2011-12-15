@@ -585,7 +585,7 @@ def record_carenet_create(request, record_id):
             # if we tried to create a carenet with "New carenet" and it already existed, try again with "New carenet-1" and so on to not annoy the user
             if has_default_name:
                 i = 0
-                while 200 != status and 'Carenet name is already taken' == ret.response.get('response_data'):
+                while 200 != status and 'Carenet name is already taken' == ret.response.get('response_data'):		# todo: Hardcoded server response here, improve (server should return a 409, maybe?)
                     i += 1
                     name = '%s-%d' % (default_name, i)
                     ret = api.create_carenet(record_id=record_id, data={'name': name})
@@ -596,8 +596,8 @@ def record_carenet_create(request, record_id):
                 nodes = ET.fromstring(ret.response.get('response_data', '<root/>')).findall('Carenet')
                 tree = nodes[0] if len(nodes) > 0 else None
                 if tree is not None:
-                    carenet = {'record_id': record_id, 'carenet_id': tree.attrib.get('id'), 'name': tree.attrib.get('name'), 'accounts': [], 'has_default_name': has_default_name}
-                    return HttpResponse(simplejson.dumps(carenet))
+                    tree.attrib['has_default_name'] = '1' if has_default_name else '0'
+                    return HttpResponse(ET.tostring(tree))
             
             return HttpResponseBadRequest(ErrorStr(ret.response.get('response_data', 'Error creating carenet')).str())
     
