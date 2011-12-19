@@ -15,6 +15,7 @@ UI.Models.IndivoBase.extend('UI.Models.Carenet',
 		return new this({
 			'id': data.attr("id"),
 			'name': data.attr("name"),
+			'has_default_name': data.attr("has_default_name"),		///< @attention This will only be set when creating a new carenet
 			'mode': data.attr("explicit")
 		});	
 	}
@@ -51,7 +52,7 @@ UI.Models.IndivoBase.extend('UI.Models.Carenet',
 		});
     },
     
-	get_people: function(success, error) {
+	get_accounts: function(success, error) {
 		return $.ajax({
 			url: this.baseURL() + '/accounts/',
 			type: 'get',

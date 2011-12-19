@@ -19,7 +19,7 @@
     <!-- Warning: don't use record_id in the id attr!! Issue with JQuery UI record tab panels!! -->
     <div class="details" style="font-style: italic; font-size: .85em; color: #777; margin: -1em 0 0 1.5em">
       &nbsp;&ndash; {% trans "sent by" %} <%= notifications[i].sender %> {% trans "about" %}
-      <a class="goto_record" href="#"><%= notifications[i].record.label %>&rsquo;s {% trans "record" %}</a>
+      <%= notifications[i].record.label %>&rsquo;s {% trans "record" %}
       <span class="created_at">
        - <%= UI.UTILS.dateTimeToPrettyString(notifications[i].received_at) %>
       </span>

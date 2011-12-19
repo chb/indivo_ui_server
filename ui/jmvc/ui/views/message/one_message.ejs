@@ -10,7 +10,7 @@
       <td>{% trans "from" %}</td><td><%= message.sender %></td>
     <tr>
     <tr>
-      <td>{% trans "to" %}</td><td><%= account.get_record_label(message.record_id) || account.fullName %></td>
+      <td>{% trans "about" %}</td><td><%= account.get_record_label(message.record_id) %></td>
     <tr>
     <tr>
       <td>{% trans "subject" %}</td><td><%= message.subject %></td>
@@ -31,7 +31,12 @@
             &middot;
             <%=attachment.type%>
             &middot;
-            [<a class="attachment_accept" id="attachment_<%= attachment.num %>">{% trans "Accept into Record" %}</a>]
+            <% if (attachment.doc_id) { %>
+            	[{% trans "Accepted into Record" %}]
+            <% } else { %>
+            	[<a class="attachment_accept" id="attachment_<%= attachment.num %>">{% trans "Accept into Record" %}</a>]
+            <% } %>
+            
           </td>
         </tr>
       <% }); %>

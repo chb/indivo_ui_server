@@ -53,15 +53,15 @@ $.Controller.extend('UI.Controllers.Carenet',
     		
     		// load accounts in carenets
 			$(carenets).each(function(i, carenet) {
-				carenet.get_people(self.callback('didGetPeople', carenet));
+				carenet.get_accounts(self.callback('didGetAccounts', carenet));
 			});
 		}
 		else {
-			this.didGetPeople(null, []);
+			this.didGetAccounts(null, []);
 		}
 	},
 	
-	didGetPeople: function(carenet, c_accounts) {
+	didGetAccounts: function(carenet, c_accounts) {
 		this.waitingForCarenetAccounts--;
 		
 		// store accounts
@@ -458,11 +458,13 @@ $.Controller.extend('UI.Controllers.Carenet',
 	createCarenet: function(name, carenet_view, callback) {
 		this.record.create_carenet(name, this.callback('didCreateCarenet', carenet_view, callback), this.callback('didNotCreateCarenet', carenet_view, callback));
 	},
-	didCreateCarenet: function(carenet_view, callback, json, textStatus, xhr) {
-		var new_carenet = UI.Models.Carenet.from_json(null, json);
+	didCreateCarenet: function(carenet_view, callback, new_carenet, textStatus, xhr) {
 		
 		// did create the new carenet
 		if (new_carenet && new_carenet.id) {
+			if (!new_carenet.accounts) {
+				new_carenet.accounts = [];
+			}
 			this.carenets.push(new_carenet);
 			
 			carenet_view.model(new_carenet);
@@ -493,10 +495,10 @@ $.Controller.extend('UI.Controllers.Carenet',
 			callback(null, 'error', xhr);
 		}
 	},
-	didNotCreateCarenet: function(carenet_view, callback, errXHR) {		// error callback for createCallback
+	didNotCreateCarenet: function(carenet_view, callback, errXHR) {		// error callback for createCarenet
 		try {
 			if (errXHR.responseText.length > 0) {
-				alert(errXHR.responseText);
+				alert('{% trans "There was an error creating your new carenet: " }' + errXHR.responseText);
 			}
 			else {
 				throw('No response text');

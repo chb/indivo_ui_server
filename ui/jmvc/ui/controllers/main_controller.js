@@ -14,6 +14,7 @@ $.Controller.extend('UI.Controllers.MainController',
 /* @Static */
 { 
 	defaults: {
+		messageCheck: true,
 		messageCheckDelay: 10
 	},
 	
@@ -100,19 +101,35 @@ $.Controller.extend('UI.Controllers.MainController',
 /* @Prototype */
 {
 	init: function(){
+		var self = this;
 		this.account = this.options.account;
+		this.messageCheck = this.options.messageCheck;
 		this.messageCheckDelay = this.options.messageCheckDelay;
 		
-		// setup periodic new message check TODO: might want to switch to a recursive timeout to prevent queued requests that might not return in order
-		var self = this;
-		this.inboxCheckInterval = setInterval(function(){self.update_inbox_tab(self.account)}, this.messageCheckDelay * 1000);
+		$('body').ajaxComplete(function(e, xhr, settings) {
+			if(xhr.status === 401) {
+				// logout user if we receive any unauthorized responses
+				window.location.href = '/logout';
+			}
+		});
+
+		// setup periodic new message check 
+		(function inboxUpdater(){
+			if(self.messageCheck) {
+				self.update_inbox_tab(self.account, function() {
+					setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
+				});
+			} else {
+				setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
+			}
+		})();
 	},
 	
 	'#add_record_tab click': function(el) {
 		UI.Controllers.Record.createNewRecord(el);
 	},
 	
-	update_inbox_tab: function(account) {
+	update_inbox_tab: function(account, success) {
 		account.get_inbox(function(messages) {
 			var n_unread = _(messages).select(function(m) {
 				if(!m.read_at)
@@ -137,6 +154,9 @@ $.Controller.extend('UI.Controllers.MainController',
 			}
 
 			a.prepend(img)
+			if (success) {
+				success();
+			}
 		});
 	}
 });

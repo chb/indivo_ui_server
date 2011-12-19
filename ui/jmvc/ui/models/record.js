@@ -67,7 +67,7 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 			error: error
 		});
 	},
-
+	
 	//TODO: move to Static
 	create_carenet: function(name, callback, error) {
 		$.ajax({

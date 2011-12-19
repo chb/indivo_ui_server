@@ -41,21 +41,25 @@ steal(
 		$(document).ready(function($) {
 			UI.ENABLED_APPS = new UI.Models.PHA.List();  // TODO: Currently you can not listen to add/remove events on a List inside an $.Observe, so this is external for now
 			UI.ALL_APPS = new UI.Models.PHA.List(); 	 // TODO: Currently you can not listen to add/remove events on a List inside an $.Observe, so this is external for now
-		
-			
+	
 			/**
 			 * ACCOUNT_ID comes in from django: we might want an extern here for Google Closure Complier
 			 * http://code.google.com/closure/compiler/docs/api-tutorial3.html#externs
 			 */
 			// retrieve the logged in account
 			UI.Models.Account.findOne(ACCOUNT_ID, function(account) {
-				// init controllers once Account is loaded
-				$("body").ui_main({account:account});
-				$("body").ui_record({account:account});
-				$("#app_selector").ui_app_list({account:account, enabledApps:UI.ENABLED_APPS});
+				if (account && account.id) {
+					// init controllers once Account is loaded
+					$("body").ui_main({account:account});
+					$("body").ui_record({account:account});
+					$("#app_selector").ui_app_list({account:account, enabledApps:UI.ENABLED_APPS});
+				}
+				else {
+					alert("could not load account");  //TODO: move to common messages file?
+				}
 			},
 			function(error) {
-				alert("could not load account");
+				alert("could not load account"); //TODO: move to common messages file?
 			});
 			
 		});
