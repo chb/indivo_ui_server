@@ -497,7 +497,7 @@ def forgot_password(request):
         
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         # get account id from email (which we are assuming is contact email)
-        ret = api.account_forgot_password(parameters={'contact_email': email})
+        ret = api.account_forgot_password(account_id=email)
         
         # password was reset, show secondary secret
         if 200 == ret.response.get('response_status', 0):
