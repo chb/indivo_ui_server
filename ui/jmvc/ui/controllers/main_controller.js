@@ -132,6 +132,10 @@ $.Controller.extend('UI.Controllers.MainController',
 			if(self.messageCheck) {
 				self.update_inbox_tab(self.account, function() {
 					setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
+				},
+				function() {
+					// increase message check delay if we experienced an error on the last try
+					setTimeout(inboxUpdater, (self.messageCheckDelay + 30) * 1000);
 				});
 			} else {
 				setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
@@ -143,7 +147,7 @@ $.Controller.extend('UI.Controllers.MainController',
 		UI.Controllers.Record.createNewRecord(el);
 	},
 	
-	update_inbox_tab: function(account, success) {
+	update_inbox_tab: function(account, success, error) {
 		account.get_inbox(function(messages) {
 			var n_unread = _(messages).select(function(m) {
 				if(!m.read_at)
@@ -168,9 +172,10 @@ $.Controller.extend('UI.Controllers.MainController',
 			}
 
 			a.prepend(img)
-			if (success) {
+			if(success) {
 				success();
 			}
-		});
+		}, error);
 	}
+
 });
