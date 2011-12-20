@@ -497,18 +497,22 @@ def forgot_password(request):
         
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         # get account id from email (which we are assuming is contact email)
-        ret = api.account_forgot_password(account_id=email)
+        res = api.account_forgot_password(account_id=email).response
+        status = res.get('response_status', 0)
         
         # password was reset, show secondary secret
-        if 200 == ret.response.get('response_status', 0):
-            e = ET.fromstring(ret.response.get('response_data', '<root/>'))
+        if 200 == status:
+            e = ET.fromstring(res.get('response_data', '<root/>'))
             params['SECONDARY_SECRET'] = e.text
         
         # error resetting, try to find out why
         else:
-            params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Password reset failed')
+            if 404 == status:
+                params['ERROR'] = ErrorStr('Unknown account')
+            else:
+                params['ERROR'] = ErrorStr(res.get('response_data') or 'Password reset failed')
             params['ACCOUNT_ID'] = email
-            if 'Account has not been initialized' == ret.response.get('response_data'):
+            if 'Account has not been initialized' == res.get('response_data'):
                 params['UNINITIALIZED'] = True
             
     return utils.render_template('ui/forgot_password', params)
