@@ -30,6 +30,16 @@ $.Controller.extend('UI.Controllers.MainController',
 		$('#app_selector').append('<div id="app_selector_cover"> </div>');
 	},
 	
+	/*
+	 * Show a simple alert to the user
+	 * @parm {String} text The text for the alert
+	 * @param {String} level The level to use for the alert styling. One of "error", "warning", "info", or "success"
+	 */
+	alert: function(text, level) {
+		level = level || "info";
+		$('#alerts').append($.View("//ui/views/main/alert", {text:text, level:level}));
+	},
+	
 	/**
 	 * poof animation
 	 */
@@ -107,6 +117,13 @@ $.Controller.extend('UI.Controllers.MainController',
 			if(xhr.status === 401) {
 				// logout user if we receive any unauthorized responses
 				window.location.href = '/logout';
+			}
+			else if(xhr.status === 500) {
+				var alertsElement = $('#alerts');
+				if (alertsElement.children().length < 5 ) {
+					// don't flood the user with alerts
+					self.Class.alert("Sorry, but something went wrong, Please try again later", "error");
+				}
 			}
 		});
 

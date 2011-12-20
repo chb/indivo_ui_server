@@ -14,10 +14,12 @@ steal(
 )
 .then(
 	// Resources
+	"./resources/js/bootstrap-alerts.js",
 	"./resources/js/underscore-min.js",
 	"./resources/jquery-ui-1.8.16.custom/js/jquery-ui-1.8.16.custom.min.js",
 	"./resources/js/date.js",
 	"./resources/js/utils.js",
+	"./resources/css/bootstrap-custom.css",
 	// Models
 	'./models/account',
 	'./models/record',

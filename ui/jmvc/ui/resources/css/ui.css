@@ -879,6 +879,15 @@ h4 img { vertical-align: -5%; margin-right: 0.75em; }
 }
 
 
+/* Alerts */
+#alerts {
+	position: fixed;
+	top: 5px;
+	width: 80%;
+	z-index: 1000;
+	left: 10%;
+}
+
 
 /***********  Overrides of jquery UI ***********/
 /*.ui-helper-reset { line-height: 1.75; }*/
@@ -923,5 +932,3 @@ h4 img { vertical-align: -5%; margin-right: 0.75em; }
 
 .ui-tabs .ui-tabs-panel { padding: 1em 1.4em; display: block; border-width: 0; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
-
-

@@ -668,7 +668,12 @@ def indivo_api_call_get(request):
     else:
         data = {}
     
-    return HttpResponse(api.call(request.method, request.path[10:], options= {'data': data}), mimetype="application/xml")
+        
+    resp = api.call(request.method, request.path[10:], options= {'data': data})
+    if resp == False:
+        return HttpResponseServerError
+    else:
+        return HttpResponse(resp, mimetype="application/xml")
 
 def indivo_api_call_delete_record_app(request):
     """
