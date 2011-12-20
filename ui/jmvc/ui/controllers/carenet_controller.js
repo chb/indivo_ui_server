@@ -20,10 +20,10 @@ $.Controller.extend('UI.Controllers.Carenet',
 		this.accounts = [];
 		this.carenets = [];
 		
-		this.element.html($.View('//ui/views/carenet/show', {'label': this.record.label}));
-
-    	//this.reloadRecord();
-    	this.didReloadRecord(this.record);
+		if (this.record) {
+			this.element.html($.View('//ui/views/carenet/show', {'label': this.record.label}));
+	    	this.didReloadRecord(this.record);
+	    }
 	},
 	
     /**

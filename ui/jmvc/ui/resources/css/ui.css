@@ -446,6 +446,9 @@ blockquote.content { margin: 1em 0; }
 #add_record_tab img {
 	vertical-align: -6%;
 }
+#add_record_tab.selected {
+	background-color: rgb(250,250,250);
+}
 
 .record_tab {
 	float: right; display: block;
@@ -509,6 +512,33 @@ blockquote.content { margin: 1em 0; }
 .wrap {
   padding: 0px 10px 10px 10px;
 }
+
+
+/*** Managing records ***/
+.table_form {
+	display: table; width: 100%; margin-top: 2em;
+	font-size: 1.2em; line-height: 1.7;
+}
+.table_form input[type="text"] { width: 98%; }
+.table_form button[type="submit"] { min-width: 34%; font-size: 18px; margin-bottom: 10px; }
+
+.row { display: table-row; }
+a.row { display: block; font-size: 1.2em; }
+
+.cell { display: table-cell; padding: 0.25em; }
+.cell:first-child { width: 39%; padding-left: 0; padding-right: 0.8em; text-align: right; color: #666; }
+.cell:last-child { padding-right: 0; }
+.main_action_button { margin-top: 1.5em; }
+.main_action_button .loader { margin-left: 1em; vertical-align: -5%; }
+.moreinfo {
+	margin-top: 0.5em; font-size: 13px; font-weight: normal; color: #666;
+}
+.moreinfo b {
+	color: #CCCCCC; padding: 0 1em;
+}
+
+#new_record_form { max-width: 600px; }
+#new_record_form .cell:first-child { width: 30%; }
 
 
 /***

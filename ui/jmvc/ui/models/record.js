@@ -32,15 +32,15 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 	
 	/**
 	 * Creates a new record
-	 * @param {name} A name for the record
+	 * @param {dictionary} A dictionary containing the record's data
 	 * @param {callback} callback function upon success
 	 * @param {error} callback function upon failure
 	 */
-	create: function(name, callback, error) {
+	create: function(dictionary, callback, error) {
 		$.ajax({
 			type: 'post',
 			url: '/records/',
-			data: {'name': name},
+			data: dictionary,
 			dataType: 'json',
 			success: callback,
 			error: error

@@ -665,7 +665,7 @@ def record_create(request):
         return HttpResponseForbidden(ErrorStr('Adding records is disabled').str())
     
     if HTTP_METHOD_POST == request.method:
-        print request.session.items()
+        
         # make sure we know which account
         account_id = request.session.get('account_id')
         if not account_id:

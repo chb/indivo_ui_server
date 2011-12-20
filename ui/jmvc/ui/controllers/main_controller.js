@@ -21,16 +21,19 @@ $.Controller.extend('UI.Controllers.MainController',
 	/**
 	 * General record UI handling
 	 */
-	hasRecords: function() {
+	lockAppSelector: function() {
+		$('#app_selector').append('<div id="app_selector_cover"> </div>');
+	},
+	unlockAppSelector: function() {
 		$('#app_selector_cover').remove();
 	},
-	noRecords: function() {
+	showNoRecordsHint: function() {
+		UI.Controllers.MainController.lockAppSelector();
 		$('#app_content_iframe').attr('src', 'about:blank').hide();
 		
 		// this will also be shown if adding records has been disabled, but signing up from the site automatically creates the first record,
 		// so this should not be a real issue. Better check here again, anyway.
 		$('#app_content').html('<div id="no_record_hint"><h2>{% trans "Start by creating a record for this account" %}</h2></div>').show();
-		$('#app_selector').append('<div id="app_selector_cover"> </div>');
 	},
 	
 	/**
@@ -123,10 +126,6 @@ $.Controller.extend('UI.Controllers.MainController',
 				setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
 			}
 		})();
-	},
-	
-	'#add_record_tab click': function(el) {
-		UI.Controllers.Record.createNewRecord(el);
 	},
 	
 	update_inbox_tab: function(account, success) {

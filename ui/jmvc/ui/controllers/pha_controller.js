@@ -183,12 +183,12 @@ $.Controller.extend('UI.Controllers.PHA',
 			all_apps = [],
 			my_apps = [],
 			carenets = [];
-	
-		this.record = this.options.account.attr("activeRecord");
-		this.element.html($.View('//ui/views/pha/show', {'label': this.record.label}));
 		
-		//this.reloadRecord();
-		this.didReloadRecord(this.record);
+		this.record = this.options.account.attr("activeRecord");
+		if (this.record) {
+			this.element.html($.View('//ui/views/pha/show', {'label': this.record.label}));
+			this.didReloadRecord(this.record);
+		}
 	},
 	
 	
