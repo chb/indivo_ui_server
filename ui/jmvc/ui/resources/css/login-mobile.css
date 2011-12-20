@@ -28,7 +28,7 @@ label { margin-left: 0.5em; }
 .table_form input[type="text"] { width: 98%; }
 .table_form button[type="submit"] { min-width: 34%; font-size: 18px; margin-bottom: 10px; }
 
-.row { display: block; width: 280px; margin: 0 auto 0.25em; }
+.row { display: block; width: 280px; margin: 0 auto; }
 .list_form .row { width: auto; max-width: 380px; margin: 0 auto; padding: 0.2em 0.8em; background-color: white; border: 1px solid #999; border-bottom-width: 0; }
 .list_form .row:first-child {
 	-moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; border-top-left-radius: 6px;

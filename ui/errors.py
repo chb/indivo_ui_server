@@ -30,6 +30,7 @@ class ErrorStr:
                         'Record name required': _("Please provide a name if you wish to create a record"),
                'Carenet name is already taken': _("This carenet name is already taken, please choose a different one"),
                            'multiple accounts': _("There was a problem resetting your password. Please contact support."),
+                                 'No such App': _("This App does not exist"),
                            'Permission Denied': _("You are not authorized"),
                                 'Socket Error': _("The server is currently unavailable. Please try again in a few minutes."),
             'Socket Error: Connection refused': _("The server is currently unavailable. Please try again in a few minutes.")

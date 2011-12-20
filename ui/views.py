@@ -724,7 +724,7 @@ def record_carenet_create(request, record_id):
             # if we tried to create a carenet with "New carenet" and it already existed, try again with "New carenet-1" and so on to not annoy the user
             if has_default_name:
                 i = 0
-                while 200 != status and 'Carenet name is already taken' == ret.response.get('response_data'):		# todo: Hardcoded server response here, improve (server should return a 409, maybe?)
+                while 200 != status and 'Carenet name is already taken' == ret.response.get('response_data'):       # todo: Hardcoded server response here, improve (server should return a 409, maybe?)
                     i += 1
                     name = '%s-%d' % (default_name, i)
                     ret = api.create_carenet(record_id=record_id, data={'name': name})
@@ -783,6 +783,39 @@ def carenet_delete(request, carenet_id):
 
 
 ##
+##  Apps
+##
+def launch_app(request, app_id):
+    api = get_api()
+    res = api.get_app_info(app_id=app_id).response
+    status = res.get('response_status', 500)
+    
+    # handle errors
+    error_message = None
+    if 404 == status:
+        error_message = ErrorStr('No such App').str()
+    elif 200 != status:
+        error_message = ErrorStr(res.get('response_data', 'Error getting app info')).str()
+        
+    if error_message is not None:
+        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+    
+    # success, find start URL template
+    xml = res.get('response_data', '<root />')
+    e = ET.fromstring(xml)
+    start_url = e.findtext('startURLTemplate')
+    if start_url is None or len(start_url) < 1:
+        start_url = '/record_select'
+    
+    # fill template
+    record_id = request.GET.get('record_id', '') if request.GET else ''
+    carenet_id = request.GET.get('carenet_id', '') if request.GET else ''
+    start_url_rendered = start_url.replace('{record_id}', record_id).replace('{carenet_id}', carenet_id)
+    
+    return HttpResponseRedirect(start_url_rendered)
+
+
+##
 ##  Helpers
 ##
 def indivo_api_call_get(request):
@@ -793,7 +826,7 @@ def indivo_api_call_get(request):
     if DEBUG:
         utils.log('indivo_api_call_get: ' + request.path)
     if not tokens_p(request):
-        utils.log('indivo_api_call_get: No oauth_token or oauth_token_secret.. sending to login')
+        utils.log('indivo_api_call_get: No oauth_token or oauth_token_secret... sending to login')
         res = HttpResponse("Unauthorized")
         res.status_code = 401
         return res
@@ -820,7 +853,7 @@ def indivo_api_call_delete_record_app(request):
         utils.log('indivo_api_call_delete_record_app: ' + request.path + ' ' + request.POST['app_id'] + ' ' + request.POST['record_id'])
     
     if not tokens_p(request):
-        utils.log('indivo_api_call_delete_record_app: No oauth_token or oauth_token_secret.. sending to login')
+        utils.log('indivo_api_call_delete_record_app: No oauth_token or oauth_token_secret... sending to login')
         return HttpResponseRedirect('/login')
     
     # update the IndivoClient object with the tokens stored in the django session
