@@ -101,26 +101,27 @@ def index(request):
 
 def login(request, status):
     """
-    clear tokens in session, show a login form, get tokens from indivo_server, then redirect to index
-    FIXME: make note that account will be disabled after 3 failed logins!!!
+    clear tokens in session, show a login form, get tokens from indivo_server, then redirect to index or return_url
+    FIXME: make note that account will be disabled after x failed logins!!!
     """
     
     # carry over a callback_url and login_return_url should we still have one (calling /logout will clear these and redirect to callback_url)
-    callback_url = request.session.get('callback_url')
-    return_url = request.session.get('login_return_url');
+#    callback_url = request.session.get('callback_url')
+#    return_url = request.session.get('login_return_url');
     request.session.flush()
-    if callback_url:
-        request.session['callback_url'] = callback_url
+#    if callback_url:
+#        request.session['callback_url'] = callback_url
     
     # generate a new session and get return_url
+    return_url = None
     if request.POST.has_key('return_url'):
         return_url = request.POST['return_url']
     elif request.GET.has_key('return_url'):
         return_url = request.GET['return_url']
     
     # save return_url
-    if return_url:
-        request.session['login_return_url'] = return_url
+#    if return_url:
+#        request.session['login_return_url'] = return_url
     
     # set up the template
     FORM_USERNAME = 'username'
@@ -165,19 +166,19 @@ def login(request, status):
         params['ERROR'] = ErrorStr(e.value)                             # get rid of the damn IUtilsError things!
         return utils.render_template(LOGIN_PAGE, params)
     
-    print 'RETURNING TO %s' % return_url
     # we will now return to return_url and can thus delete the stored return url
-    if request.session.has_key('login_return_url'):
-        del request.session['login_return_url']
+#    if request.session.has_key('login_return_url'):
+#        del request.session['login_return_url']
     return HttpResponseRedirect(return_url or '/')
 
 
 def logout(request):
-    callback_url = request.session.get('callback_url')
+#    callback_url = request.session.get('callback_url')
     request.session.flush()
     
     # if we had a callback url stored, redirect to that one
-    return HttpResponseRedirect(callback_url or '/login/did_logout')
+#    return HttpResponseRedirect(callback_url or '/login/did_logout')
+    return HttpResponseRedirect('/login/did_logout')
 
 
 def change_password(request):
@@ -379,10 +380,7 @@ def account_init(request, account_id, primary_secret):
         elif 403 == status:
             return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Wrong confirmation code')})
         else:
-            print '-----'
-            print 'account_init failed:'
-            print ret.response
-            print '-----'
+            utils.log("account_init(): Error initializing an account: %s" % ret.response)
             return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Setup failed')})
     
     # proceed to setup if we have the correct secondary secret
@@ -596,39 +594,39 @@ def account_name(request, account_id):
 ##
 ##  Record Carenet Handling
 ##
-def record_select(request):
-    """
-    Displays an account's records when visiting:
-    http://localhost/oauth/record_select
-    Upon selecting a record, the callback URL is called with the record label and udid attached
-    """
-    #import pdb; pdb.set_trace()
-    api = get_api(request)
-    account_id = urllib.unquote(request.session.get('account_id', ''))
-    if account_id:
-        res = api.read_records(account_id = account_id)
-        status = res.response.get('response_status', 500)
-        go_to_login = False
-        if 404 == status:               # probably unknown account
-            go_to_login = True
-        elif 403 == status:             # maybe old credentials still around?
-            go_to_login = True
-        elif 200 != status:
-            return HttpResponseBadRequest(ErrorStr(res.response.get('response_data', 'Server Error')).str())
-        
-        if not go_to_login:
-            records_xml = res.response.get('response_data', '<root/>')
-            records = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
-            callback_url = request.GET.get('callback_url')
-            if callback_url:
-                request.session['callback_url'] = callback_url
-            elif request.session.has_key('callback_url'):
-                callback_url = request.session['callback_url']
-            
-            return utils.render_template('ui/record_select', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'CALLBACK_URL': callback_url, 'RECORD_LIST': records})
-    
-    url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
-    return HttpResponseRedirect(url)
+#def record_select(request):
+#    """
+#    Displays an account's records when visiting:
+#    http://localhost/record_select
+#    Upon selecting a record, the callback URL is called with the record label and udid attached
+#    """
+#    #import pdb; pdb.set_trace()
+#    api = get_api(request)
+#    account_id = urllib.unquote(request.session.get('account_id', ''))
+#    if account_id:
+#        res = api.read_records(account_id = account_id)
+#        status = res.response.get('response_status', 500)
+#        go_to_login = False
+#        if 404 == status:               # probably unknown account
+#            go_to_login = True
+#        elif 403 == status:             # maybe old credentials still around?
+#            go_to_login = True
+#        elif 200 != status:
+#            return HttpResponseBadRequest(ErrorStr(res.response.get('response_data', 'Server Error')).str())
+#        
+#        if not go_to_login:
+#            records_xml = res.response.get('response_data', '<root/>')
+#            records = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
+#            callback_url = request.GET.get('callback_url')
+#            if callback_url:
+#                request.session['callback_url'] = callback_url
+#            elif request.session.has_key('callback_url'):
+#                callback_url = request.session['callback_url']
+#            
+#            return utils.render_template('ui/record_select', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'CALLBACK_URL': callback_url, 'RECORD_LIST': records})
+#    
+#    url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
+#    return HttpResponseRedirect(url)
 
 
 def record_create(request):
@@ -779,34 +777,34 @@ def carenet_delete(request, carenet_id):
 ##
 ##  Apps
 ##
-def launch_app(request, app_id):
-    api = get_api()
-    res = api.get_app_info(app_id=app_id).response
-    status = res.get('response_status', 500)
-    
-    # handle errors
-    error_message = None
-    if 404 == status:
-        error_message = ErrorStr('No such App').str()
-    elif 200 != status:
-        error_message = ErrorStr(res.get('response_data', 'Error getting app info')).str()
-        
-    if error_message is not None:
-        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
-    
-    # success, find start URL template
-    xml = res.get('response_data', '<root />')
-    e = ET.fromstring(xml)
-    start_url = e.findtext('startURLTemplate')
-    if start_url is None or len(start_url) < 1:
-        start_url = '/record_select'
-    
-    # fill template
-    record_id = request.GET.get('record_id', '') if request.GET else ''
-    carenet_id = request.GET.get('carenet_id', '') if request.GET else ''
-    start_url_rendered = start_url.replace('{record_id}', record_id).replace('{carenet_id}', carenet_id)
-    
-    return HttpResponseRedirect(start_url_rendered)
+#def launch_app(request, app_id):
+#    api = get_api()
+#    res = api.get_app_info(app_id=app_id).response
+#    status = res.get('response_status', 500)
+#    
+#    # handle errors
+#    error_message = None
+#    if 404 == status:
+#        error_message = ErrorStr('No such App').str()
+#    elif 200 != status:
+#        error_message = ErrorStr(res.get('response_data', 'Error getting app info')).str()
+#        
+#    if error_message is not None:
+#        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+#    
+#    # success, find start URL template
+#    xml = res.get('response_data', '<root />')
+#    e = ET.fromstring(xml)
+#    start_url = e.findtext('startURLTemplate')
+#    if start_url is None or len(start_url) < 1:
+#        start_url = '/record_select'
+#    
+#    # fill template
+#    record_id = request.GET.get('record_id', '') if request.GET else ''
+#    carenet_id = request.GET.get('carenet_id', '') if request.GET else ''
+#    start_url_rendered = start_url.replace('{record_id}', record_id).replace('{carenet_id}', carenet_id)
+#    
+#    return HttpResponseRedirect(start_url_rendered)
 
 
 ##
