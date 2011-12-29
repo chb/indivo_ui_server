@@ -14,7 +14,10 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 		data = $(data);
 		return new this({
 			'id': data.attr("id"),
-			'label': data.attr("label")
+			'label': data.attr("label"),
+			'carenet_id': data.attr("carenet_id"),
+			'carenet_label': data.attr("carenet_label"),
+			'shared': data.attr("shared")
 		});	
 	},
 	
