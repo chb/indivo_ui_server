@@ -37,6 +37,7 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 	 * @param {error} callback function upon failure
 	 */
 	create: function(dictionary, callback, error) {
+		dictionary['dataType'] = 'json';
 		$.ajax({
 			type: 'post',
 			url: '/records/',

@@ -30,7 +30,7 @@
 		{% trans "Adding records has been disabled by the administrator" %}
 	</div>
 	{% else %}
-	<form id="record_create_form" class="table_form" method="post" action="/record_create">
+	<form id="record_create_form" class="table_form" method="post" action="/records/">
 		{% if ON_SELECT_URL %}
 		<input type="hidden" name="on_select_url" value="{{ ON_SELECT_URL }}" />
 		{% endif %}

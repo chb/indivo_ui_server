@@ -631,12 +631,18 @@ def record_select(request):
     return HttpResponseRedirect(url)
 
 
-def record_create_form(request):
+def record_create(request):
     """
-    GET+POST /record_create
-    GET: Returns a form
-    POST: Tries to create a record based on the supplied values and returns to the form or on_select_url, if the latter is provided
+    GET+POST to /records/
+    GET:  Show the "record_create" template
+    POST: Try to create a record
     """
+    
+    # is adding records enabled?
+    if not settings.ALLOW_ADDING_RECORDS:
+        return HttpResponseForbidden(ErrorStr('Adding records is disabled').str())
+    
+    # are we logged in?
     account_id = request.session.get('account_id')
     if not account_id:
         url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
@@ -645,40 +651,24 @@ def record_create_form(request):
     on_select_url = request.POST.get('on_select_url', request.GET.get('on_select_url', ''))
     params = {'ON_SELECT_URL': on_select_url, 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS}
     
-    # got a name, try to create
+    # POST, try to create a record
     if HTTP_METHOD_POST == request.method:
-        ret = record_create(request)
+        ret = _record_create(account_id, request.POST)
         if 200 == ret.status_code:
             if on_select_url:
                 return HttpResponseRedirect(on_select_url)
+            elif 'json' == request.POST.get('dataType'):
+                return ret
+            
             params['MESSAGE'] = _('Successfully created new record')
         else:
             params['ERROR'] = ErrorStr(ret.content).str()
     
+    # Not POST and not GET
+    elif HTTP_METHOD_GET != request.method:
+        return HttpResponseBadRequest()
+    
     return utils.render_template('ui/record_create', params)
-
-
-def record_create(request):
-    """
-    POST /records/
-    If POSTing without a name, displays the record create template. If a name is in the POST variables, creates a record
-    and returns to "on_select_url".
-    arrive here from a mobile device.
-    """
-    if not settings.ALLOW_ADDING_RECORDS:
-        return HttpResponseForbidden(ErrorStr('Adding records is disabled').str())
-    
-    if HTTP_METHOD_POST == request.method:
-        
-        # make sure we know which account
-        account_id = request.session.get('account_id')
-        if not account_id:
-            return HttpResponseBadRequest(ErrorStr('Login required').str())
-        
-        # ok, let's try
-        return _record_create(account_id, request.POST)
-    
-    return HttpResponseBadRequest()
 
 
 def _record_create(account_id, dataDict):

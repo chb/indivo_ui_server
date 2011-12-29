@@ -35,7 +35,6 @@ urlpatterns = patterns(
     
     # record and carenet handling
     (r'^records/$', record_create),
-    (r'^record_create', record_create_form),
     (r'^record_select$', record_select),
     (r'^records/(?P<record_id>[^/]+)/carenets/$', record_carenet_create),
     
