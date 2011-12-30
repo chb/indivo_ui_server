@@ -53,7 +53,6 @@ UI.Models.IndivoBase.extend('UI.Models.Account',
 		});
 	},
 	
-	
 	/**
 	 * Retrieve records associated with this Account.
 	 */ 
