@@ -204,12 +204,13 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
   font-weight: bold;
   line-height: 13.5px;
   text-shadow: 0 1px 0 #ffffff;
-  filter: alpha(opacity=25);
-  -khtml-opacity: 0.25;
-  -moz-opacity: 0.25;
-  opacity: 0.25;
+  filter: alpha(opacity=75); /* custom */
+  -khtml-opacity: 0.75; /* custom */
+  -moz-opacity: 0.75; /* custom */
+  opacity: 0.75; /* custom */
 }
 .close:hover {
+  border-bottom: none; /* custom */
   color: #000000;
   text-decoration: none;
   filter: alpha(opacity=40);
@@ -221,7 +222,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 .alert-message {
   position: relative;
   padding: 7px 15px;
-  margin-bottom: 18px;
+  margin-bottom: 5px; /* custom */
   color: #404040;
   background-color: #eedc94;
   background-repeat: repeat-x;

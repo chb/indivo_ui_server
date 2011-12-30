@@ -21,6 +21,8 @@ $.Controller.extend('UI.Controllers.Record',
 {
 	init: function() {
 		this.account = this.options.account;
+		this.alertQueue = this.options.alertQueue;
+		
 		var self = this, 
 			colors = ['rgb(250,250,250)', 'rgb(242,246,255)', 'rgb(244,255,242)', 'rgb(250,242,255)', 'rgb(254,255,242)', 'rgb(255,248,242)', 'rgb(255,242,242)', 'rgb(255,242,251)']; //TODO: greater than 8 records will cause errors
 		
@@ -37,6 +39,9 @@ $.Controller.extend('UI.Controllers.Record',
 			} else {
 				UI.Controllers.MainController.noRecords();
 			}
+		},
+		function() {
+			self.alertQueue.push(new UI.Models.Alert({text:"Sorry, but we were not able to load your records. Please try again later", level:"error"}));
 		});
 	},
 

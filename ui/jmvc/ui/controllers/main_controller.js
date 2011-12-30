@@ -30,16 +30,6 @@ $.Controller.extend('UI.Controllers.MainController',
 		$('#app_selector').append('<div id="app_selector_cover"> </div>');
 	},
 	
-	/*
-	 * Show a simple alert to the user
-	 * @parm {String} text The text for the alert
-	 * @param {String} level The level to use for the alert styling. One of "error", "warning", "info", or "success"
-	 */
-	alert: function(text, level) {
-		level = level || "info";
-		$('#alerts').append($.View("//ui/views/main/alert", {text:text, level:level}));
-	},
-	
 	/**
 	 * poof animation
 	 */
@@ -112,6 +102,7 @@ $.Controller.extend('UI.Controllers.MainController',
 		this.account = this.options.account;
 		this.messageCheck = this.options.messageCheck;
 		this.messageCheckDelay = this.options.messageCheckDelay;
+		this.alertQueue = this.options.alertQueue;
 		
 		$('body').ajaxComplete(function(e, xhr, settings) {
 			if(xhr.status === 401) {
@@ -119,10 +110,10 @@ $.Controller.extend('UI.Controllers.MainController',
 				window.location.href = '/logout';
 			}
 			else if(xhr.status === 500) {
-				var alertsElement = $('#alerts');
-				if (alertsElement.children().length < 5 ) {
+				// TODO: remove once we make sure the rest of the code uses error handlers
+				if (self.alertQueue.length < 5 ) {
 					// don't flood the user with alerts
-					self.Class.alert("Sorry, but something went wrong, Please try again later", "error");
+					self.alertQueue.push(new UI.Models.Alert({text:"Sorry, but something went wrong, Please try again later", level:"error"}));
 				}
 			}
 		});
@@ -177,5 +168,4 @@ $.Controller.extend('UI.Controllers.MainController',
 			}
 		}, error);
 	}
-
 });
