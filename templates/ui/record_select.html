@@ -1,0 +1,36 @@
+{% extends "ui/base.html" %}
+{% load i18n %}
+
+{% block title_suffix %}{% trans "Records" %}{% endblock %}
+{% block welcome %}{% trans "Select Record" %}{% endblock %}
+
+{% block main %}
+	<!-- Login Form -->
+	<div class="list_form">
+		{% for id, name in RECORD_LIST %}
+		<a class="row" href="{{ CALLBACK_URL|default:'/' }}?account_id={{ ACCOUNT_ID }}&record_id={{ id }}&record_label={{ name }}">
+			{{ name }}
+		</a>
+		{% empty %}
+		{% if SETTINGS and not SETTINGS.ALLOW_ADDING_RECORDS %}
+		<div class="login_message">
+			{% trans "This account has no records" %}
+		</div>
+		{% endif %}
+		{% endfor %}
+	</div>
+	
+	{% if SETTINGS and SETTINGS.ALLOW_ADDING_RECORDS %}
+	<div class="list_form">
+		<a class="row" href="/records/?on_select_url=/record_select">
+			{% trans "Add a Record" %}
+		</a>
+	</div>
+	{% endif %}
+	
+	<div class="main_action_button">
+		<p class="moreinfo">
+			<a href="/logout">{% trans "Logout" %}</a>
+		</p>
+	</div>
+{% endblock %}

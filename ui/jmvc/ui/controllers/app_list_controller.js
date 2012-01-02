@@ -31,7 +31,7 @@ $.Controller.extend('UI.Controllers.AppList',
 			controller = el.attr("data-controller");
 		
 		// animate tab to new selection TODO: do we want to revert on failure?
-		this.animateTab(el);
+		this.selectTab(el);
 		
 		switch (type) {
 			case "internal":
@@ -42,7 +42,7 @@ $.Controller.extend('UI.Controllers.AppList',
 				break;
 			case "external": 
 				var url = el.attr("data-url");
-				$("#app_content").html("Loading...").show();
+				$("#app_content").html("Loading...").show();			/// @todo show a nice loading screen
 				$('#app_content_iframe').hide().attr("src", url).load(function(){
 					$(this).show();
 					$("#app_content").hide();
@@ -81,23 +81,24 @@ $.Controller.extend('UI.Controllers.AppList',
 	 * @codeend
 	 */
 	"{enabledApps} add": function(list, ev, newApps) {
-		var self = this;
+		var activeRecord = this.account.attr("activeRecord");
+		if (activeRecord) {
+			$.each(newApps, function(i, app) {
+				// app with a UI
+				if (app.ui) {
+					var startURL = app.getStartURL({
+						'record_id': activeRecord.carenet_id ? '' : activeRecord.id,
+						'carenet_id': activeRecord.carenet_id || ''
+					});
+					$('#active_app_tabs').append($.View("//ui/views/pha/app_tab", {isBackgroundApp:false, app:app, startURL:startURL}));
+				}
 		
-		$.each(newApps, function(i, app) {
-			// app with a UI
-			if(app.ui) {
-				var startURL = app.getStartURL({
-					'record_id': self.account.attr("activeRecord").carenet_id ? '' : self.account.attr("activeRecord").id,
-					'carenet_id': self.account.attr("activeRecord").carenet_id || ''
-				});
-				$('#active_app_tabs').append($.View("//ui/views/pha/app_tab", {isBackgroundApp:false, app:app, startURL:startURL}));
-			}
-	
-			// background app
-			else {
-				$('#background_app_tabs').append($.View("//ui/views/pha/app_tab", {isBackgroundApp:true, app:app}));
-			}
-		});
+				// background app
+				else {
+					$('#background_app_tabs').append($.View("//ui/views/pha/app_tab", {isBackgroundApp:true, app:app}));
+				}
+			});
+		}
 	},
 	
 	/*
@@ -116,13 +117,21 @@ $.Controller.extend('UI.Controllers.AppList',
 		//TODO: JMVC 3.3 should merge $.Observable with $.Model, so we can listen for changes to a specific attribute
 		// load record's apps
 		if (attr === "activeRecord") {
-			var record = newVal;
+			if (newVal) {
+				UI.Controllers.MainController.unlockAppSelector();
+				var record = newVal;
+				// is this a carenet or a record? depending on which, init the appropriate apps
+				if (record.carenet_id) {
+					UI.Models.PHA.get_by_carenet(record.carenet_id, null, this.callback('set_enabled_apps'));
+				} else {
+					UI.Models.PHA.get_by_record(record.id, null, this.callback('set_enabled_apps'));
+				}
+			}
 			
-			// is this a carenet or a record? depending on which, init the appropriate apps
-			if(record.carenet_id) {
-				UI.Models.PHA.get_by_carenet(record.carenet_id, null, this.callback('set_enabled_apps'));
-			} else {
-				UI.Models.PHA.get_by_record(record.id, null, this.callback('set_enabled_apps'));
+			// if we got no record, e.g. to show the new-record form
+			else {
+				UI.Controllers.MainController.lockAppSelector();
+				this.set_enabled_apps([]);
 			}
 		}
 	},
@@ -141,18 +150,23 @@ $.Controller.extend('UI.Controllers.AppList',
 			enabledList.remove(app.id);
 		});
 		
-		// add new ones
+		// add new ones...
 		$.each(apps, function(index, value){
 			enabledList.push(value);
 		});
 		
-		//TODO: is keeping track of previously selected app something we really want to do? 
+		// TODO: is keeping track of previously selected app something we really want to do?
+		// Yes, otherwise switching a record will always throw you to the healthfeed, which I think is not desireable (pp)
 		// ...and try to re-select previous app, show healthfeed otherwise
-		var old_app = $('#' + selected_id);
-		if(old_app.is('*')) {
-			old_app.click();
-		} else {
-			$('#healthfeed_li').click();
+		if (this.account.activeRecord) {
+			var old_app = $('#' + selected_id);
+			if (old_app.is('*')) {
+				console.log(1);
+				old_app.click();
+			}
+			else {
+				$('#healthfeed_li').click();
+			}
 		}
 	},
 	
@@ -169,14 +183,14 @@ $.Controller.extend('UI.Controllers.AppList',
 	/**
 	 * Simple tab functionality
 	 */
-	animateTab: function(el) {
+	selectTab: function(el) {
 		var selector = this.element,
 			selected = selector.find(this.selector + '.selected'),
 			activeRecord = this.account.attr("activeRecord"),
 			bgcolor = activeRecord ? activeRecord.bgcolor : 'rgb(250,250,250)';
 		
 		// deselect old tab and select new tab
-		if (selected.is('*') && selected.attr('id') != el.attr('id')) {
+		if (selected.is('*') && (!el || selected.attr('id') != el.attr('id'))) {
 			var sel_clone = selected.clone(false).css({
 				       'position': 'absolute',
 				           'left': '10px',
@@ -188,25 +202,30 @@ $.Controller.extend('UI.Controllers.AppList',
 			selected.removeClass('selected').css('background-color', '');
 			
 			// animate tab selection
-			el.css('background-color', 'transparent').css('border-right-color', 'transparent');
-			if (this.animateTabSelection) {
-				selected.parent().parent().children().first().prepend(sel_clone);		// prepend to first <ul> to stack it behind all other tabs
-				sel_clone.animate({
-						   'top': el.position().top + 'px',
-						'height': el.innerHeight() - 8 + 'px'
-					},
-					300,
-					'swing',
-					function() {
-						var bgcolor = activeRecord ? activeRecord.bgcolor : 'rgb(250,250,250)';
-						el.addClass('selected').css('background-color', bgcolor).css('border-right-color', '');
-						$(this).remove();
-					}
-				);
-				return;
+			if (el) {
+				el.css('background-color', 'transparent').css('border-right-color', 'transparent');
+				if (this.animateTabSelection) {
+					selected.parent().parent().children().first().prepend(sel_clone);		// prepend to first <ul> to stack it behind all other tabs
+					sel_clone.animate({
+							   'top': el.position().top + 'px',
+							'height': el.innerHeight() - 8 + 'px'
+						},
+						300,
+						'swing',
+						function() {
+							var bgcolor = activeRecord ? activeRecord.bgcolor : 'rgb(250,250,250)';
+							el.addClass('selected').css('background-color', bgcolor).css('border-right-color', '');
+							$(this).remove();
+						}
+					);
+					return;
+				}
 			}
 		}
-		// set background color
-		el.addClass('selected').css('background-color', bgcolor);
+		
+		// set background color on newly selected tab
+		if (el) {
+			el.addClass('selected').css('background-color', bgcolor);
+		}
 	}
 });

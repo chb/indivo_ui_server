@@ -1,0 +1,32 @@
+{% load i18n %}
+<h2>{% trans "Create a new record" %}</h2>
+<form id="new_record_form" class="table_form" method="post" action="" onsubmit="return false;">
+	<div class="table_row">
+		<div class="table_cell">Given Name:</div>
+		<div class="table_cell">
+			<input type="text" id="givenName" name="givenName" value="" tabindex="1" />
+		</div>
+	</div>
+	<div class="table_row">
+		<div class="table_cell">Family Name:</div>
+		<div class="table_cell">
+			<input type="text" name="familyName" value="" tabindex="2" />
+		</div>
+	</div>
+	<div class="table_row">
+		<div class="table_cell">Email Address:</div>
+		<div class="table_cell">
+			<input type="text" name="email" value="" tabindex="3" />
+			
+			<div class="main_action_button">
+				<div class="error_area" style="display:none;"></div>
+				<button id="create_record_submit" type="submit" tabindex="4">Create</button>
+				<img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" style="display:none;" />
+				<p class="moreinfo">
+					<!-- @todo Create a record_controller method to select the first (or last selected) record tab -->
+					<a href="javascript:;" onclick="$('#record_tabs .record_tab').not('#add_record_tab').first().click()">Cancel</a>
+				</p>
+			</div>
+		</div>
+	</div>
+</form>

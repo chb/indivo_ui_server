@@ -1,0 +1,59 @@
+{% extends "ui/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Record" %}{% endblock %}
+
+{% block readyscript %}
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#fullName').select();
+		});
+	</script>
+{% endblock %}
+
+{% block welcome %}{% trans "Create Record" %}{% endblock %}
+
+{% block msg_error %}
+	{% if ERROR %}
+		<div class="login_error">
+			{{ERROR}}
+		</div>
+	{% endif %}
+	{% if MESSAGE %}
+		<div class="login_message">{{ MESSAGE }}</div>
+	{% endif %}
+{% endblock %}
+
+{% block main %}
+	{% if not ALLOW_ADDING_RECORDS %}
+	<div class="login_error">
+		{% trans "Adding records has been disabled by the administrator" %}
+	</div>
+	{% else %}
+	<form id="record_create_form" class="table_form" method="post" action="/records/">
+		{% if ON_SELECT_URL %}
+		<input type="hidden" name="on_select_url" value="{{ ON_SELECT_URL }}" />
+		{% endif %}
+		<div class="row">
+			<div class="cell">{% trans "Record Name:" %}</div>
+			<div class="cell">
+				<input type="text" id="fullName" name="fullName" tabindex="1" value="{{ RECORD_NAME }}" />
+				<!--p class="moreinfo">{% trans "You can change this name any time" %}</p-->
+				
+				<div class="main_action_button">
+					<button id="submit" type="submit" name="submit" tabindex="2">{% trans "Create Record" %}</button>
+					<p class="moreinfo">
+						{% if ON_SELECT_URL %}
+						<a href="{{ ON_SELECT_URL }}">{% trans "Go back" %}</a>
+						{% else %}
+						<a href="/">{% trans "Go to my account" %}</a>
+						{% endif %}
+						<b>|</b>
+						<a href="/logout">{% trans "Logout" %}</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</form>
+	{% endif %}
+{% endblock %}

@@ -36,9 +36,10 @@ from indivo_client_py.lib.client import IndivoClient
 def get_api(request=None):
     api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
     if request:
-        api.update_token(request.session['oauth_token_set'])
+        api.update_token(request.session.get('oauth_token_set'))
     
     return api
+
 
 def tokens_p(request):
     try:
@@ -49,6 +50,7 @@ def tokens_p(request):
             return False
     except KeyError:
         return False
+
 
 def tokens_get_from_server(request, username, password):
     """
@@ -72,7 +74,7 @@ def tokens_get_from_server(request, username, password):
 def index(request):
     if tokens_p(request):
         # get the realname here. we already have it in the js account model
-        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        api = get_api()
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
         try:
             res = api.account_info(account_id = account_id)
@@ -86,28 +88,48 @@ def index(request):
                 fullname = e.findtext('fullName')
                 return utils.render_template('ui/index', { 'ACCOUNT_ID': account_id,
                                                              'FULLNAME': fullname,
+                                                 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS,
                                                    'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
                                                          'HIDE_SHARING': settings.HIDE_SHARING })
             # error
+            return_url = request.session.get('return_url', '/')
             err_msg = res.response.get('response_data', '500: Unknown Error')
-            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(err_msg), 'RETURN_URL': '/', 'SETTINGS': settings})
+            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(err_msg), 'RETURN_URL': return_url, 'SETTINGS': settings})
     
     return HttpResponseRedirect(reverse(login))
 
 
 def login(request, status):
     """
-    clear tokens in session, show a login form, get tokens from indivo_server, then redirect to index
-    FIXME: make note that account will be disabled after 3 failed logins!!!
+    clear tokens in session, show a login form, get tokens from indivo_server, then redirect to index or return_url
+    FIXME: make note that account will be disabled after x failed logins!!!
     """
-    # generate a new session
+    
+    # carry over a callback_url and login_return_url should we still have one (calling /logout will clear these and redirect to callback_url)
+#    callback_url = request.session.get('callback_url')
+#    return_url = request.session.get('login_return_url');
     request.session.flush()
+#    if callback_url:
+#        request.session['callback_url'] = callback_url
+    
+    # generate a new session and get return_url
+    return_url = None
+    if request.POST.has_key('return_url'):
+        return_url = request.POST['return_url']
+    elif request.GET.has_key('return_url'):
+        return_url = request.GET['return_url']
+    
+    # save return_url
+#    if return_url:
+#        request.session['login_return_url'] = return_url
     
     # set up the template
     FORM_USERNAME = 'username'
     FORM_PASSWORD = 'password'
-    FORM_RETURN_URL = 'return_url'
     params = {'SETTINGS': settings}
+    if return_url:
+        params['RETURN_URL'] = return_url
+    
     if 'did_logout' == status:
         params['MESSAGE'] = _("You were logged out")
     elif 'changed' == status:
@@ -115,12 +137,9 @@ def login(request, status):
     
     # process form vars
     if request.method == HTTP_METHOD_GET:
-        params['RETURN_URL'] = request.GET.get(FORM_RETURN_URL, '/')
         return utils.render_template(LOGIN_PAGE, params)
     
     if request.method == HTTP_METHOD_POST:
-        return_url = request.POST.get(FORM_RETURN_URL, '/')
-        params['RETURN_URL'] = return_url
         if request.POST.has_key(FORM_USERNAME) and request.POST.has_key(FORM_PASSWORD):
             username = request.POST[FORM_USERNAME].lower().strip()
             password = request.POST[FORM_PASSWORD]
@@ -147,11 +166,18 @@ def login(request, status):
         params['ERROR'] = ErrorStr(e.value)                             # get rid of the damn IUtilsError things!
         return utils.render_template(LOGIN_PAGE, params)
     
+    # we will now return to return_url and can thus delete the stored return url
+#    if request.session.has_key('login_return_url'):
+#        del request.session['login_return_url']
     return HttpResponseRedirect(return_url or '/')
 
 
 def logout(request):
+#    callback_url = request.session.get('callback_url')
     request.session.flush()
+    
+    # if we had a callback url stored, redirect to that one
+#    return HttpResponseRedirect(callback_url or '/login/did_logout')
     return HttpResponseRedirect('/login/did_logout')
 
 
@@ -212,7 +238,7 @@ def register(request):
                      'full_name': post.get('full_name'),
               'primary_secret_p': set_primary,
             'secondary_secret_p': settings.REGISTRATION.get('set_secondary_secret', 1)}
-        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        api = get_api()
         res = api.create_account(user_hash)
         
         # on success, forward to page according to the secrets that were or were not generated
@@ -342,23 +368,19 @@ def account_init(request, account_id, primary_secret):
                                            data = data)
         status = ret.response.get('response_status', 0)
         
-        # on success also create the first record if we have a full_name
+        # on success also create the first record if we have a full_name and is enabled in settings
         if 200 == status:
-            if account['fullName'] and len(account['fullName']) > 0:
-                record = {'full_name': account['fullName']}
-                res = api.create_record(record)
-                if 200 != res.get('response_status', 0):
-                    utils.log("account_init(): Error creating a record after initializing the account, failing silently. The error was: %s" % res.get('response_data'))
+            if settings.REGISTRATION['autocreate_record'] and account['fullName'] and len(account['fullName']) > 0:
+                res = _record_create(account_id, {'fullName': account['fullName'], 'email': account_id})
+                if 200 != res.status_code:
+                    utils.log("account_init(): Error creating a record after initializing the account, failing silently. The error was: %s" % res.content)
             move_to_setup = True
         elif 404 == status:
             return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
         elif 403 == status:
             return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Wrong confirmation code')})
         else:
-            print '-----'
-            print 'account_init failed:'
-            print ret.response
-            print '-----'
+            utils.log("account_init(): Error initializing an account: %s" % ret.response)
             return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Setup failed')})
     
     # proceed to setup if we have the correct secondary secret
@@ -473,18 +495,22 @@ def forgot_password(request):
         
         api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
         # get account id from email (which we are assuming is contact email)
-        ret = api.account_forgot_password(parameters={'contact_email': email})
+        res = api.account_forgot_password(account_id=email).response
+        status = res.get('response_status', 0)
         
         # password was reset, show secondary secret
-        if 200 == ret.response.get('response_status', 0):
-            e = ET.fromstring(ret.response.get('response_data', '<root/>'))
+        if 200 == status:
+            e = ET.fromstring(res.get('response_data', '<root/>'))
             params['SECONDARY_SECRET'] = e.text
         
         # error resetting, try to find out why
         else:
-            params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Password reset failed')
+            if 404 == status:
+                params['ERROR'] = ErrorStr('Unknown account')
+            else:
+                params['ERROR'] = ErrorStr(res.get('response_data') or 'Password reset failed')
             params['ACCOUNT_ID'] = email
-            if 'Account has not been initialized' == ret.response.get('response_data'):
+            if 'Account has not been initialized' == res.get('response_data'):
                 params['UNINITIALIZED'] = True
             
     return utils.render_template('ui/forgot_password', params)
@@ -549,7 +575,7 @@ def account_name(request, account_id):
     """
     http://localhost/accounts/foo@bar.com/name
     """
-    api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+    api = get_api()
     ret = api.account_info(account_id=account_id)
     status = ret.response.get('response_status', 500)
     dict = {'account_id': account_id}
@@ -568,6 +594,111 @@ def account_name(request, account_id):
 ##
 ##  Record Carenet Handling
 ##
+#def record_select(request):
+#    """
+#    Displays an account's records when visiting:
+#    http://localhost/record_select
+#    Upon selecting a record, the callback URL is called with the record label and udid attached
+#    """
+#    #import pdb; pdb.set_trace()
+#    api = get_api(request)
+#    account_id = urllib.unquote(request.session.get('account_id', ''))
+#    if account_id:
+#        res = api.read_records(account_id = account_id)
+#        status = res.response.get('response_status', 500)
+#        go_to_login = False
+#        if 404 == status:               # probably unknown account
+#            go_to_login = True
+#        elif 403 == status:             # maybe old credentials still around?
+#            go_to_login = True
+#        elif 200 != status:
+#            return HttpResponseBadRequest(ErrorStr(res.response.get('response_data', 'Server Error')).str())
+#        
+#        if not go_to_login:
+#            records_xml = res.response.get('response_data', '<root/>')
+#            records = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
+#            callback_url = request.GET.get('callback_url')
+#            if callback_url:
+#                request.session['callback_url'] = callback_url
+#            elif request.session.has_key('callback_url'):
+#                callback_url = request.session['callback_url']
+#            
+#            return utils.render_template('ui/record_select', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'CALLBACK_URL': callback_url, 'RECORD_LIST': records})
+#    
+#    url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
+#    return HttpResponseRedirect(url)
+
+
+def record_create(request):
+    """
+    GET+POST to /records/
+    GET:  Show the "record_create" template
+    POST: Try to create a record
+    """
+    
+    # is adding records enabled?
+    if not settings.ALLOW_ADDING_RECORDS:
+        return HttpResponseForbidden(ErrorStr('Adding records is disabled').str())
+    
+    # are we logged in?
+    account_id = request.session.get('account_id')
+    if not account_id:
+        url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
+        return HttpResponseRedirect(url)
+    
+    on_select_url = request.POST.get('on_select_url', request.GET.get('on_select_url', ''))
+    params = {'ON_SELECT_URL': on_select_url, 'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS}
+    
+    # POST, try to create a record
+    if HTTP_METHOD_POST == request.method:
+        ret = _record_create(account_id, request.POST)
+        if 200 == ret.status_code:
+            if on_select_url:
+                return HttpResponseRedirect(on_select_url)
+            elif 'json' == request.POST.get('dataType'):
+                return ret
+            
+            params['MESSAGE'] = _('Successfully created new record')
+        else:
+            params['ERROR'] = ErrorStr(ret.content).str()
+    
+    # Not POST and not GET
+    elif HTTP_METHOD_GET != request.method:
+        return HttpResponseBadRequest()
+    
+    return utils.render_template('ui/record_create', params)
+
+
+def _record_create(account_id, dataDict):
+    """
+    Returns an HttpResponse according to the result
+    """
+    api = get_api()
+    res = {}
+    try:
+        res = api.create_record(dataDict)
+        status = res.get('response_status', 0)
+    except IOError, e:
+        status = e.errno
+        res['response_data'] = e.strerror
+    
+    # success, parse XML and change owner to current user
+    if 200 == status:
+        tree = ET.fromstring(res.get('response_data', '<Record/>'))
+        if tree is not None:
+            record_id = tree.attrib.get('id')
+            res = api.set_record_owner(record_id=record_id, data=account_id).response
+            status = res.get('response_status', 0)
+            if 200 == status:
+                record = {'record_id': record_id, 'label': tree.attrib.get('label')}
+                return HttpResponse(simplejson.dumps(record))
+    
+    # failed
+    if 403 == status:
+        return HttpResponseForbidden()
+    return HttpResponseBadRequest(ErrorStr(res.get('response_data', 'Error creating record')).str())
+
+
 def record_carenet_create(request, record_id):
     """
     Create a new carenet for the given record. POST data must have a name, which must not yet exist for this record
@@ -585,7 +716,7 @@ def record_carenet_create(request, record_id):
             # if we tried to create a carenet with "New carenet" and it already existed, try again with "New carenet-1" and so on to not annoy the user
             if has_default_name:
                 i = 0
-                while 200 != status and 'Carenet name is already taken' == ret.response.get('response_data'):		# todo: Hardcoded server response here, improve (server should return a 409, maybe?)
+                while 200 != status and 'Carenet name is already taken' == ret.response.get('response_data'):       # todo: Hardcoded server response here, improve (server should return a 409, maybe?)
                     i += 1
                     name = '%s-%d' % (default_name, i)
                     ret = api.create_carenet(record_id=record_id, data={'name': name})
@@ -644,6 +775,39 @@ def carenet_delete(request, carenet_id):
 
 
 ##
+##  Apps
+##
+#def launch_app(request, app_id):
+#    api = get_api()
+#    res = api.get_app_info(app_id=app_id).response
+#    status = res.get('response_status', 500)
+#    
+#    # handle errors
+#    error_message = None
+#    if 404 == status:
+#        error_message = ErrorStr('No such App').str()
+#    elif 200 != status:
+#        error_message = ErrorStr(res.get('response_data', 'Error getting app info')).str()
+#        
+#    if error_message is not None:
+#        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+#    
+#    # success, find start URL template
+#    xml = res.get('response_data', '<root />')
+#    e = ET.fromstring(xml)
+#    start_url = e.findtext('startURLTemplate')
+#    if start_url is None or len(start_url) < 1:
+#        start_url = '/record_select'
+#    
+#    # fill template
+#    record_id = request.GET.get('record_id', '') if request.GET else ''
+#    carenet_id = request.GET.get('carenet_id', '') if request.GET else ''
+#    start_url_rendered = start_url.replace('{record_id}', record_id).replace('{carenet_id}', carenet_id)
+#    
+#    return HttpResponseRedirect(start_url_rendered)
+
+
+##
 ##  Helpers
 ##
 def indivo_api_call_get(request):
@@ -654,7 +818,7 @@ def indivo_api_call_get(request):
     if DEBUG:
         utils.log('indivo_api_call_get: ' + request.path)
     if not tokens_p(request):
-        utils.log('indivo_api_call_get: No oauth_token or oauth_token_secret.. sending to login')
+        utils.log('indivo_api_call_get: No oauth_token or oauth_token_secret... sending to login')
         res = HttpResponse("Unauthorized")
         res.status_code = 401
         return res
@@ -686,7 +850,7 @@ def indivo_api_call_delete_record_app(request):
         utils.log('indivo_api_call_delete_record_app: ' + request.path + ' ' + request.POST['app_id'] + ' ' + request.POST['record_id'])
     
     if not tokens_p(request):
-        utils.log('indivo_api_call_delete_record_app: No oauth_token or oauth_token_secret.. sending to login')
+        utils.log('indivo_api_call_delete_record_app: No oauth_token or oauth_token_secret... sending to login')
         return HttpResponseRedirect('/login')
     
     # update the IndivoClient object with the tokens stored in the django session
@@ -697,8 +861,24 @@ def indivo_api_call_delete_record_app(request):
     
     return HttpResponse(str(status))
 
+
+##
+##  Authorization
+##
 def authorize(request):
     """
+    If we arrive here via GET:
+        If user has no valid token:
+            Redirect to login with return_url set to the request URL
+        For not yet approved apps:
+            Return JSON with some info data, ui_server will then have the user click "OK"
+        For already approved apps:
+            Silently approve and proceed
+    
+    If we arrive here via POST:
+        Approve the request token in 'oauth_token' for the record id in 'record_id' and redirect to:
+        after_auth?oauth_token=<access_token>&oauth_verifier=<oauth_verifier>
+    
     app_info (the response_data from the get_request_token_info call) looks something like:
     
     <RequestToken token="LNrHRM1OA6ExcSyq22O0">
@@ -721,18 +901,21 @@ def authorize(request):
     
     </RequestToken>
     """
+    
+    # if we don't have a valid token then go to login
     if not tokens_p(request):
         url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
         return HttpResponseRedirect(url)
     
     api = get_api(request)
-    REQUEST_TOKEN = request.REQUEST['oauth_token']
+    request_token = request.REQUEST.get('oauth_token')
+    callback_url = request.REQUEST.get('oauth_callback')
     
     # process GETs (initial adding and a normal call for this app)
     if request.method == HTTP_METHOD_GET and request.GET.has_key('oauth_token'):
         
         # claim request token and check return value
-        res = api.claim_request_token(request_token=REQUEST_TOKEN)
+        res = api.claim_request_token(request_token=request_token)
         if not res or not res.response:
             return utils.render_template('ui/error', {'error_message': 'no response to claim_request_token'})
         
@@ -741,7 +924,8 @@ def authorize(request):
             response_message = res.response.get('response_data', 'bad response to claim_request_token')
             return utils.render_template('ui/error', {'error_status': response_status, 'error_message': ErrorStr(response_message)})
         
-        app_info = api.get_request_token_info(request_token=REQUEST_TOKEN).response['response_data']
+        # get info on the requent token
+        app_info = api.get_request_token_info(request_token=request_token).response['response_data']
         e = ET.fromstring(app_info)
         record_id = e.find('record').attrib.get('id', None)
         carenet_id = e.find('carenet').attrib.get('id', None)
@@ -760,6 +944,8 @@ def authorize(request):
         
         # the "kind" param lets us know if this is app setup or a normal call
         if kind == 'new':
+            title = _('Authorize "{{name}}"?').replace('{{name}}', name)
+            
             if record_id:
                 # single record
                 record_xml = api.read_record(record_id = record_id).response['response_data']
@@ -774,45 +960,58 @@ def authorize(request):
                 RECORDS = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
                 carenets = None
             
+            # render a template if we have a callback and thus assume the request does not come from chrome UI
+            if callback_url is not None:
+                # what to do when we don't have a record_id at this point?
+                request.session['oauth_callback'] = callback_url
+                return utils.render_template('ui/authorize_record', {'REQUEST_TOKEN': request_token,
+                                                                      'CALLBACK_URL': callback_url,
+                                                                         'RECORD_ID': record_id,
+                                                                             'TITLE': title})
+            
+            # return JSON
             data = {      'app_id': app_id,
                             'name': name,
-                           'title': _('Authorize "{{name}}"?').replace('{{name}}', name),
+                           'title': title,
                      'description': description,
-                   'request_token': REQUEST_TOKEN,
+                   'request_token': request_token,
                          'records': RECORDS,
                         'carenets': carenets,
                       'autonomous': autonomous,
                 'autonomousReason': autonomousReason}
             return HttpResponse(simplejson.dumps(data))
-            #return utils.render_template('ui/authorize', data)
+            
         elif kind == 'same':
             # return HttpResponse('fixme: kind==same not implimented yet')
             # in this case we will have record_id in the app_info
-            return _approve_and_redirect(request, REQUEST_TOKEN, record_id, carenet_id)
+            return _approve_and_redirect(request, request_token, record_id, carenet_id)
+            
         else:
             return utils.render_template('ui/error', {'error_message': 'bad value for kind parameter'})
-            #return HttpResponse('bad value for kind parameter')
     
-    # process POST
+    
+    # process POST -- authorize the given token for the given record_id
     elif request.method == HTTP_METHOD_POST \
         and request.POST.has_key('oauth_token') \
         and request.POST.has_key('record_id'):
         
-        app_info = api.get_request_token_info(request_token=REQUEST_TOKEN).response['response_data']
+        app_info = api.get_request_token_info(request_token=request_token).response['response_data']
         e = ET.fromstring(app_info)
         
         record_id = e.find('record').attrib.get('id', None)
         carenet_id = e.find('carenet').attrib.get('id', None)
-        name = e.findtext('App/name')
+        #name = e.findtext('App/name')
         app_id = e.find('App').attrib['id']
-        kind = e.findtext('kind')
-        description = e.findtext('App/description')
+        #kind = e.findtext('kind')
+        #description = e.findtext('App/description')
         
         offline_capable = request.POST.get('offline_capable', False)
         if offline_capable == "0":
             offline_capable = False
         
-        location = _approve_and_redirect(request, request.POST['oauth_token'], request.POST['record_id'], offline_capable = offline_capable)
+        # authenticate for this record
+        if request.POST.has_key('record_id'):
+            location = _approve_and_redirect(request, request_token, request.POST['record_id'], offline_capable = offline_capable)
         
         approved_carenet_ids = request.POST.getlist('carenet_id')
         
@@ -824,9 +1023,11 @@ def authorize(request):
     
     return HttpResponse('bad request method or missing param in request to authorize')
 
+
 def authorize_cancel(request):
     """docstring for authorize_cancel"""
     pass
+
 
 def _approve_and_redirect(request, request_token, record_id=None, carenet_id=None, offline_capable=False):
     """
@@ -838,14 +1039,19 @@ def _approve_and_redirect(request, request_token, record_id=None, carenet_id=Non
         data['record_id'] = record_id
     if carenet_id:
         data['carenet_id'] = carenet_id
-    
     if offline_capable:
         data['offline'] = 1
     
     result = api.approve_request_token(request_token=request_token, data=data)
-    # strip location= (note: has token and verifer)
-    location = urllib.unquote(result.response['prd'][9:])
-    return HttpResponseRedirect(location)
+    status = result.response.get('response_status', 0) if result and result.response else 0
+    if 200 == status:
+        # strip location= (note: has token and verifer)
+        location = urllib.unquote(result.response.get('prd')[9:])
+        return HttpResponseRedirect(location)
+    if 403 == status:
+        return HttpResponseForbidden(result.response.get('prd'))
+    return HttpResponseBadRequest(result.response.get('prd'))
+
 
 def localize_jmvc_template(request, *args, **kwargs):
     """

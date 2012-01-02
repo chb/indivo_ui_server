@@ -18,6 +18,9 @@ urlpatterns = patterns(
     (r'^change_password$', change_password),
     (r'^forgot_password$', forgot_password),
     
+    # Launch an app by its id
+#    (r'^apps/(?P<app_id>[^/]*)', launch_app),
+    
     # account init emails
     # http://localhost/accounts/catherine800@indivohealth.org/init/icmloNHxQrnCQKNn
     # Legacy: http://localhost/indivoapi/accounts/catherine800@indivohealth.org/initialize/icmloNHxQrnCQKNn
@@ -30,13 +33,15 @@ urlpatterns = patterns(
     (r'^accounts/(?P<account_id>[^/]+)/reset_password/(?P<primary_secret>[^/]+)', reset_password),
     (r'^accounts/(?P<account_id>[^/]+)/name$', account_name),
     
-    # record carenet handling
+    # record and carenet handling
+    (r'^records/$', record_create),
+#    (r'^record_select$', record_select),
     (r'^records/(?P<record_id>[^/]+)/carenets/$', record_carenet_create),
     
     # carenet handling
     (r'^carenets/(?P<carenet_id>[^/]+)/rename$', carenet_rename),
     (r'^carenets/(?P<carenet_id>[^/]+)$', MethodDispatcher({'DELETE': carenet_delete})),
-    
+
     # indivo api calls
     (r'^indivoapi/delete_record_app/$', indivo_api_call_delete_record_app),
     (r'^indivoapi/', indivo_api_call_get),

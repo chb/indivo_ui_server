@@ -45,7 +45,9 @@
 		<div id="alerts"></div>
 		
 		<div id="record_tabs">
+			{% if ALLOW_ADDING_RECORDS %}
 			<a id="add_record_tab" class="record_tab" href="javascript:void(0);"><img src="/jmvc/ui/resources/images/add_11.png" alt="+" /></a>
+			{% endif %}
 		</div>
 		
 		<div id="app_container">

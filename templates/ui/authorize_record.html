@@ -1,0 +1,27 @@
+{% extends "ui/base.html" %}
+{% load i18n %}
+
+{% block title_suffix %}{% trans "Records" %}{% endblock %}
+{% block welcome %}{% trans "Authorize Record" %}{% endblock %}
+
+{% block main %}
+	<!-- Authorization Form -->
+	<form method="post" action="/oauth/authorize">
+		<input type="hidden" name="oauth_token" value="{{REQUEST_TOKEN}}" />
+		<input type="hidden" name="oauth_callback" value="{{CALLBACK_URL}}" />
+		<input type="hidden" name="record_id" value="{{RECORD_ID}}" />
+		
+		<div class="login_message">
+			{{TITLE}}
+		</div>
+		
+		<div class="main_action_button">
+			<button type="submit">{% trans "Authorize" %}</button>
+			<p class="moreinfo">
+				<a href="/login" onclick="history.back(); return false;">{% trans "Go back" %}</a>
+				<b>|</b>
+				<a href="/logout">{% trans "Logout" %}</a>
+			</p>
+		</div>
+	</form>
+{% endblock %}
