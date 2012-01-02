@@ -127,6 +127,7 @@ $.Controller.extend('UI.Controllers.Record',
 	
 	/**
 	 * Did submit the create record form - create a record!
+	 * @todo The cancel link does not cancel an active call on a slow network
 	 */
 	'#new_record_form submit': function(el, ev) {
 		el.find('.error_area').first().hide().text('');
