@@ -82,5 +82,14 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 			success: callback,
 			error: error
 		});
+	},
+	
+	enable_app: function(app_id, success, error) {
+		$.ajax({
+			type: 'put',
+			url: this.baseURL() + '/apps/' + app_id,
+			success: success,
+			error: error
+		});
 	}
 })

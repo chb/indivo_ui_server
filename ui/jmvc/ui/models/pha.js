@@ -74,18 +74,6 @@ UI.Models.IndivoBase.extend('UI.Models.PHA',
 		});
 	},
 	
-	//TODO: move to Record/Carenet
-	enable_pha: function(record_id, pha, success, error) {
-		var startURL = this.interpolate_url_template(pha.startURLTemplate, {'record_id' : record_id, 'carenet_id': ''});
-		$.ajax({
-			type: 'get',
-			url: startURL,
-			dataType: 'json',			// the response does NOT get parsed - because of the redirect? Anyway, just parse data.responseText in the callback
-			success: success,
-			error: error
-		});
-	},
-	
 	authorize_token: function(token, record_id, success) {
 		var postURL = '/oauth/authorize';		// should we really POST directly to OAuth?
 		var dict = {
