@@ -16,7 +16,7 @@ p { margin: 0; }
 	position: absolute; top: 0; width: 100%; min-height: 100%;
 }
 #main_box {
-	width: 600px; min-height: 300px; margin: 10% auto 120px;
+	width: 600px; min-height: 300px; margin: 5% auto 120px;
 }
 .table_form {
 	display: table; width: 100%; margin-top: 2em;

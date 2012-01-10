@@ -250,10 +250,16 @@ blockquote.content { margin: 1em 0; }
 .small { font-size: .85em; }
 .details { font-weight: normal; font-style: italic; color: #777; font-family: Corbel, "Lucida Sans", "Gill Sans", "Helvetica Neue", Helvetica, Tahoma, Verdana, sans-serif; ;}
 
+.branding-image {
+	height: 80px;
+	display: inline;
+}
+
 #front_site_name {
 	font-size: 3em; text-align: center;
 	font-family: "Gill Sans", "HelveticaNeue-Light", "Helvetica Neue Light", Corbel, Helvetica, Arial, sans-serif; font-weight: 300;
 	letter-spacing: -0.7px;
+	white-space: nowrap;
 }
 
 #front_site_trademark {
