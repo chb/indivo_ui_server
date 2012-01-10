@@ -263,7 +263,7 @@ blockquote.content { margin: 1em 0; }
 }
 
 #error {
-    width: 500px;
+    max-width: 500px;
     margin: 10% auto 0;
     padding: 2em;
     border: 2px solid rgba(0,0,0,0.15);

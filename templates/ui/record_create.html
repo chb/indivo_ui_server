@@ -31,8 +31,8 @@
 	</div>
 	{% else %}
 	<form id="record_create_form" class="table_form" method="post" action="/records/">
-		{% if ON_SELECT_URL %}
-		<input type="hidden" name="on_select_url" value="{{ ON_SELECT_URL }}" />
+		{% if AFTER_CREATE_URL %}
+		<input type="hidden" name="after_create_url" value="{{ AFTER_CREATE_URL }}" />
 		{% endif %}
 		<div class="row">
 			<div class="cell">{% trans "Record Name:" %}</div>
@@ -43,8 +43,8 @@
 				<div class="main_action_button">
 					<button id="submit" type="submit" name="submit" tabindex="2">{% trans "Create Record" %}</button>
 					<p class="moreinfo">
-						{% if ON_SELECT_URL %}
-						<a href="{{ ON_SELECT_URL }}">{% trans "Go back" %}</a>
+						{% if AFTER_CREATE_URL %}
+						<a href="{{ AFTER_CREATE_URL }}">{% trans "Go back" %}</a>
 						{% else %}
 						<a href="/">{% trans "Go to my account" %}</a>
 						{% endif %}

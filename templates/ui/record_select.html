@@ -8,7 +8,7 @@
 	<!-- Login Form -->
 	<div class="list_form">
 		{% for id, name in RECORD_LIST %}
-		<a class="row" href="{{ CALLBACK_URL|default:'/' }}?account_id={{ ACCOUNT_ID }}&record_id={{ id }}&record_label={{ name }}">
+		<a class="row" href="{{ ON_SELECT_URL|default:'/' }}?record_id={{ id }}&record_label={{ name }}">
 			{{ name }}
 		</a>
 		{% empty %}
@@ -22,7 +22,7 @@
 	
 	{% if SETTINGS and SETTINGS.ALLOW_ADDING_RECORDS %}
 	<div class="list_form">
-		<a class="row" href="/records/?on_select_url=/record_select">
+		<a class="row" href="/records/?after_create_url=/apps/{{ APP_ID }}">
 			{% trans "Add a Record" %}
 		</a>
 	</div>

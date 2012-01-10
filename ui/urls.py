@@ -19,7 +19,7 @@ urlpatterns = patterns(
     (r'^forgot_password$', forgot_password),
     
     # Launch an app by its id
-#    (r'^apps/(?P<app_id>[^/]*)', launch_app),
+    (r'^apps/(?P<app_id>[^/]*)', launch_app),
     
     # account init emails
     # http://localhost/accounts/catherine800@indivohealth.org/init/icmloNHxQrnCQKNn
@@ -35,7 +35,6 @@ urlpatterns = patterns(
     
     # record and carenet handling
     (r'^records/$', record_create),
-#    (r'^record_select$', record_select),
     (r'^records/(?P<record_id>[^/]+)/carenets/$', record_carenet_create),
     
     # carenet handling
