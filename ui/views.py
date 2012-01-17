@@ -747,10 +747,10 @@ def launch_app(request, app_id):
     """
     
     # make the user login first
+    login_url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
     account_id = urllib.unquote(request.session.get('account_id', ''))
     if not account_id:
-        url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
-        return HttpResponseRedirect(url)
+        return HttpResponseRedirect(login_url)
     
     # logged in, get information about the desired app
     api = get_api()         # gets the API with chrome credentials
@@ -778,6 +778,8 @@ def launch_app(request, app_id):
     
     if 404 == status:
         error_message = ErrorStr('Unknown account').str()
+    elif 403 == status:
+        return HttpResponseRedirect(login_url)
     elif 200 != status:
         error_message = ErrorStr(res.response.get('response_data', 'Error getting account records')).str()
     if error_message:
