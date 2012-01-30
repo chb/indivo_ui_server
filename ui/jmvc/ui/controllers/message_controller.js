@@ -25,6 +25,9 @@ $.Controller.extend('UI.Controllers.Message',
 		var self = this;
 
 		this.account.get_inbox(function(messages) {
+			// refresh unread message count
+			// TODO: Once we move the indox to a non-record specific area, allow message controller to use a Message List for showing unread counts, etc
+			UI.Controllers.MainController.update_inbox_tab(messages); 
 			self.messages = messages;
 			// manually pass messages to view
 			self.element.html($.View('//ui/views/message/show.ejs', {
@@ -38,6 +41,10 @@ $.Controller.extend('UI.Controllers.Message',
 		var self = this;
 
 		this.account.get_message(params.message_id, function(message) {
+			// mark this message as read in our existing list  TODO: see todo in showMessageList
+			self.messages.get(params.message_id)[0].read_at = new Date;
+			UI.Controllers.MainController.update_inbox_tab(self.messages); 
+			
 			self.message = message;
 
 			// render one message template
@@ -72,6 +79,4 @@ $.Controller.extend('UI.Controllers.Message',
 				alert(textStatus + ': ' + errorThrown);
 		});
 	}
-
-
 });

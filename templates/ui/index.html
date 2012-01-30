@@ -41,6 +41,9 @@
 			</div>
 		</div>
 		
+		<!-- container for alert messages -->
+		<div id="alerts"></div>
+		
 		<div id="record_tabs">
 			{% if ALLOW_ADDING_RECORDS %}
 			<a id="add_record_tab" class="record_tab" href="javascript:void(0);"><img src="/jmvc/ui/resources/images/add_11.png" alt="+" /></a>
@@ -78,7 +81,7 @@
 		
 		<!-- used for jquery tools overlay -->
 		<div class="overlay" id="overlay"><div class="wrap"></div></div>
-
+		
 		{% if branding %}
 			{% include branding.footer_template %}
 		{% else %}

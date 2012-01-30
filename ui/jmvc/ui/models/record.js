@@ -14,7 +14,10 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 		data = $(data);
 		return new this({
 			'id': data.attr("id"),
-			'label': data.attr("label")
+			'label': data.attr("label"),
+			'carenet_id': data.attr("carenet_id"),
+			'carenet_label': data.attr("carenet_label"),
+			'shared': data.attr("shared")
 		});	
 	},
 	
@@ -77,6 +80,15 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 			data: {'name': name},
 			dataType: 'carenet.model',
 			success: callback,
+			error: error
+		});
+	},
+	
+	enable_app: function(app_id, success, error) {
+		$.ajax({
+			type: 'put',
+			url: this.baseURL() + '/apps/' + app_id,
+			success: success,
 			error: error
 		});
 	}

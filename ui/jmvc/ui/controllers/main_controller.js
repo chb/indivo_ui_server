@@ -99,6 +99,35 @@ $.Controller.extend('UI.Controllers.MainController',
 				setTimeout(UI.Controllers.MainController.poof, 50);
 			}
 		}
+	},
+	
+	update_inbox_tab: function(messages, success, error) {
+		var n_unread = _(messages).select(function(m) {
+			if(!m.read_at)
+				return m;
+		}).length;
+		// alter img src
+		var img = $('#inbox_li img');
+		if(n_unread > 0 && n_unread < 10) {
+			img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox_' + n_unread + '.png');
+		} else if(n_unread >= 10) {
+			img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox_9_plus.png')
+		} else {
+			img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox.png')
+		}
+
+		// alert link text
+		var a = $('#inbox_li a');
+		if(n_unread > 0) {
+			a.text('Inbox (' + n_unread + ')')
+		} else {
+			a.text('Inbox')
+		}
+
+		a.prepend(img)
+		if (success) {
+			success();
+		}
 	}
 },
 /* @Prototype */
@@ -108,54 +137,37 @@ $.Controller.extend('UI.Controllers.MainController',
 		this.account = this.options.account;
 		this.messageCheck = this.options.messageCheck;
 		this.messageCheckDelay = this.options.messageCheckDelay;
+		this.alertQueue = this.options.alertQueue;
 		
 		$('body').ajaxComplete(function(e, xhr, settings) {
 			if(xhr.status === 401) {
 				// logout user if we receive any unauthorized responses
 				window.location.href = '/logout';
 			}
+			else if(xhr.status === 500) {
+				// TODO: remove once we make sure the rest of the code uses error handlers
+				if (self.alertQueue.length < 5 ) {
+					// don't flood the user with alerts
+					self.alertQueue.push(new UI.Models.Alert({text:"Sorry, but something went wrong, Please try again later", level:"error"}));
+				}
+			}
 		});
 
 		// setup periodic new message check 
 		(function inboxUpdater(){
 			if(self.messageCheck) {
-				self.update_inbox_tab(self.account, function() {
-					setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
+				self.account.get_inbox(function(messages) {
+					self.Class.update_inbox_tab(messages, function() {
+						setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
+					},
+					function() {
+						// increase message check delay if we experienced an error on the last try
+						setTimeout(inboxUpdater, (self.messageCheckDelay + 30) * 1000);
+					});
 				});
 			} else {
 				setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
 			}
 		})();
-	},
-	
-	update_inbox_tab: function(account, success) {
-		account.get_inbox(function(messages) {
-			var n_unread = _(messages).select(function(m) {
-				if(!m.read_at)
-					return m;
-			}).length;
-			// alter img src
-			var img = $('#inbox_li img');
-			if(n_unread > 0 && n_unread < 10) {
-				img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox_' + n_unread + '.png');
-			} else if(n_unread >= 10) {
-				img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox_9_plus.png')
-			} else {
-				img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox.png')
-			}
-
-			// alert link text
-			var a = $('#inbox_li a');
-			if(n_unread > 0) {
-				a.text('Inbox (' + n_unread + ')')
-			} else {
-				a.text('Inbox')
-			}
-
-			a.prepend(img)
-			if (success) {
-				success();
-			}
-		});
 	}
 });

@@ -250,10 +250,16 @@ blockquote.content { margin: 1em 0; }
 .small { font-size: .85em; }
 .details { font-weight: normal; font-style: italic; color: #777; font-family: Corbel, "Lucida Sans", "Gill Sans", "Helvetica Neue", Helvetica, Tahoma, Verdana, sans-serif; ;}
 
+.branding-image {
+	height: 80px;
+	display: inline;
+}
+
 #front_site_name {
 	font-size: 3em; text-align: center;
 	font-family: "Gill Sans", "HelveticaNeue-Light", "Helvetica Neue Light", Corbel, Helvetica, Arial, sans-serif; font-weight: 300;
 	letter-spacing: -0.7px;
+	white-space: nowrap;
 }
 
 #front_site_trademark {
@@ -907,6 +913,15 @@ h4 img { vertical-align: -5%; margin-right: 0.75em; }
 }
 
 
+/* Alerts */
+#alerts {
+	position: fixed;
+	top: 5px;
+	width: 80%;
+	z-index: 1000;
+	left: 10%;
+}
+
 
 /***********  Overrides of jquery UI ***********/
 /*.ui-helper-reset { line-height: 1.75; }*/
@@ -951,5 +966,3 @@ h4 img { vertical-align: -5%; margin-right: 0.75em; }
 
 .ui-tabs .ui-tabs-panel { padding: 1em 1.4em; display: block; border-width: 0; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
-
-

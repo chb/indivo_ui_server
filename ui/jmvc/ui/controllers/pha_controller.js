@@ -470,23 +470,10 @@ $.Controller.extend('UI.Controllers.PHA',
 	},
 	
 	enableApp: function(app, checkbox) {
-		UI.Models.PHA.enable_pha(this.record.id, app, this.callback('doEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
-	},
-	doEnableApp: function(app, checkbox, json_app, textStatus, xhr) {
-		
-		// did we enable the correct app?
-		if (json_app.app_id == app.app_id) {
-			if (confirm(json_app.title + (json_app.description && json_app.description.length > 0 ? "\n\n" + json_app.description : ''))) {
-				UI.Models.PHA.authorize_token(json_app.request_token, this.record.id, this.callback('didEnableApp', app, checkbox));
-				return;
-			}
-		}
-		else {
-			alert("Internal Error: Did not call the correct app\nRequested: " + app.app_id + "\nReceived: " + json_app.app_id + "\n\nA probable error is that the start URL in server settings is not correct");
-		}
-		checkbox.prop('checked', false).removeAttr('disabled');
+		this.record.enable_app(app.app_id, this.callback('didEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
 	},
 	doNotEnableApp: function(app, checkbox, xhr, textStatus, error) {
+		//TODO: if we are coming from a successful ajax request, the xhr.status is not filled out accurately (always 200). Once this is fixed in the client, add in better handling
 		try {
 			if (404 == xhr.status) {
 				error = '{% trans "This app is no longer available" %}' + ' (404)';
@@ -495,7 +482,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				error = '{% trans "This app is not available" %}' + ' (No response)';
 			}
 			else {
-				error = (xhr.responseText && xhr.responseText.length > 0) ? xhr.responseText : error;
+				error = '{% trans "Sorry, but we were unable to enable this app." %}';
 			}
 		}
 		catch (exc) {}
@@ -503,19 +490,9 @@ $.Controller.extend('UI.Controllers.PHA',
 		
 		checkbox.prop('checked', false).removeAttr('disabled');
 	},
-	didEnableApp: function(app, checkbox, data, textStatus) {
-		if ('success' == textStatus) {
-			
-			// add to app tabs
-			/*var img_name = app.data.name.toLowerCase().replace(/ +/g, '_');
-			var icon = '<img class="app_tab_img" src="/jmvc/ui/resources/images/app_icons_32/' + img_name + '.png" alt="" />';
-			var params = {'pha': app,
-				       'fire_p': false,
-				    'record_id': this.record.id,					// TODO: supply only record_id OR carenet_id
-				   'carenet_id': this.record.carenet_id
-			};
-			$(document.documentElement).ui_main('add_app', params);*/
-			
+	didEnableApp: function(app, checkbox, data, textStatus, jqXHR) {
+		if (jqXHR.responseText === '<?xml version="1.0" encoding="utf-8" ?><ok/>') {  //TODO: currently the python client eats all useful HTTP status codes, so we have to hack this in for now
+			checkbox.prop('checked', true);
 			UI.ENABLED_APPS.push(app);
 			
 			// add to array and update status
@@ -525,15 +502,13 @@ $.Controller.extend('UI.Controllers.PHA',
 				var this_app = this.all_apps[i];
 				this_app.enabled = (u_apps.detect(function(a) { return a.app_id === app.app_id; }));
 			}
-			checkbox.parentsUntil('.app').last().parent().removeClass('disabled').draggable('option', 'disabled', false);
+			checkbox.removeAttr('disabled').parentsUntil('.app').last().parent().removeClass('disabled').draggable('option', 'disabled', false);
 		}
 		
 		// failed
 		else {
-			checkbox.prop('checked', false);
+			this.doNotEnableApp(app, checkbox, jqXHR, "error");
 		}
-		
-		checkbox.removeAttr('disabled');
 	},
 	
 	disableApp: function(app, checkbox) {

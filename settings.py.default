@@ -47,8 +47,8 @@ ALLOW_ADDING_RECORDS = False
 #   'pretty_name_prepend': 'The',
 #   'header_template': 'ui/header_gpp.html',
 #   'footer_template': 'ui/footer_gpp.html',
-#   'logo_image_src': '/static/resources/images/branding/gpp_three_loop_96x31.png',
-#   'logo_image_big_src': '/static/resources/images/branding/gpp_three_loop_big.png'
+#   'logo_image_src': '/jmvc/ui/resources/images/branding/gpp_three_loop_96x31.png',
+#   'logo_image_big_src': '/jmvc/ui/resources/images/branding/gpp_three_loop_big.png'
 # }
 
 TIME_ZONE = 'UTC'
