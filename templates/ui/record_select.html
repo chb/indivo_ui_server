@@ -7,8 +7,8 @@
 {% block main %}
 	<!-- Login Form -->
 	<div class="list_form">
-		{% for id, name in RECORD_LIST %}
-		<a class="row" href="{{ ON_SELECT_URL|default:'/' }}?record_id={{ id }}&record_label={{ name }}">
+		{% for id, name, url in RECORD_LIST %}
+		<a class="row" href="{{ url|default:'/' }}">
 			{{ name }}
 		</a>
 		{% empty %}

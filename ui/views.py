@@ -754,7 +754,8 @@ def launch_app(request, app_id):
     
     # logged in, get information about the desired app
     api = get_api()         # gets the API with chrome credentials
-    res = api.get_app_info(app_id=app_id).response
+    ret = api.get_app_info(app_id=app_id)
+    res = ret.response if ret else {}
     status = res.get('response_status', 500)
     
     error_message = None
@@ -773,22 +774,28 @@ def launch_app(request, app_id):
     
     # read account records
     api.update_token(request.session.get('oauth_token_set'))        # must be in app-credential-mode now
-    res = api.read_records(account_id = account_id)
-    status = res.response.get('response_status', 500)
+    ret = api.read_records(account_id = account_id)
+    res = ret.response if ret else {}
+    status = res.get('response_status', 500)
     
     if 404 == status:
         error_message = ErrorStr('Unknown account').str()
     elif 403 == status:
         return HttpResponseRedirect(login_url)
     elif 200 != status:
-        error_message = ErrorStr(res.response.get('response_data', 'Error getting account records')).str()
+        error_message = ErrorStr(res.get('response_data', 'Error getting account records')).str()
     if error_message:
         return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
     
     # parse records XML
-    records_xml = res.response.get('response_data', '<root/>')
-    records = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
-    return utils.render_template('ui/record_select', {'SETTINGS': settings, 'APP_ID': app_id, 'ON_SELECT_URL': start_url, 'RECORD_LIST': records})
+    records_xml = res.get('response_data', '<root/>')
+    records_extracted = [[r.get('id'), r.get('label')] for r in ET.fromstring(records_xml).findall('Record')]
+    records = []
+    for rec_id, rec_label in records_extracted:
+        rec_dict = { 'record_id': rec_id, 'carenet_id' : '' }           # TODO: Carenets are not yet supported
+        records.append([rec_id, rec_label, _interpolate_url_template(start_url, rec_dict)])
+    
+    return utils.render_template('ui/record_select', {'SETTINGS': settings, 'APP_ID': app_id, 'RECORD_LIST': records})
 
 
 ##
@@ -945,26 +952,12 @@ def authorize(request):
                 carenets = None
             
             # render a template if we have a callback and thus assume the request does not come from chrome UI
-            if callback_url is not None:
-                # what to do when we don't have a record_id at this point?
-                request.session['oauth_callback'] = callback_url
-                return utils.render_template('ui/authorize_record', {'REQUEST_TOKEN': request_token,
+            request.session['oauth_callback'] = callback_url
+            return utils.render_template('ui/authorize_record', {'REQUEST_TOKEN': request_token,
                                                                       'CALLBACK_URL': callback_url,
                                                                          'RECORD_ID': record_id,
                                                                              'TITLE': title})
-            
-            # return JSON
-            data = {      'app_id': app_id,
-                            'name': name,
-                           'title': title,
-                     'description': description,
-                   'request_token': request_token,
-                         'records': RECORDS,
-                        'carenets': carenets,
-                      'autonomous': autonomous,
-                'autonomousReason': autonomousReason}
-            return HttpResponse(simplejson.dumps(data))
-            
+        
         elif kind == 'same':
             # return HttpResponse('fixme: kind==same not implimented yet')
             # in this case we will have record_id in the app_info
@@ -1035,6 +1028,16 @@ def _approve_and_redirect(request, request_token, record_id=None, carenet_id=Non
     if 403 == status:
         return HttpResponseForbidden(result.response.get('prd'))
     return HttpResponseBadRequest(result.response.get('prd'))
+
+
+def _interpolate_url_template(url, variables):
+    """ Interpolates variables into a url which has placeholders enclosed by curly brackets """
+    
+    new_url = url
+    for key in variables:
+        new_url = re.sub('{\s*' + key + '\s*}', variables.get(key), new_url)
+    
+    return new_url
 
 
 def localize_jmvc_template(request, *args, **kwargs):
