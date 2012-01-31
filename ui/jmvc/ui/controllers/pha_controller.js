@@ -470,7 +470,12 @@ $.Controller.extend('UI.Controllers.PHA',
 	},
 	
 	enableApp: function(app, checkbox) {
-		this.record.enable_app(app.app_id, this.callback('didEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
+		if (confirm('{% trans "Are you sure you want to enable " %}' + app.name + '?')) {
+			this.record.enable_app(app.app_id, this.callback('didEnableApp', app, checkbox), this.callback('doNotEnableApp', app, checkbox));
+		}
+		else {
+			checkbox.prop('checked', false).removeAttr('disabled');
+		}
 	},
 	doNotEnableApp: function(app, checkbox, xhr, textStatus, error) {
 		//TODO: if we are coming from a successful ajax request, the xhr.status is not filled out accurately (always 200). Once this is fixed in the client, add in better handling
