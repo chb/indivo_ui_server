@@ -3,21 +3,7 @@
  * 
 @tag controllers, home
  *
- * PHA settings controller. Can remove a pha here and later set preferences, view logs, etc
- *
- *
- *
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- * WARNING: carenet stuff broken and incomplete!!!
- *
+ * PHA settings controller.
  *
  * @author Pascal Pfiffner (pascal.pfiffner@childrens.harvard.edu)
  * @author Arjun Sanyal (arjun.sanyal@childrens.harvard.edu)
