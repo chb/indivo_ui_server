@@ -183,35 +183,46 @@ def change_password(request):
     """
     params = {}
     
+    # POST: Try to set a new password
     if request.method == HTTP_METHOD_POST:
         account_id = request.POST.get('account_id')
-        params['ACCOUNT_ID'] = account_id
-        
-        # get old password
-        old_password = request.POST.get('old_pw')
-        
-        # check new passwords
-        pw1 = request.POST.get('pw1')
-        if len(pw1) >= (settings.REGISTRATION['min_password_length'] or 8):
-            pw2 = request.POST.get('pw2')
-            if pw1 == pw2:
-                api = get_api(request)
-                ret = api.account_change_password(account_id=account_id, data={'old': old_password, 'new': pw1})
-                status = ret.response.get('response_status', 0)
-                
-                # password was reset, log the user in
-                if 200 == status:
-                    return HttpResponseRedirect('/login/changed')
-                elif 403 == status:
-                    params['ERROR'] = ErrorStr('Wrong old password')
+        if account_id:
+            params['ACCOUNT_ID'] = account_id
+            
+            # get old password
+            old_password = request.POST.get('old_pw')
+            
+            # check new passwords
+            pw1 = request.POST.get('pw1')
+            if len(pw1) >= (settings.REGISTRATION['min_password_length'] or 8):
+                pw2 = request.POST.get('pw2')
+                if pw1 == pw2:
+                    api = get_api(request)
+                    ret = api.account_change_password(account_id=account_id, data={'old': old_password, 'new': pw1})
+                    status = ret.response.get('response_status', 0)
+                    
+                    # password was reset, log the user in
+                    if 200 == status:
+                        return HttpResponseRedirect('/login/changed')
+                    elif 403 == status:
+                        params['ERROR'] = ErrorStr('Wrong old password')
+                    else:
+                        params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Password change failed')
                 else:
-                    params['ERROR'] = ErrorStr(ret.response.get('response_data') or 'Password change failed')
+                    params['ERROR'] = ErrorStr('Passwords do not match')
             else:
-                params['ERROR'] = ErrorStr('Passwords do not match')
+                params['ERROR'] = ErrorStr('Password too short')
         else:
-            params['ERROR'] = ErrorStr('Password too short')
+            params['ERROR'] = 'No account_id present'
+    
+    # GET: Show the form, if we are logged in
     else:
-        account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
+        token = request.session.get('oauth_token_set')
+        if not token:
+            login_url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
+            return HttpResponseRedirect(login_url)
+        
+        account_id = urllib.unquote(token.get('account_id') if token else '')
         params['ACCOUNT_ID'] = account_id
     
     return utils.render_template('ui/change_password', params)
