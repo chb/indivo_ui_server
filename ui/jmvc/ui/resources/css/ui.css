@@ -379,6 +379,9 @@ blockquote.content { margin: 1em 0; }
 	margin: 0 22px -6px 0; padding: 2px 5px 0;
 	overflow: hidden;
 }
+#loading_records_hint {
+	margin-right: 1em; line-height: 35px; color: rgb(190,188,185); color: rgba(0,0,0,0.25);
+}
 #add_record_tab img {
 	vertical-align: -6%;
 }

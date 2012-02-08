@@ -21,6 +21,10 @@ $.Controller.extend('UI.Controllers.Record',
 		this.loadRecords();
 	},
 	
+	/**
+	 *	Removes all record tabs (but not the add-record tab), fetches the records of this.account, adds tabs for each record and then
+	 *	loads the first or the given record.
+	 */
 	loadRecords: function(load_record) {
 		this.removeAllTabs();
 		var self = this, 
@@ -104,7 +108,8 @@ $.Controller.extend('UI.Controllers.Record',
 	 * Add a record tab
 	 */
 	addTab: function(record, selected) {
-		// TODO: replace with a listener for changes to a List of Records on the Account when JMVC merges Observable into Model 
+		// TODO: replace with a listener for changes to a List of Records on the Account when JMVC merges Observable into Model
+		$('#loading_records_hint').remove();
 		// append tab to existing list
 		$('#record_tabs').append($.View("//ui/views/record/show_tab", {record:record, selected:selected, color:record ? record.bgcolor : 'rgb(250,250,250)'}));
 	},
