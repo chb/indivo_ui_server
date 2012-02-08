@@ -1,13 +1,28 @@
 
 Indivo UI Server
 ================
-
-Arjun Sanyal (arjun.sanyal@childrens.harvard.edu)  
-Ben Adida (ben.adida@childrens.harvard.edu)
-
+The Indivo UI Server is a reference implementation of an Indivo X UI app, which uses
+the Indivo API to present users with an interface in which to login and run user apps.
+For more information about the Indivo X Personally Controlled Health Record Platform,
+see <http://indivohealth.org>, or the technical documentation at 
+<http://docs.indivohealth.org>
 
 Installation instructions for all of Indivo X are at <http://wiki.chip.org/indivo>
-All source code is licensed under GPLv3.
+
+Licensing
+---------
+Copyright (C) 2012 Children's Hospital Boston. All rights reserved.
+
+This program is free software: you can redistribute it and/or modify it under the terms
+of the GNU Lesser General Public License as published by the Free Software Foundation, 
+either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Lesser General Public License for more details.
+
+A copy of the GNU Lesser General Public License is located in the LICENSE.txt file in this
+repository, and at http://www.gnu.org/licenses/.
 
 
 Dependencies
