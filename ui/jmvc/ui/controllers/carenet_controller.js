@@ -353,6 +353,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				
 				// remove warning
 				if (account.in_no_carenet) {
+					account.in_no_carenet = false;
 					$('#known_accounts').find('.account').each(function(i, node) {
 						var acc = $(node).model();
 						if (acc && acc.id == account.id) {
