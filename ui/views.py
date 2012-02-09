@@ -721,7 +721,7 @@ def carenet_rename(request, carenet_id):
             ret = api.rename_carenet(carenet_id=carenet_id, data={'name': name})
             status = ret.response.get('response_status', 500)
             if 200 == status:
-                return ret;
+                return HttpResponse(ret.response.get('response_data'));
             elif 403 == status:
                 return HttpResponseForbidden('You do not have permission to rename carenets')
             return HttpResponseBadRequest(ErrorStr(ret.response.get('response_data', 'Error renaming carenet')).str())

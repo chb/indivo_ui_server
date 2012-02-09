@@ -39,13 +39,13 @@ UI.Models.IndivoBase.extend('UI.Models.Carenet',
     	var self = this;
         $.ajax({
 			type: 'post',
-			url: this.baseURL() + '/rename',
+			url: '/carenets/' + this.id + '/rename',
 			data: {'name': new_name},
 			dataType: 'carenet.models',  // single values are wrapped in a <Carenets> element
 			success: function(data, textStatus, xhr) {
-				self.name = data[0].name;
+				self.name = (data && data.length > 0) ? data[0].name : self.name;
 				if (success) {
-					success(self, textStatus, xhr);
+					success(textStatus, xhr);
 				}
 			},
 			error: error
