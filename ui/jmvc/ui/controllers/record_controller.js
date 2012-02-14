@@ -156,7 +156,7 @@ $.Controller.extend('UI.Controllers.Record',
 		this.loadRecords(new_record_id);
 	},
 	didNotCreateNewRecord: function(form, errXhr) {
-		console.log('Error handling not really implemented', errXhr);
+		steal.dev.log('Error handling not really implemented', errXhr);
 		form.find('.error_area').first().text('Error');
 		form.find('.loader').first().hide();
 		$('#create_record_submit').removeAttr('disabled');

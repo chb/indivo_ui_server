@@ -532,11 +532,11 @@ $.Controller.extend('UI.Controllers.Carenet',
 				carenet_view.removeClass('highlight');
 			}
 			else {
-				console.log('deleteCarenet: carenet_view has no model!');
+				steal.dev.log('deleteCarenet: carenet_view has no model!');
 			}
 		}
 		else {
-			console.log('deleteCarenet: carenet_view was null!');
+			steal.dev.log('deleteCarenet: carenet_view was null!');
 		}
 	},
 	didDeleteCarenet: function(carenet, carenet_view, data, textStatus, xhr) {
@@ -599,7 +599,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			}
 		}
 		catch (exc) {
-			console.log('didNotDeleteCarenet:', exc);
+			steal.dev.log('didNotDeleteCarenet:', exc);
 			alert('{% trans "There was an error deleting the carenet, please try again" %}');
 		}
 		

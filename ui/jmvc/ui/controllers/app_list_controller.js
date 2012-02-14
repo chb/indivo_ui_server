@@ -161,7 +161,6 @@ $.Controller.extend('UI.Controllers.AppList',
 		if (this.account.activeRecord) {
 			var old_app = $('#' + selected_id);
 			if (old_app.is('*')) {
-				console.log(1);
 				old_app.click();
 			}
 			else {
