@@ -73,27 +73,13 @@ def tokens_get_from_server(request, username, password):
 
 def index(request):
     if tokens_p(request):
-        # get the realname here. we already have it in the js account model
         api = get_api()
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
-#        try:
-#            res = api.account_info(account_id = account_id)
-#        except:
-#            res = None
-#        
-#        # got account info from the server
-#        if res and res.response:
-#            if 200 == res.response.get('response_status', 0):
-#                e = ET.fromstring(res.response.get('response_data', '<xml/>'))
-#                fullname = e.findtext('fullName')
+
         return utils.render_template('ui/index', { 'ACCOUNT_ID': account_id,
                                          'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS,
                                            'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
                                                  'HIDE_SHARING': settings.HIDE_SHARING })
-            # error
-#            return_url = request.session.get('return_url', '/')
-#            err_msg = res.response.get('response_data', '500: Unknown Error')
-#            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(err_msg), 'RETURN_URL': return_url, 'SETTINGS': settings})
     
     return HttpResponseRedirect(reverse(login))
 
