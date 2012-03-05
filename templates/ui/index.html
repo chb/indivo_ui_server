@@ -7,9 +7,9 @@
 		<link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
 		
 		{% if branding %}
-			<title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
+			<title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}</title>
 		{% else %}
-			<title>{% trans "Indivohealth" %} {% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</title>
+			<title>{% trans "Indivohealth" %}</title>
 		{% endif %}
 	</head>
 	<body>
@@ -27,7 +27,7 @@
 						{% trans "Indivohealth" %}<span id="header_trademark">&trade;</span>
 					{% endif %}
 				</div>
-				<div id="header_fullname">{% blocktrans %}for {{FULLNAME}}{% endblocktrans %}</div>
+				<div id="header_fullname"></div>
 			</div>
 			<div id="header_controls">
 				<a href="{% url ui.views.change_password %}">

@@ -57,6 +57,9 @@ steal(
 			// retrieve the logged in account
 			UI.Models.Account.findOne(ACCOUNT_ID, function(account) {
 				if (account && account.id) {
+					// update title and header with account fullName
+					$('#header_fullname').text(' for ' + account.fullName);
+					$('title').text($('title').text() + ' for ' + account.fullName);
 					// init controllers once Account is loaded
 					$("body").ui_main({account:account, alertQueue:UI.ALERT_QUEUE});
 					$("body").ui_record({account:account, alertQueue:UI.ALERT_QUEUE});
