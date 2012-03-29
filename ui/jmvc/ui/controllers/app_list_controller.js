@@ -37,8 +37,11 @@ $.Controller.extend('UI.Controllers.AppList',
 			case "internal":
 				// clear out old controllers and attach new one
 				this.clearControllers($('#app_content'));
+				
+				// make sure previously attached iframe load event does not fire
+				$('#app_content_iframe').unbind("load").hide();
+				
 				$("#app_content").html("")["ui_" + controller]({account:this.account}).show();
-				$('#app_content_iframe').hide();
 				break;
 			case "external": 
 				var url = el.attr("data-url");
