@@ -21,43 +21,94 @@ $.Controller.extend('UI.Controllers.AppList',
 		this.enabledApps = this.options.enabledApps;
 		this.selector = this.options.selector;
 		this.animateTabSelection = this.options.animateTabSelection;
+		this.appMap = {};
+		this.lastAppId = null;
 	},
 	
 	/*
 	 * Display an app when its selector is clicked.  
 	 */
 	"{selector} click": function(el, ev) {
-		var type = el.attr("data-appType"),
-			controller = el.attr("data-controller");
-		
+	        var appModel = el.model();
+		var appId = el.attr("id");
+	        var controller = el.attr("data-controller");
+
 		// animate tab to new selection TODO: do we want to revert on failure?
-		this.selectTab(el);
+		this.selectTab(el);		
+
+		// Clean up the previous running app
+		$("#app_content").children().hide();
+		if (this.lastAppId) {
+		    // if the click was on the previously running app, then refresh that app
+		    if (appId === this.lastAppId && this.appMap[appId]) {
+
+			// if the previously selected tab was internal, clean up its div
+			if (!appModel) { this.appMap[appId].remove(); }
 		
-		switch (type) {
-			case "internal":
-				// clear out old controllers and attach new one
-				this.clearControllers($('#app_content'));
-				
-				// make sure previously attached iframe load event does not fire
-				$('#app_content_iframe').unbind("load").hide();
-				
-				$("#app_content").html("")["ui_" + controller]({account:this.account}).show();
-				break;
-			case "external": 
-				var url = el.attr("data-url");
-				$("#app_content").html("Loading...").show();			/// @todo show a nice loading screen
-				$('#app_content_iframe').hide().attr("src", url).load(function(){
-					$(this).show();
-					$("#app_content").hide();
-				});
-				break;
-			case "background":
-				alert("background not supported yet");
-				break;
-			default:
-				alert("app type of " + type + " not supported")
-				break;
+			// otherwise, let the app_manager handle it
+			else { APP_MANAGER.stop_managing_app(appModel.MANAGER_uuid);}
+			
+			// and remove it from our app map
+			delete this.appMap[appId];
+		    }
+		     
+		    // Otherwise, Background the previous running app
+		    else {
+			var lastModel = $("#" + this.lastAppId).model();
+			if (lastModel) {
+			    APP_MANAGER.notify_app_backgrounded(lastModel.MANAGER_uuid);
+			}
+		    }
 		}
+
+		// If the newly selected app is already running and has an associated model,
+		// foreground it and show it		
+		var appEl = this.appMap[appId];
+		if (appEl && appModel) {
+		    APP_MANAGER.notify_app_foregrounded(appModel.MANAGER_uuid);
+		    appEl.show()
+		}
+
+		// If the newly selected app is already running and internal, just show it.
+		else if (appEl) {
+		    appEl.show()
+		}
+		
+		// If we are starting an app for the first time, and it has an associated model, 
+		// set it up with the app manager
+		else if (appModel) {
+
+		    // show a loading image while we wait
+		    var loading_img = el.find(".app_tab_loading");
+		    loading_img.show()
+		    
+		    var activeRecord = this.account.attr("activeRecord");
+		    var manifest = appModel.getManifest({'record_id': activeRecord.carenet_id ? '' : activeRecord.id,
+							 'carenet_id': activeRecord.carenet_id || ''});
+		    var context = this.getContext();
+		    var self = this;
+		    var ret = APP_MANAGER.launch_app(manifest, context, {})
+		    ret.done(function(app_instance){
+			    self.appMap[appId] = $(app_instance.iframe).load(function(){loading_img.hide();});
+			    appModel.attr("MANAGER_uuid", app_instance.uuid);
+			});
+		}
+		
+		// If we are starting an app for the first time, and it is internal,
+		// just load the html under the #app_content div and show it.
+		else {
+		    // show a loading image while we wait
+		    var loading_img = el.find(".app_tab_loading");
+		    loading_img.show()
+
+		    var newHtml = $('<div></div>')["ui_" + controller]({account:this.account});
+		    this.appMap[appId] = newHtml.appendTo("#app_content").show();
+
+		    loading_img.hide()
+		}
+
+		// set the newly active app as the latest active one
+		this.lastAppId = appId;
 	},
 	
 	/**
@@ -123,6 +174,14 @@ $.Controller.extend('UI.Controllers.AppList',
 			if (newVal) {
 				UI.Controllers.MainController.unlockAppSelector();
 				var record = newVal;
+
+				// stop managing the old record's apps
+				APP_MANAGER.record_context_changed();
+				$.each(this.appMap, function(app_id, app_el) {
+					if (!app_el.model()) { app_el.remove(); }
+				    });
+				this.appMap = {};
+
 				// is this a carenet or a record? depending on which, init the appropriate apps
 				if (record.carenet_id) {
 					UI.Models.PHA.get_by_carenet(record.carenet_id, null, this.callback('set_enabled_apps'));
@@ -148,15 +207,15 @@ $.Controller.extend('UI.Controllers.AppList',
 			selected_id = $('#app_selector .selected').attr('id'), // remember selected app before clearing...
 			removeList = enabledList.slice(0, enabledList.length); 
 			
-		// clear out exising apps	
+		// clear out exising apps
 		$.each(removeList, function(i, app) { 
 			enabledList.remove(app.id);
-		});
+		    });		
 		
 		// add new ones...
 		$.each(apps, function(index, value){
 			enabledList.push(value);
-		});
+		    });
 		
 		// TODO: is keeping track of previously selected app something we really want to do?
 		// Yes, otherwise switching a record will always throw you to the healthfeed, which I think is not desireable (pp)
@@ -229,5 +288,19 @@ $.Controller.extend('UI.Controllers.AppList',
 		if (el) {
 			el.addClass('selected').css('background-color', bgcolor);
 		}
+	},
+
+	getContext: function() {
+	    var activeRecord = this.account.attr("activeRecord");
+	    var context = {}
+	    context.user = {
+		id: this.account.id,
+		full_name: this.account.fullName
+	    };
+	    context.record = {
+		id: activeRecord.carenet_id || activeRecord.id,
+		full_name: activeRecord.label
+	    };
+	    return context;
 	}
 });

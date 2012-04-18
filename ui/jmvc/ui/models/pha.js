@@ -16,7 +16,21 @@ UI.Models.IndivoBase.extend('UI.Models.PHA',
 		// custom converter for this model
 		data = $(data);
 		return new this({
+			/*			'app_id': data.attr("id"),
+			'startURLTemplate': data.find("startURLTemplate").text(),
+			'name': data.find("name").text(),
+			'description': data.find("description").text(),
+			'autonomous': ("True" === data.find("autonomous").text()),
+			'autonomousReason': data.find("autonomousReason").text(),
+			'frameable': ("True" === data.find("frameable").text()),
+			'ui': ("True" === data.find("ui").text())*/
+			
 			'app_id': data.attr("id"),
+			'author':"TRAVERS AWESOME FRANCKLE",
+			'version': "1.0",
+			'mode':"ui",
+			"scope":"record",
+			"icon": "/jmvc/ui/resources/images/app_icons_32/patient_notifier.png",
 			'startURLTemplate': data.find("startURLTemplate").text(),
 			'name': data.find("name").text(),
 			'description': data.find("description").text(),
@@ -24,11 +38,12 @@ UI.Models.IndivoBase.extend('UI.Models.PHA',
 			'autonomousReason': data.find("autonomousReason").text(),
 			'frameable': ("True" === data.find("frameable").text()),
 			'ui': ("True" === data.find("ui").text())
+
 		});	
 	},
 	
 	get_by_record: function(record_id, type, success, error) {
-		var url = this.apiBase() + 'records/' + encodeURIComponent(record_id) + '/apps/';
+	        var url = this.apiBase() + 'records/' + encodeURIComponent(record_id) + '/apps/';
 		if (type) { url += "?type=" + encodeURIComponent(type); }
 		return $.ajax({
 			url: url,
@@ -110,21 +125,34 @@ UI.Models.IndivoBase.extend('UI.Models.PHA',
 
 /* @Prototype */
 {
-	setup: function(attributes) {
-		// TODO: move to utils? (TF)
-		// we add in a surrogate id here since the one used by Indivo contains characters that are not compatible with the way JMVC ties
-		// models to elements by using their id in a class name
-		this.attr("id", UI.UTILS.generateID());
-		this._super(attributes);
-	},
-
+        setup: function(attributes) {
+	    // TODO: move to utils? (TF)
+	    // we add in a surrogate id here since the one used by Indivo contains characters that are not compatible with the way JMVC ties
+	    // models to elements by using their id in a class name
+	    this.attr("id", UI.UTILS.generateID());
+	    this._super(attributes);
+        },
+	
 	getImageSource: function() {
-		var img_name = this.name.toLowerCase().replace(/ +/, '_');
-		return "/jmvc/ui/resources/images/app_icons_32/" + img_name + ".png";
+	    var img_name = this.name.toLowerCase().replace(/ +/, '_');
+	    return "/jmvc/ui/resources/images/app_icons_32/" + img_name + ".png";
 	},
 	
 	getStartURL: function(vars) {
-		return this.Class.interpolate_url_template(this.startURLTemplate, vars);
-	}
+	    return this.Class.interpolate_url_template(this.startURLTemplate, vars);
+        },
 	
+        getManifest: function(context_vars) {
+	    return {
+		name: this.name,
+		description: this.description,
+		author: this.author,
+		id: this.app_id,
+		version: this.version,
+		mode: this.mode,
+		scope: this.scope,
+		index: this.getStartURL(context_vars),
+		icon: this.getImageSource()
+	    }
+        }
 });

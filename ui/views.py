@@ -17,8 +17,11 @@ from django.template import Template, Context
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
+from indivo_client_py.oauth import oauth
+
 import xml.etree.ElementTree as ET
-import urllib, re
+from lxml import etree
+import urllib, re, copy
 
 import utils
 from errors import ErrorStr
@@ -70,6 +73,33 @@ def tokens_get_from_server(request, username, password):
     
     return True
 
+def store_connect_secret(request, raw_credentials):
+    xml_etree = etree.XML(raw_credentials)
+
+    credentials = {
+        "app_id": xml_etree.find('App').get("id"),
+        "connect_token": xml_etree.findtext("ConnectToken"),
+        "api_base": xml_etree.findtext('APIBase'), 
+        "rest_token":xml_etree.findtext('RESTToken'),          
+        "rest_secret": xml_etree.findtext('RESTSecret'), 
+        "oauth_header": xml_etree.findtext('OAuthHeader'),
+        }
+    
+    request.session[credentials["connect_token"]] = xml_etree.findtext('ConnectSecret')
+    return credentials
+
+def retrieve_connect_secret(request, connect_token_str):
+    if connect_token_str:
+        return request.session.get(connect_token_str, None)
+    return None
+
+def get_connect_credentials(request, account_id, app_email):
+    api = get_api(request)
+    data = {'record_id': request.GET.get('record_id', '')}
+    result = api.call("POST", "/accounts/%s/apps/%s/connect_credentials"%(account_id, app_email),
+                      options={'data':data})
+    credentials = store_connect_secret(request, result)
+    return HttpResponse(simplejson.dumps(credentials), content_type="application/json")
 
 def index(request):
     if tokens_p(request):
@@ -797,11 +827,12 @@ def launch_app(request, app_id):
 ##
 ##  Helpers
 ##
-def indivo_api_call_get(request):
+def indivo_api_call_get(request, relative_path):
     """
     take the call, forward it to the Indivo server with oAuth signature using
-    the session-stored oAuth tokens
+    the session-stored oAuth tokens OR connect tokens passed in via the request
     """
+
     if DEBUG:
         utils.log('indivo_api_call_get: ' + request.path)
     if not tokens_p(request):
@@ -809,18 +840,44 @@ def indivo_api_call_get(request):
         res = HttpResponse("Unauthorized")
         res.status_code = 401
         return res
+
+    # Add a leading slash onto the relative path
+    relative_path = "/" + relative_path
+    method = request.method
+
+    # Pull in the GET / POST data
+    options = {}
+    query_dict = copy.copy(request.GET)
+    if query_dict:
+        options['parameters'] = query_dict
+
+    post_dict = copy.copy(request.POST)
+    post_data = post_dict or request.raw_post_data
+    if post_data:
+        options['data'] = post_data
     
-    # update the IndivoClient object with the tokens stored in the django session
-    api = get_api(request)
-    
-    # strip the leading /indivoapi, do API call, and return result
-    if request.method == "POST":
-        data = dict((k,v) for k,v in request.POST.iteritems())
+    # Parse the Authorization headers for a connect token, if available
+    auth_header = request.META.get('HTTP_AUTHORIZATION', None)
+    if auth_header:
+        parsed_header = oauth.parse_header(auth_header)
+        connect_token = parsed_header.get('connect_token', None)
+        connect_secret = retrieve_connect_secret(request, connect_token)
     else:
-        data = {}
-    
+        connect_token = conncet_secret = None
+
+    # Get the API, signed with a connect token if available, and the session token otherwise
+    if connect_token and connect_secret:
+        oauth_token = {
+            'oauth_token': connect_token,
+            'oauth_token_secret': connect_secret
+            }
+        api = get_api()
+        api.update_token(oauth_token)
+    else:
+        api = get_api(request)
         
-    resp = api.call(request.method, request.path[10:], options= {'data': data})
+    # Make the call, and return the response
+    resp = api.call(method, relative_path, options=options)
     if resp == False:
         return HttpResponseServerError
     else:

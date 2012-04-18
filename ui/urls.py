@@ -43,10 +43,11 @@ urlpatterns = patterns(
 
     # indivo api calls
     (r'^indivoapi/delete_record_app/$', indivo_api_call_delete_record_app),
-    (r'^indivoapi/', indivo_api_call_get),
+    (r'^indivoapi/(?P<relative_path>.+)$', indivo_api_call_get),
 
     # oauth
     (r'^oauth/authorize$', authorize),
+    (r'^accounts/(?P<account_id>[^/]+)/apps/(?P<app_email>[^/]+)/connect_credentials', get_connect_credentials),
 
     # widgets
     (r'^lib/(?P<path>[^/]*)$', 'django.views.static.serve', {'document_root': settings.SERVER_ROOT_DIR + '/ui/lib'}),

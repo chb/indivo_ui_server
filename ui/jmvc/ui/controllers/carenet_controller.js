@@ -115,7 +115,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				// indicate (im)possible targets
 				var account = $(this).model();
 				var account_id = account ? account.id : 0;
-				$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
+				$('#sharing_carenets').find('.carenet').not('.new').each(function(i, elem) {
 					if (!account_id) {
 						$(elem).css('opacity', 0.4);
 					}
@@ -131,7 +131,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				});
 			},
 			stop: function(event) {				// this may be called AFTER another 'start' if the user very quickly drags another app. We could use 'drag' instead of 'start'
-				$('#carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
+				$('#sharing_carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
 			}
 		})
 		
@@ -141,7 +141,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				var account = $(this).model();
 				if (account) {
 					var account_id = account.id;
-					$('#carenets').find('.carenet').not('.new').each(function(i, elem) {
+					$('#sharing_carenets').find('.carenet').not('.new').each(function(i, elem) {
 						
 						// get accounts of this carenet
 						var account_arr = $(elem).model().accounts;
@@ -169,15 +169,15 @@ $.Controller.extend('UI.Controllers.Carenet',
 				}
 			},
 			'mouseout': function(event) {
-				$('#carenets').find('.account').removeClass('highlight');
-				$('#carenets').find('.carenet').removeClass('highlight');
+				$('#sharing_carenets').find('.account').removeClass('highlight');
+				$('#sharing_carenets').find('.carenet').removeClass('highlight');
 			}
 		});
 	},
 	
 	showCarenets: function() {
 		var self = this;
-		var nets = $('#carenets');
+		var nets = $('#sharing_carenets');
 		
 		// show and setup existing accounts
 		nets.show().html(this.view('carenets', {'carenets': this.carenets, 'controller': this}));
@@ -429,7 +429,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			
 			// show warning when account is in no other carenet
 			var found = false;
-			$('#carenets').find('.account').each(function(i, node) {
+			$('#sharing_carenets').find('.account').each(function(i, node) {
 				var acc = $(node).model();
 				if (acc && acc.id == acc_id) {
 					found = true;
@@ -482,7 +482,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 			
 			// insert the "Create Carenet" carenet
 			var create_view = $(this.view('new_carenet'));
-			$('#carenets').children().last().before(create_view);
+			$('#sharing_carenets').children().last().before(create_view);
 			this.setupCarenetView(create_view);
 			
 			if (callback) {
@@ -646,7 +646,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 	},
 	
 	carenetViewForCarenet: function(carenet) {
-		var carenets = $('#carenets').find('.carenet');
+		var carenets = $('#sharing_carenets').find('.carenet');
 		for (var i = 0; i < carenets.length; i++) {
 			var node = $(carenets[i]);
 			if (node.model() && node.model().id == carenet.id) {
@@ -733,7 +733,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 				// cancel input if we click somewhere outside
 				$('body').click(function(event) {
 					$(this).unbind('click');
-					var forms = $('#carenets').find('.carenet_inner').find('form');
+					var forms = $('#sharing_carenets').find('.carenet_inner').find('form');
 					if (forms.length > 0) {
 						forms.each(function(i) {
 							$(this).siblings().show();
@@ -795,7 +795,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					// indicate (im)possible targets
 					var account = acc_view.model();
 					var account_id = account.id;
-					$('#carenets').find('.carenet').not('.expanded').not('.new').each(function(i, elem) {
+					$('#sharing_carenets').find('.carenet').not('.expanded').not('.new').each(function(i, elem) {
 						var account_arr = $(elem).model().accounts;
 						if (account_arr && account_arr.length > 0 && _(account_arr).detect(function(a) { return a.id === account_id; })) {
 							$(elem).css('opacity', 0.4);
@@ -837,7 +837,7 @@ $.Controller.extend('UI.Controllers.Carenet',
 					ui.helper.removeClass('account_dragged');
 					
 					// revert UI (note: this may be called AFTER another 'start' if the user very quickly drags another app since this is only called once the move-back animation finished)
-					$('#carenets').find('.carenet').each(function(i, elem) {
+					$('#sharing_carenets').find('.carenet').each(function(i, elem) {
 						$(elem).css('opacity', 1);
 					});
 					$('#known_accounts').find('.accounts').not('.new').removeClass('highlight');

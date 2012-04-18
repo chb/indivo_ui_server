@@ -13,12 +13,18 @@ steal(
 	"./models/indivoBase"
 )
 .then(
+        // Resource Dependencies
+        "./resources/js/jschannel.js",
+	"./resources/js/smart-api-container.js"
+)
+.then(
 	// Resources
 	"./resources/js/bootstrap-alerts.js",
 	"./resources/js/underscore-min.js",
 	"./resources/js/jquery-ui-1.8.16.custom.min.js",
 	"./resources/js/date.js",
 	"./resources/js/utils.js",
+	"./resources/js/app-manager.js",
 	"./resources/css/bootstrap-custom.css",
 	// Models
 	'./models/account',

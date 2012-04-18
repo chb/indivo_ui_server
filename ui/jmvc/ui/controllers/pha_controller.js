@@ -220,13 +220,13 @@ $.Controller.extend('UI.Controllers.PHA',
 		var app_div = $('#apps');
 		var params = {'all_apps': this.all_apps};
 		app_div.empty().html(this.view('apps', params));
-		$('#carenets').show();
+		$('#app_settings_carenets').show();
 		
 		// setup app hovering (so we see in which carenets the app already is)
 		app_div.find('.app').bind({
 			'mouseover': function(event) {
 				var app_id = $(this).model().app_id;
-				$('#carenets').find('.carenet').each(function(i, elem) {
+				$('#app_settings_carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
 					if (app_arr && _(app_arr).detect(function(a) { return a.app_id === app_id; })) {
 						$(elem).addClass('highlight');
@@ -234,7 +234,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				});
 			},
 			'mouseout': function(event) {
-				$('#carenets').find('.carenet').removeClass('highlight');
+				$('#app_settings_carenets').find('.carenet').removeClass('highlight');
 			}
 		})
 		
@@ -248,7 +248,7 @@ $.Controller.extend('UI.Controllers.PHA',
 			containment: '#app_content',
 			start: function(event, ui) {
 				var app_id = $(this).model().app_id;
-				$('#carenets').find('.carenet').each(function(i, elem) {
+				$('#app_settings_carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
 					if (app_arr && _(app_arr).detect(function(a) { return a.app_id === app_id; })) {
 						$(elem).css('opacity', 0.4);
@@ -257,7 +257,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				ui.helper.addClass('app_dragged');
 			},
 			stop: function(event) {				// this may be called AFTER another 'start' if the user very quickly drags another app. We could use 'drag' instead of 'start'
-				$('#carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
+				$('#app_settings_carenets').find('.carenet').each(function(i, elem) { $(elem).css('opacity', 1); });
 			}
 		})
 		
@@ -319,7 +319,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		$('#carenet_drag_apps').fadeIn('fast');
 		
 		// show carenets and their apps
-		var nets = $('#carenets');
+		var nets = $('#app_settings_carenets');
 		var params = {
 			'all_apps': this.all_apps,
 			 'my_apps': this.my_apps,
@@ -532,7 +532,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		
 		// remove from carenets (only in the UI, the server did this when disabling the app)
 		var self = this;
-		$('#carenets').find('.carenet').each(function(j) {
+		$('#app_settings_carenets').find('.carenet').each(function(j) {
 			var carenet_view = $(this);
 			carenet_view.find('.carenet_app').each(function(i) {
 				var view = $(this);
@@ -652,7 +652,7 @@ $.Controller.extend('UI.Controllers.PHA',
 					
 					// indicate (im)possible targets
 					var app_id = view.model().app_id;
-					$('#carenets').find('.carenet').not('.expanded').each(function(i, elem) {
+					$('#app_settings_carenets').find('.carenet').not('.expanded').each(function(i, elem) {
 						var app_arr = $(elem).model().apps;
 						if (app_arr && _(app_arr).detect(function(a) { return a.app_id === app_id; })) {
 							$(elem).css('opacity', 0.4);
@@ -678,7 +678,7 @@ $.Controller.extend('UI.Controllers.PHA',
 					view.removeClass('app_dragged');
 					
 					// revert UI (note: this may be called AFTER another 'start' if the user very quickly drags another app)
-					$('#carenets').find('.carenet').each(function(i, elem) {
+					$('#app_settings_carenets').find('.carenet').each(function(i, elem) {
 						$(elem).css('opacity', 1);
 					});
 					$('#apps').find('.app').removeClass('app_showinfo');
