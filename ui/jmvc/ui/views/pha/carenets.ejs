@@ -11,8 +11,8 @@
 			<% _(carenet.apps).each(function(app, i) {
 				app.temporarily_added = false;
 				var coords = UI.Controllers.PHA.coordinatesForAppIndex(i);
-				var img_name = app.name.toLowerCase().replace(/ +/, '_'); %>
-				<div class="carenet_app" style="top: <%= coords.top %>px; left: <%= coords.left %>px; background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png')" <%= app %>></div>
+				var img_url = app.getImageSource(); %>
+				<div class="carenet_app" style="top: <%= coords.top %>px; left: <%= coords.left %>px; background-image: url('<%= img_url %>')" <%= app %>></div>
 			<% }) %>
 			</div>
 		</div>

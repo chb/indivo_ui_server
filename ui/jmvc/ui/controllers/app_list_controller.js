@@ -139,7 +139,7 @@ $.Controller.extend('UI.Controllers.AppList',
 		if (activeRecord) {
 			$.each(newApps, function(i, app) {
 				// app with a UI
-				if (app.ui) {
+				if (app.has_ui) {
 					var startURL = app.getStartURL({
 						'record_id': activeRecord.carenet_id ? '' : activeRecord.id,
 						'carenet_id': activeRecord.carenet_id || ''

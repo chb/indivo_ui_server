@@ -1,3 +1,3 @@
 <% var opacity = app.temporarily_added ? 0.5 : 1;
-   var img_name = app.name.toLowerCase().replace(/ +/, '_'); %>
-<div class="carenet_app" style="opacity: <%= opacity %>; top: <%= coords.top %>px; left: <%= coords.left %>px; background-image: url('/jmvc/ui/resources/images/app_icons_32/<%= img_name %>.png');" <%= app %>></div>
+   var img_url = app.getImageSource(); %>
+<div class="carenet_app" style="opacity: <%= opacity %>; top: <%= coords.top %>px; left: <%= coords.left %>px; background-image: url('<%= img_url %>');" <%= app %>></div>
