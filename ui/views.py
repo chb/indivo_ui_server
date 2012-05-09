@@ -877,11 +877,11 @@ def indivo_api_call_get(request, relative_path):
         api = get_api(request)
         
     # Make the call, and return the response
-    resp = api.call(method, relative_path, options=options)
+    resp, mimetype = api.call(method, relative_path, options=options, get_mimetype=True)
     if resp == False:
         return HttpResponseServerError
     else:
-        return HttpResponse(resp, mimetype="application/xml")
+        return HttpResponse(resp, mimetype=mimetype)
 
 def indivo_api_call_delete_record_app(request):
     """
