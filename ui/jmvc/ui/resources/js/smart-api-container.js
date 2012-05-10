@@ -39,6 +39,25 @@ window.SMART_CONNECT_HOST = function() {
     sc.on_app_launch_delegated_begin =    function(a,callback){ callback(); };
     sc.on_app_launch_delegated_complete = function(a,callback) { callback(); };
 
+    var app_event_handlers = {};
+    
+    sc.on = function(n, cb) {
+
+      if (app_event_handlers[n]) {
+	throw "Already registered a handler for " + n;
+      }
+
+      app_event_handlers[n] = cb;
+    };
+
+    sc.off = function(n, cb) {
+      if (!app_event_handlers[n]) {
+	throw "No registered handler for " + n;
+      }
+
+      delete app_event_handlers[n];
+    };
+
     sc.get_credentials = function() {
 	var err = "Must override SMART_CONNECT_HOST.get_credentials";
 	console.log(err);
@@ -51,16 +70,24 @@ window.SMART_CONNECT_HOST = function() {
 	throw err;
     };
 
-    sc.get_iframe = function() {
+    sc.handle_api = function() {
 	var err = "Must override SMART_CONNECT_HOST.handle_api";
 	console.log(err);
 	throw err;
     };
 
+    sc.display_app = function() {
+	var err = "Must override SMART_CONNECT_HOST.display_ap";
+	console.log(err);
+	throw err;
+    };
+
     sc.destroy_app_instance = function(app_instance) {
+
     	var c = app_instance.channel;
+	sc.notify_app(app_instance, "destroyed");
+
     	if (c)  {
-            c.notify({method: "destroy"});
     	    c.destroy();
     	}
 	if (app_instance.iframe)
@@ -78,39 +105,27 @@ window.SMART_CONNECT_HOST = function() {
 	});
     };
 
-    sc.notify_app_foregrounded= function(app_instance_id){
-    	var app_instance = sc.running_apps[app_instance_id];
-	if (app_instance.channel !== undefined)
-	    app_instance.channel.notify({method: "foreground"});
-    };
-
-    sc.notify_app_backgrounded = function(app_instance_id){
-    	var app_instance = sc.running_apps[app_instance_id];
-	if (app_instance.channel !== undefined)
-	    app_instance.channel.notify({method: "background"});
-    };
-
-
-    sc.notify_app_destroyed = function(app_instance_id){
-    	var app_instance = sc.running_apps[app_instance_id];
-	if (app_instance.channel !== undefined)
-	    app_instance.channel.notify({method: "destroy"});
+    sc.notify_app = function(app_instance, notification, params){
+	if (app_instance.channel !== undefined) {
+	    app_instance.channel.notify({
+		method: notification, 
+		params: params
+	    });
+	}
     };
   
     sc.launch_app = function(manifest, context, options) {
+        var app_instance = generate_app_instance(manifest, context, options);
+		return launch_app_instance(app_instance);
+    };    
 
-	if (typeof manifest !== "object" || typeof manifest.id !== "string") {
-	    throw "Expected an app manifest!";
-	}
-	
-	var uuid = randomUUID();
-	var app_instance = sc.running_apps[uuid] = {
-	    uuid: uuid,
-	    manifest: manifest,
-	    context: context,
-	    options: options
-	};
 
+    /*
+      Beyond here are private functions, not exposed on the SMART_CONTAINER object.
+      (Note: channel calls, accessible via postMessage, are defined below.)
+     */
+
+    var launch_app_instance = function(app_instance) {
 	return begin_launch_wrapper(app_instance)
 	    .pipe(get_credentials_wrapper)
 	    .pipe(get_iframe_wrapper)
@@ -127,13 +142,23 @@ window.SMART_CONNECT_HOST = function() {
 		return app_instance;
 	    })
 	    .pipe(complete_launch_wrapper);	
-    };    
+    };
 
+    var generate_app_instance = function(manifest, context, options) {
+	if (typeof manifest !== "object" || typeof manifest.id !== "string") {
+	    throw "Expected an app manifest!";
+	}
+	
+	var uuid = randomUUID();
+	var app_instance = sc.running_apps[uuid] = {
+	    uuid: uuid,
+	    manifest: manifest,
+	    context: context,
+	    options: options
+	};
 
-    /*
-      Beyond here are private functions, not exposed on the SMART_CONTAINER object.
-      (Note: channel calls, accessible via postMessage, are defined below.)
-     */
+	return app_instance;
+    };
 
     var generate_ready_message = function(app_instance, callback) {	    
 	var message = { 
@@ -201,14 +226,33 @@ window.SMART_CONNECT_HOST = function() {
     };
 
 
-    var receive_api_call = function(app_instance, call_info, callback) {
+    var receive_api_call = function(app_instance, call_info, callback_success, callback_error) {
 	sc.handle_api(app_instance, 
 				     call_info, 
-				     function(r){
-					 callback({
-					     contentType: "text",  
-					     data: r})
-				     });	    
+				     callback_success,
+                     callback_error);	    
+    };
+
+    var receive_call_app = function(calling_app_instance, p, callback) {
+
+	    var manifest = p.manifest,
+		context = calling_app_instance.context,
+	        new_app_instance = generate_app_instance(manifest, 
+							 context, 
+							 { 
+							   launched_by: calling_app_instance,
+							   on_return: callback
+							 });
+
+	    new_app_instance.ready_data = p.ready_data;
+	    launch_app_instance(new_app_instance);
+    };
+
+    var receive_app_return = function(app_instance, params) {
+	  var l = app_instance.options.launched_by;
+	  app_instance.options.on_return(params);
+	  sc.destroy_app_instance(app_instance);
+	  sc.display_app(l);
     };
 
     var procureChannel = function(event){
@@ -268,7 +312,7 @@ window.SMART_CONNECT_HOST = function() {
 		var on_behalf_of = p.app_instance;
 		var call_info = p.call_info;
 
-		receive_api_call(on_behalf_of, call_info, t.complete); 
+		receive_api_call(on_behalf_of, call_info, t.complete, t.error); 
 	    });
 
 	    app_instance.channel.bind("launch_app_delegated", function(t, p) {
@@ -288,9 +332,13 @@ window.SMART_CONNECT_HOST = function() {
     };
 
     var bind_ui_app_channel = function(app_instance) {
-	    app_instance.channel.bind("call_app_and_wait", function(t, p) {
+	    app_instance.channel.bind("call_app", function(t, p) {
 		t.delayReturn(true);
-		receive_call_app_and_wait(app_instance, p, t.complete);
+		receive_call_app(app_instance, p, t.complete);
+	    });
+
+	    app_instance.channel.bind("return", function(t,p) {
+		receive_app_return(app_instance, p);
 	    });
     };
 
@@ -298,9 +346,15 @@ window.SMART_CONNECT_HOST = function() {
 
 	app_instance.channel.bind("api_call", function(t, p) {
 	    t.delayReturn(true);
-	    receive_api_call(app_instance, p, t.complete);
+	    receive_api_call(app_instance, p, t.complete, t.error);
 	});
-	
+
+	for (var n in app_event_handlers)  {
+	  app_instance.channel.bind(n, function(t, p) {
+	    app_event_handlers[n](app_instance, p);
+	  });
+	}
+
     };
 
 };

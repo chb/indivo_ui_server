@@ -50,7 +50,7 @@ $.Controller.extend('UI.Controllers.AppList',
 
 				// otherwise, let the app_manager handle it
 				else {
-					APP_MANAGER.stop_managing_app(appModel.MANAGER_uuid);
+					APP_MANAGER.destroy_app_instance(appModel);
 				}
 
 				// and remove it from our app map
@@ -61,7 +61,7 @@ $.Controller.extend('UI.Controllers.AppList',
 			else {
 				var lastModel = $("#" + this.lastAppId).model();
 				if ( lastModel ) {
-					APP_MANAGER.notify_app_backgrounded(lastModel.MANAGER_uuid);
+					APP_MANAGER.notify_app(lastModel, 'background', {});
 				}
 			}
 		}
@@ -70,7 +70,7 @@ $.Controller.extend('UI.Controllers.AppList',
 		// foreground it and show it		
 		var appEl = this.appMap[appId];
 		if ( appEl && appModel ) {
-			APP_MANAGER.notify_app_foregrounded(appModel.MANAGER_uuid);
+			APP_MANAGER.notify_app(appModel, 'foreground', {});
 			appEl.show()
 		}
 
