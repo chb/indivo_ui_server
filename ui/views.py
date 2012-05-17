@@ -790,13 +790,17 @@ def launch_app(request, app_id):
     elif 200 != status:
         error_message = ErrorStr(res.get('response_data', 'Error getting app info')).str()
     
+    # success, find start URL template
+    else:
+        app_info_json = res.get('response_data', '')
+        app_info = simplejson.loads(app_info_json)
+        if not app_info:
+            error_message = ErrorStr('Error getting app info')
+        else:
+            start_url = app_info.get('oauth_callback_url')
+    
     if error_message is not None:
         return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
-    
-    # success, find start URL template
-    xml = res.get('response_data', '<root />')
-    e = ET.fromstring(xml)
-    start_url = e.findtext('startURLTemplate')
     
     # read account records
     api.update_token(request.session.get('oauth_token_set'))        # must be in app-credential-mode now
