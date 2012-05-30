@@ -586,7 +586,7 @@ input.account_name { width: 95%; }
 	font-size: 0.8em; text-align: center;
 	border: 1px solid transparent;
 	-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px;
-	background: url() 34px 10px no-repeat;
+	background: url() 34px 10px no-repeat; background-size: 32px;
 	-webkit-transition-property: min-height, border-radius, margin, padding, opacity;
 	-moz-transition-property: min-height, border-radius, margin, padding, opacity;
 	-o-transition-property: min-height, border-radius, margin, padding, opacity;
