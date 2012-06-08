@@ -34,7 +34,7 @@ APP_MANAGER.handle_api = function(app_instance, api_call, success, error) {
     var header = "OAuth " + auth_params;
 
     var data = api_call.params;
-    var method = api_call.type;
+    var method = api_call.method;
     var contentType = api_call.contentType;
     var url = "indivoapi" + api_call.func; // TODO: ADD THE BASE URL!!
     
