@@ -3,7 +3,9 @@ APP_MANAGER = new SMART_CONNECT_HOST();
 APP_MANAGER.get_credentials = function(app_instance, callback){
     var app_email = encodeURIComponent(app_instance.manifest.id);
     var account_id = encodeURIComponent(app_instance.context.user.id);
-    var data = { record_id: encodeURIComponent(app_instance.context.record.id)};
+    var data = { record_id: encodeURIComponent(app_instance.context.record.id),
+                 carenet_id: app_instance.context.carenet ? encodeURIComponent(app_instance.context.carenet.id) : "" 
+    };
     
     $.ajax({url: "/accounts/" + account_id + "/apps/" + app_email + "/connect_credentials",
 	    data: data,

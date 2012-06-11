@@ -95,7 +95,7 @@ def retrieve_connect_secret(request, connect_token_str):
 
 def get_connect_credentials(request, account_id, app_email):
     api = get_api(request)
-    data = {'record_id': request.GET.get('record_id', '')}
+    data = {'record_id': request.GET.get('record_id', ''), 'carenet_id': request.GET.get('carenet_id', '')}
     result = api.call("POST", "/accounts/%s/apps/%s/connect_credentials"%(account_id, app_email),
                       options={'data':data})
     credentials = store_connect_secret(request, result)

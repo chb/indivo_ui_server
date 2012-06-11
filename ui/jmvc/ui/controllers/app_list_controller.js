@@ -324,6 +324,9 @@ $.Controller.extend('UI.Controllers.AppList',
 			id: activeRecord.carenet_id || activeRecord.id,
 			full_name: activeRecord.label
 		};
+        if (activeRecord.carenet_id) {
+            context.carenet = { id: activeRecord.carenet_id }
+        }
 		return context;
 	}
 });
