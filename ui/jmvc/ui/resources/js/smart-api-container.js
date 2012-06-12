@@ -134,8 +134,9 @@ window.SMART_CONNECT_HOST = function() {
 		var base_url =  app_instance.manifest.base_url;
 		launch_url = launch_url.replace("{base_url}", base_url);
 
-		launch_url += "?oauth_header="+
-		    encodeURIComponent(app_instance.credentials.oauth_header);
+		querystring_sep = launch_url.indexOf('?') !== -1 ? '&' : '?';
+		launch_url += querystring_sep + "oauth_header=" +
+			encodeURIComponent(app_instance.credentials.oauth_header);
 
 		app_instance.origin = __SMART_extract_origin(launch_url);
 		app_instance.iframe.src = launch_url;
