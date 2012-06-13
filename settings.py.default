@@ -3,7 +3,7 @@
 # 2. through hardcoded URL routes in the file ref'd by ROOT_URLCONF
 
 SERVER_ROOT_DIR = '/web/indivo_ui_server'
-INDIVO_SERVER_LOCATION = {'scheme': 'http', 'host': 'localhost', 'port': '8000'}
+INDIVO_SERVER_LOCATION = 'http://localhost:8000'
 INDIVO_UI_SERVER_BASE = 'http://localhost:80'
 
 # we need to put absolute paths here for the UI server's template AND
