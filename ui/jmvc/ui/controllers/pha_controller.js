@@ -482,7 +482,6 @@ $.Controller.extend('UI.Controllers.PHA',
 		checkbox.prop('checked', false).removeAttr('disabled');
 	},
 	didEnableApp: function(app, checkbox, data, textStatus, jqXHR) {
-		if (jqXHR.responseText === '<?xml version="1.0" encoding="utf-8" ?><ok/>') {  //TODO: currently the python client eats all useful HTTP status codes, so we have to hack this in for now
 			checkbox.prop('checked', true);
 			UI.ENABLED_APPS.push(app);
 			
@@ -494,12 +493,6 @@ $.Controller.extend('UI.Controllers.PHA',
 				this_app.enabled = (u_apps.detect(function(a) { return a.app_id === app.app_id; }));
 			}
 			checkbox.removeAttr('disabled').parentsUntil('.app').last().parent().removeClass('disabled').draggable('option', 'disabled', false);
-		}
-		
-		// failed
-		else {
-			this.doNotEnableApp(app, checkbox, jqXHR, "error");
-		}
 	},
 	
 	disableApp: function(app, checkbox) {
