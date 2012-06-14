@@ -608,12 +608,12 @@ def account_name(request, account_id):
     http://localhost/accounts/foo@bar.com/name
     """
     api = get_api()
-    resp, content = api.account_info(account_id=account_id)
+    resp, content = api.account_info(account_email=account_id)
     status = resp['status']
     dict = {'account_id': account_id}
-    if 404 == status:
+    if '404' == status:
         dict['error'] = ErrorStr('Unknown account').str()
-    elif 200 != status:
+    elif '200' != status:
         dict['error'] = ErrorStr(ret.response.get('response_data', 'Server Error')).str()
     else:
         account = utils.parse_account_xml(content)
