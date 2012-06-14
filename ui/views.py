@@ -772,7 +772,7 @@ def launch_app(request, app_id):
     """ Entry point for a given app.
 
     If the app does not exist (or another exception occurrs), will render /ui/error with the given error message. On
-    success, renders /ui/record_select after the user has logged in. Selecting a record will call the app's start_url.
+    success, renders /ui/record_select after the user has logged in. Selecting a record will redirect to launch_app_complete.
     
     """
     
@@ -781,32 +781,10 @@ def launch_app(request, app_id):
     account_id = urllib.unquote(request.session.get('account_id', ''))
     if not account_id:
         return HttpResponseRedirect(login_url)
-    
-    # logged in, get information about the desired app
-    api = get_api()         # gets the API with chrome credentials
-    resp, content = api.pha(pha_email=app_id)
-    status = resp['status']
-    
-    error_message = None
-    if '404' == status:
-        error_message = ErrorStr('No such App').str()
-    elif '200' != status:
-        error_message = ErrorStr(content or 'Error getting app info').str()
-    
-    # success, find start URL template
-    else:
-        app_info_json = content or ''
-        app_info = simplejson.loads(app_info_json)
-        if not app_info:
-            error_message = ErrorStr('Error getting app info')
-        else:
-            start_url = app_info.get('oauth_callback_url')
-    
-    if error_message is not None:
-        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
-    
+        
     # read account records
-    api.update_token(request.session.get('oauth_token_set'))        # must be in app-credential-mode now
+    error_message = None
+    api = get_api(request)
     resp, content = api.record_list(account_email=account_id)
     status = resp['status']
     
@@ -825,11 +803,65 @@ def launch_app(request, app_id):
     records = []
     for rec_id, rec_label in records_extracted:
         rec_dict = { 'record_id': rec_id, 'carenet_id' : '' }           # TODO: Carenets are not yet supported
-        records.append([rec_id, rec_label, _interpolate_url_template(start_url, rec_dict)])
-    
+        records.append([rec_id, rec_label])
+
     return utils.render_template('ui/record_select', {'SETTINGS': settings, 'APP_ID': app_id, 'RECORD_LIST': records})
 
 
+def launch_app_complete(request, app_id):
+    """ Prepare an app's start url for launch, and redirect to it. """
+
+    record_id = request.GET.get('record_id', '')
+    carenet_id = request.GET.get('carenter_id', '')
+    params_dict = {'record_id':record_id, 'carenet_id':carenet_id}
+
+    # make the user login first
+    login_url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
+    account_id = urllib.unquote(request.session.get('account_id', ''))
+    if not account_id:
+        return HttpResponseRedirect(login_url)
+
+    # logged in, get information about the desired app
+    api = get_api(request)
+    resp, content = api.pha(pha_email=app_id)
+    status = resp['status']
+    error_message = None
+    if '404' == status:
+        error_message = ErrorStr('No such App').str()
+    elif '200' != status:
+        error_message = ErrorStr(content or 'Error getting app info').str()
+    
+    # success, find start URL template
+    else:
+        app_info_json = content or ''
+        app_info = simplejson.loads(app_info_json)
+        if not app_info:
+            error_message = ErrorStr('Error getting app info')
+        else:
+            start_url = app_info.get('index')    
+            start_url = _interpolate_url_template(app_info.get('index'), params_dict)
+    
+    if not start_url:
+        error_message = ErrorStr('Error getting app info')
+
+    # get SMART credentials for the request
+    api = get_api(request)
+    resp, content = api.get_connect_credentials(account_email=account_id, pha_email=app_id, body=params_dict)
+    if resp['status'] != '200':
+        error_message = ErrorStr("Error getting account credentials")
+    else:
+        oauth_header = etree.XML(content).findtext("OAuthHeader")
+        
+    if not oauth_header:
+        error_message = ErrorStr("Error getting account credentials")
+
+    if error_message is not None:
+        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+
+    querystring_sep = '&' if '?' in start_url else '?'
+    start_url += querystring_sep + "oauth_header=" + oauth_header
+    return HttpResponseRedirect(start_url)
+    
 ##
 ##  Helpers
 ##

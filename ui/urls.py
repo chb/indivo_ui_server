@@ -19,8 +19,9 @@ urlpatterns = patterns(
     (r'^forgot_password$', forgot_password),
     
     # Launch an app by its id
+    (r'^apps/(?P<app_id>[^/]*)/complete/$', launch_app_complete),
     (r'^apps/(?P<app_id>[^/]*)', launch_app),
-    
+
     # account init emails
     # http://localhost/accounts/catherine800@indivohealth.org/init/icmloNHxQrnCQKNn
     # Legacy: http://localhost/indivoapi/accounts/catherine800@indivohealth.org/initialize/icmloNHxQrnCQKNn

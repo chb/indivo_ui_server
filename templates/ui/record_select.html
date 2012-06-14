@@ -7,8 +7,8 @@
 {% block main %}
 	<!-- Login Form -->
 	<div class="list_form">
-		{% for id, name, url in RECORD_LIST %}
-		<a class="row" href="{{ url|default:'/' }}">
+		{% for id, name in RECORD_LIST %}
+		<a class="row" href="/apps/{{APP_ID}}/complete/?record_id={{id}}">
 			{{ name }}
 		</a>
 		{% empty %}
