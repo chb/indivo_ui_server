@@ -140,11 +140,17 @@ $.Controller.extend('UI.Controllers.Record',
 		$('#create_record_submit').attr('disabled', 'disabled');
 		
 		// collect data (where's that "form_values" method of jQuery?)
-		var dict = {'givenName': el.find('input[name="givenName"]').val(),
-				   'familyName': el.find('input[name="familyName"]').val(),
-					    'email': el.find('input[name="email"]').val()};
+		var demographics = '<Demographics xmlns="http://indivo.org/vocab/xml/documents#">'
+                                    +'<dateOfBirth>1939-11-15</dateOfBirth>'
+                                    +'<gender>female</gender>'
+                                    +'<email>' + el.find('input[name="email"]').val() + '</email>'
+                                    +'<Name>'
+                                        +'<familyName>' + el.find('input[name="familyName"]').val() + '</familyName>'
+                                        +'<givenName>' + el.find('input[name="givenName"]').val() + '</givenName>'
+                                    +'</Name>'
+                                +'</Demographics>';
 		
-		UI.Models.Record.create(dict, this.callback('didCreateNewRecord', el), this.callback('didNotCreateNewRecord', el));
+		UI.Models.Record.create(demographics, this.callback('didCreateNewRecord', el), this.callback('didNotCreateNewRecord', el));
 		return false;
 	},
 	didCreateNewRecord: function(form, data, textStatus, xhr) {
