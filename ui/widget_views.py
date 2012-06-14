@@ -27,7 +27,11 @@ from views import get_api
 def _verify_surl(request):
   url = request.get_full_path()
   api = get_api(request)
-  result = ET.fromstring(api.call("GET", "/oauth/internal/surl-verify", {'parameters': {'url': url}}))
+  resp, content = api.surl_verify(body={'url': url})
+  if resp['status'] != '200':
+      raise Exception("failed verification")
+  result = ET.fromstring(content)
+  import pdb;pdb.set_trace()
   if result.text == "ok":
     return
   else:
