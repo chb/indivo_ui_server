@@ -5,6 +5,7 @@ Upon initalization, pass the error key as first argument
 If the error description for the error key is not found, the key itself is returned
 """
 from django.utils.translation import ugettext as _
+import warnings
 
 class ErrorStr:
     error_key = None
@@ -39,7 +40,9 @@ class ErrorStr:
     
     def __init__(self, error_key):
         self.error_key = error_key
-    
+ 
+    def __unicode__(self):
+        return self.__str__()
     
     def __str__(self):
         return self.errors.get(self.error_key, self.error_key)
@@ -48,6 +51,8 @@ class ErrorStr:
         return self.__str__()
     
     def str(self):
+        warnings.warn("ErrorStr.str() is deprecated, and will be removed: use str(ErrorStr) instead",
+                      DeprecationWarning)
         return self.__str__()
 
 
