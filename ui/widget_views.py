@@ -31,7 +31,6 @@ def _verify_surl(request):
   if resp['status'] != '200':
       raise Exception("failed verification")
   result = ET.fromstring(content)
-  import pdb;pdb.set_trace()
   if result.text == "ok":
     return
   else:
