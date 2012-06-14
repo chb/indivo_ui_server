@@ -809,17 +809,34 @@ def launch_app(request, app_id):
 
 
 def launch_app_complete(request, app_id):
-    """ Prepare an app's start url for launch, and redirect to it. """
+    """ Prepare an app's start url for launch, and redirect to it. 
 
-    record_id = request.GET.get('record_id', '')
-    carenet_id = request.GET.get('carenter_id', '')
-    params_dict = {'record_id':record_id, 'carenet_id':carenet_id}
+    If this is a POST, then enable the app first (because it was just authorized)
+    """
 
     # make the user login first
     login_url = "%s?return_url=%s" % (reverse(login), urllib.quote(request.get_full_path()))
     account_id = urllib.unquote(request.session.get('account_id', ''))
     if not account_id:
         return HttpResponseRedirect(login_url)
+
+    # If we were just authorized, enable the app
+    if request.method == 'POST':
+        record_id = request.POST.get('record_id', '')
+        carenet_id = ''
+        api = get_api(request)
+        if record_id:
+            resp, content = api.record_pha_enable(record_id=record_id, pha_email=app_id)
+            status = resp['status']
+            if status != '200':
+                error_message = ErrorStr("Error enabling the app")
+                return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+            
+    if request.method == 'GET':
+        record_id = request.GET.get('record_id', '')
+        carenet_id = request.GET.get('carenet_id', '')
+
+    params_dict = {'record_id':record_id, 'carenet_id':carenet_id}
 
     # logged in, get information about the desired app
     api = get_api(request)
@@ -847,7 +864,17 @@ def launch_app_complete(request, app_id):
     # get SMART credentials for the request
     api = get_api(request)
     resp, content = api.get_connect_credentials(account_email=account_id, pha_email=app_id, body=params_dict)
-    if resp['status'] != '200':
+    status = resp['status']
+    if status == '403':
+        if carenet_id:
+            error_message = ErrorStr("This app is not enabled to be run in the selected carenet.")
+        elif record_id:
+            return utils.render_template('ui/authorize_record_launch_app',
+                                         {'CALLBACK_URL': '/apps/%s/complete/'%app_id,
+                                          'RECORD_ID': record_id,
+                                          'TITLE': _('Authorize "{{name}}"?').replace('{{name}}', app_info['name'])
+})
+    elif status != '200':
         error_message = ErrorStr("Error getting account credentials")
     else:
         oauth_header = etree.XML(content).findtext("OAuthHeader")
@@ -858,6 +885,7 @@ def launch_app_complete(request, app_id):
     if error_message is not None:
         return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
 
+    # append the credentials and redirect
     querystring_sep = '&' if '?' in start_url else '?'
     start_url += querystring_sep + "oauth_header=" + oauth_header
     return HttpResponseRedirect(start_url)
