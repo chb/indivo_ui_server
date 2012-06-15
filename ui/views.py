@@ -310,7 +310,7 @@ def send_secret(request, account_id, status):
         
         # re-send the primary secret and display the secondary, if needed
         if request.POST.get('re_send', False):
-            api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+            api = get_api()
             resp, content = api.account_resend_secret(account_email=account_id)
             
             if '404' == resp['status']:
@@ -346,7 +346,7 @@ def account_init(request, account_id, primary_secret):
     http://localhost/accounts/foo@bar.com/init/icmloNHxQrnCQKNn
     Legacy: http://localhost/indivoapi/accounts/foo@bar.com/initialize/icmloNHxQrnCQKNn
     """
-    api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+    api = get_api()
     try_to_init = False
     move_to_setup = False
     
@@ -451,7 +451,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
     """
     http://localhost/accounts/foo@bar.com/setup/taOFzInlYlDKLbiM
     """
-    api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+    api = get_api()
     
     # is this account already initialized?
     resp = api.account_info(account_email=account_id)
@@ -542,7 +542,7 @@ def forgot_password(request):
     if request.method == HTTP_METHOD_POST:
         email = request.POST.get('account_id')
         
-        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        api = get_api()
         # get account id from email (which we are assuming is contact email)
         resp, content = api.account_forgot_password(account_email=email)
         status = resp['status']
@@ -575,7 +575,7 @@ def reset_password(request, account_id, primary_secret):
         secondary_secret = request.POST.get('conf1') + request.POST.get('conf2')
         
         # check the validity of the primary and secondary secrets
-        api = IndivoClient(settings.CONSUMER_KEY, settings.CONSUMER_SECRET, settings.INDIVO_SERVER_LOCATION)
+        api = get_api()
         resp, content = api.account_check_secrets(account_email=account_id, primary_secret=primary_secret, body={
             'secondary_secret': secondary_secret
         })
