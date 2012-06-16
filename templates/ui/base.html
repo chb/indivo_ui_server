@@ -17,7 +17,7 @@
 		{% block title_prefix %}{% endblock %}
 		{% block title %}
 		{% if branding %}
-			{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+			{{ branding.pretty_name_prepend|safe }} {{ branding.pretty_name|safe }}
 		{% else %}
 			{% trans "Indivohealth" %}
 		{% endif %}
@@ -34,14 +34,14 @@
 		
 		<!-- Header -->
 		<div style="text-align: center;">
-			{% if branding %}
+			{% if branding and branding.logo_image_big_src %}
 				<img class="branding-image" src='{{ branding.logo_image_big_src }}' />
 			{% endif %}
 			<div id="front_site_name">
 				<span class="welcome_prefix">{% block welcome_prefix %}{% endblock %}</span>
 				{% block welcome %}
 					{% if branding %}
-						{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+						{{ branding.pretty_name_prepend }} {{ branding.pretty_name|safe }}
 					{% else %}
 						{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
 					{% endif %}

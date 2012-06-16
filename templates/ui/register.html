@@ -51,8 +51,9 @@
 				{% if SETTINGS.REGISTRATION.set_primary_secret %}
 				<p class="moreinfo">{% trans "An activation code will be sent here" %}</p>
 				{% endif %}
-				
 				<div class="main_action_button">
+				  <p class="moreinfo"><a href="/about/#registration" class=""><img style="vertical-align:-20%; margin-right:0.5em;" src="/jmvc/ui/resources/images/app_icons_32/problems.png" width=16 />{% trans "Demo Mode: Registration May be slow" %}</a></p>
+
 					<button id="submit" type="submit" name="submit" tabindex="3">{% trans "Register" %}</button>
 					<p class="moreinfo">
 						<a href="/login">{% trans "Back to login" %}</a>
@@ -61,6 +62,7 @@
 			</div>
 		</div>
 	</form>
+		
 	{% else %}
 	<div class="login_error">{% trans "Online registration is not available" %}</div>
 	<p class="moreinfo">

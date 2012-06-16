@@ -1,0 +1,77 @@
+{% extends "ui/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "The Indivo Development Sandbox" %}{% endblock %}
+
+{% block welcome %}{% trans "The Indivo Development Sandbox" %}{% endblock %}
+
+{% block main %}
+  <!-- Info about the GP -->
+  <p>{% blocktrans %}This instance of Indivo has been setup as a development sandbox for use by Indivo application developers.{% endblocktrans %}
+  </p>
+  <h4>{% trans "How To Develop Against the Sandbox" %}</h4>
+  <p>{% blocktrans %}The sandbox has been released with Indivo's standard set of bundled applications. In addition, you will see two other available apps for your records, labeled 'Your Web App' and 'Your iOS App'. The first is a typical Indivo user app, with one difference: it has been configured to run against the local machine from which you have loaded the sandbox in the browser, on port 8001. The second is a mobile app configured to run against our {%endblocktrans%}<a href="https://github.com/chb/IndivoFramework-ios">{% trans "iOS development framework" %}</a>{% blocktrans %}.You can therefore develop against the sandbox by writing an Indivo app and either making it available on your local webserver at http://localhost:8001, or using our iphone framework and accessing the app on an iphone. The manifests and credentials for the apps look like:{% endblocktrans %}</p>
+  <pre>{% filter force_escape %}
+
+{
+  "name" : "Your iOS App",
+  "description" : "Any app you'd like, written with the Indivo iOS framework.",
+  "author" : "You!",
+  "id" : "sampleios@apps.indivo.org",
+  "version" : "1.0.0",
+  "smart_version": "0.4",
+
+  "mode" : "ui",	
+  "scope": "record",
+  "has_ui": false,
+  "frameable": false,
+
+  "icon" :  "/jmvc/ui/resources/images/app_icons_32/your_iosapp.png",
+  "index": "indivo-framework:///did_select_record?record_id={record_id}&amp;carenet_id={carenet_id}"
+}
+{
+    "consumer_key": "sampleiosapp@apps.indivo.org",
+    "consumer_secret": "youriosapp"
+}
+
+
+{
+  "name" : "Your Web App",
+  "description" : "Your sample web app: runs whatever you host at http://localhost:8001",
+  "author" : "You!",
+  "id" : "sampleweb@apps.indivo.org",
+  "version" : "1.0.0",
+  "smart_version": "0.4",
+
+  "mode" : "ui",	
+  "scope": "record",
+  "has_ui": true,
+  "frameable": true,
+
+  "icon" :  "/jmvc/ui/resources/images/app_icons_32/your_webapp.png",
+  "index": "http://localhost:8001/start_auth?record_id={record_id}&amp;carenet_id={carenet_id}",
+  "oauth_callback_url": "http://localhost:8001/after_auth"
+}
+{
+    "consumer_key": "sampleweb@apps.indivo.org",
+    "consumer_secret": "yourwebapp"
+}{% endfilter %}</pre>
+  <p>{% blocktrans %}This means that your web app should serve its start_auth url at http://localhost:8001/start_auth, and its callback url at http://localhost:8001/after_auth. It should use the oauth consumer key "sampleweb@apps.indivo.org", and the consumer secret "yourwebapp". Your mobile app doesn't need to worry about the callback urls--our framework handles that for you. You do need to make sure to configure the framework to use the consumer key "sampleios@apps.indivo.org", and the consumer secret "youriosapp". Both of your apps should access Indivo Backend Server on {% endblocktrans %}<b>http://sandbox.indivohealth.org:8000</b>{% blocktrans %}. For more information on how to write an indivo app, see <a href="http://wiki.chip.org/indivo/index.php/HOWTO:_write_an_Indivo_app_using_Python">the Indivo documentation</a>.{% endblocktrans %}</p>
+  <h4>{% trans "Issues to Be Aware Of" %}</h4>
+  <p>{% blocktrans %}Because this instance of Indivo is a sandbox intended for demonstration and development only, there are some additional considerations you should take into account.{% endblocktrans %}</p>
+  <h5 id='registration'>{% trans "Registration time: loading sample data" %}</h5>
+  <p>{% blocktrans %}The developer's sandbox runs Indivo in 'Demo Mode'. This means that when you register for a new account, Indivo automatically creates a few sample records, and populates them with data. This process takes some time, so when you register for an account, expect to wait up to 20 seconds or so for the registration to go through.{% endblocktrans %}</p>
+  <h5>{% trans "Appropriate Data" %}</h5>
+  <p>{% blocktrans %}Since this is a developer's sandbox, it is not intended for production use. By extension, it is inappropriate to store production data here. Only sample data should be stored in the sandbox. <strong>Do not store real patient data (PHI, PII, or any other data that would require HIPAA-grade storage) on this instance of Indivo.</strong></p>{% endblocktrans %}</p>
+  <h5>{% trans "Data Loss" %}</h5>
+  <p>{% blocktrans %}Because this is a development environment, we will update it regularly and without warning to make new features available. As some features (especially those that involve changes to the Indivo data models) may require database resets, <strong>you may lose all data in the environment (including your accounts) at any time.</strong> Be aware of this fact.{% endblocktrans %}</p>
+  <h4>{% trans "Feedback" %}</h4>
+  <p>{% blocktrans %}We always like to hear suggestions and complaints, so that we can improve the quality of the Indivo experience. If you have thoughts or questions about the sandbox specifically or Indivo in general, please air them over <a href="mailto:indivohealth@chip.org">our developer's list</a>, which requires <a href="http://mail.chip.org/mailman/listinfo/indivohealth">subcription</a> before you can send new posts.{% endblocktrans %}</p>
+  <p class="moreinfo" style="margin-top:20px;">
+    <a href="/login">{% trans "Back to login" %}</a>
+  </p>
+{% endblock %}
+
+{% block footer %}
+{% include 'ui/footer.html' %}
+{% endblock %}

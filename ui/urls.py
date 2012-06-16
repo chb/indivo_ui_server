@@ -9,6 +9,9 @@ urlpatterns = patterns(
     '',
     # testing
     (r'^$', index),
+
+    # info
+    (r'^about/$', about_sandbox),
     
     # auth
     (r'^login$', login, {'status': None}),

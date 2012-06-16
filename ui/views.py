@@ -114,6 +114,9 @@ def get_connect_credentials(request, account_id, app_email):
     credentials = store_connect_secret(request, content)
     return HttpResponse(simplejson.dumps(credentials), content_type="application/json")
 
+def about_sandbox(request):
+    return utils.render_template('ui/about_sandbox', {})
+
 def index(request):
     if tokens_p(request):
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])

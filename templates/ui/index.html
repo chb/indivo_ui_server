@@ -7,7 +7,7 @@
 		<link type="text/css" href="/jmvc/ui/resources/css/ui.css" rel="Stylesheet" />
 		
 		{% if branding %}
-			<title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}</title>
+			<title>{{ branding.pretty_name_prepend }} {{ branding.pretty_name|safe }}</title>
 		{% else %}
 			<title>{% trans "Indivohealth" %}</title>
 		{% endif %}
@@ -15,14 +15,14 @@
 	<body>
 		<div id="header">
 			<div id="header_logo_and_name">
-				{% if branding %}
+				{% if branding and branding.logo_image_src %}
 					<div id="header_logo_div">
 						<img id="header_logo" alt="header_logo" src='{{ branding.logo_image_src }}'/>
 					</div>
 				{% endif %}
 				<div id="header_site_name">
 					{% if branding %}
-						 {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+						 {{ branding.pretty_name_prepend }} {{ branding.pretty_name|safe }}
 					{% else %}
 						{% trans "Indivohealth" %}<span id="header_trademark">&trade;</span>
 					{% endif %}

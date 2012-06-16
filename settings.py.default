@@ -34,7 +34,7 @@ REGISTRATION = {
 	'set_primary_secret': 1,			# 0 or 1. If 0, administrators will have to approve accounts. If set to 1, make sure the server has SEND_MAIL enabled!
 	'set_secondary_secret': 1,			# 0 or 1. Can only be 1 if primary is also 1
 	'min_password_length': 8,
-	'autocreate_record': True			# if True creates a first record based on account name and email automatically
+	'autocreate_record': False			# if True creates a first record based on account name and email automatically
 }
 
 # allow user to add records?
@@ -42,11 +42,11 @@ ALLOW_ADDING_RECORDS = False
 
 #  quick and dirty private labeling (optional)
 # BRANDING = {
-#   'short_name': 'gpp',
-#   'pretty_name': 'Gene Partnership',
-#   'pretty_name_prepend': 'The',
-#   'header_template': 'ui/header_gpp.html',
-#   'footer_template': 'ui/footer_gpp.html',
+   'short_name': 'indivo',
+   'pretty_name': 'IndivoHealth&trade;',
+   'pretty_name_prepend': '',
+   'header_template': 'ui/header.html',
+   'footer_template': 'ui/footer_sandbox.html',
 #   'logo_image_src': '/jmvc/ui/resources/images/branding/gpp_three_loop_96x31.png',
 #   'logo_image_big_src': '/jmvc/ui/resources/images/branding/gpp_three_loop_big.png'
 # }

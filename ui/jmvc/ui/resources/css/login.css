@@ -16,7 +16,7 @@ p { margin: 0; }
 	position: absolute; top: 0; width: 100%; min-height: 100%;
 }
 #main_box {
-	width: 600px; min-height: 300px; margin: 5% auto 120px;
+	width: 600px; min-height: 300px; margin: 5% auto 10px;
 }
 .table_form {
 	display: table; width: 100%; margin-top: 2em;
@@ -56,5 +56,5 @@ a.row { display: block; font-size: 1.2em; }
 .faded { color: rgb(178,178,178); color: rgba(0,0,0,0.3); }
 
 #footer {
-	position: absolute; bottom: 0; left: 0; width: 100%;
+	width: 100%;
 }
