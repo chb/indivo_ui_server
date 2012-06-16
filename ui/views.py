@@ -267,7 +267,7 @@ def register(request):
         post = request.POST
         set_primary = settings.REGISTRATION.get('set_primary_secret', 1)
         user_hash = {'account_id': post.get('account_id'),
-                 'contact_email': post.get('contact_email'),        # this key is not present in the register form for now
+                 'contact_email': post.get('account_id'),        # TODO:the contact_email key is not present in the register form for now, so use the account_id
                      'full_name': post.get('full_name'),
               'primary_secret_p': set_primary,
             'secondary_secret_p': settings.REGISTRATION.get('set_secondary_secret', 1)}
@@ -405,6 +405,7 @@ def account_init(request, account_id, primary_secret):
         if '200' == status:
             if settings.REGISTRATION['autocreate_record'] and account['fullName'] and len(account['fullName']) > 0:
                 full_name = account['fullName']
+		email = account['contactEmail']
                 try:
                     split_index = full_name.index(' ')
                     given_name = full_name[0:split_index]
@@ -454,7 +455,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
     api = get_api()
     
     # is this account already initialized?
-    resp = api.account_info(account_email=account_id)
+    resp, content = api.account_info(account_email=account_id)
     status = resp['status']
     if '404' == status:
         return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
@@ -648,7 +649,6 @@ def record_create(request):
     GET:  Show the "record_create" template
     POST: Try to create a record
     """
-    import pdb;pdb.set_trace()
     # is adding records enabled?
     if not settings.ALLOW_ADDING_RECORDS:
         return HttpResponseForbidden(ErrorStr('Adding records is disabled').str())
@@ -686,7 +686,6 @@ def _record_create(account_id, demographics):
     """
     Returns an HttpResponse according to the result
     """
-    import pdb;pdb.set_trace()
     api = get_api()
     res, content = api.record_create(body=demographics)
     status = res['status']
