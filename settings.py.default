@@ -58,7 +58,7 @@ SITE_ID = 1
 USE_I18N = True
 SECRET_KEY = 'REPLACEMENOW'
 # don't forget comma here. just love the python tuple!
-TEMPLATE_LOADERS = ('django.template.loaders.filesystem.load_template_source',)
+TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',)
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
