@@ -3,8 +3,8 @@
 	<div class="app <%= app.enabled ? '' : 'disabled' %> <%= app.autonomous ? 'autonomous' : '' %>" style="background-image: url('<%=  app.getImageSource() %>');" <%= app %>>
 		<b class="app_name"><%= app.name %></b>
 		<div class="app_info">
-			<b><%= app.name %></b><br />
-			<%= app.description %><br />
+			<b><%= app.name %></b>
+			<div class="app_description"><%= app.description %></div>
 			<span><%= app.app_id %></span>
 		</div>
 		<div class="app_options">

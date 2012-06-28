@@ -222,9 +222,12 @@ $.Controller.extend('UI.Controllers.PHA',
 		app_div.empty().html(this.view('apps', params));
 		$('#app_settings_carenets').show();
 		
-		// setup app hovering (so we see in which carenets the app already is)
+		// setup app hovering (so we see app info and in which carenets the app already is)
 		app_div.find('.app').bind({
 			'mouseover': function(event) {
+				self.showAppInfo($(this));
+				
+				// show in which carenets
 				var app_id = $(this).model().app_id;
 				$('#app_settings_carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
@@ -234,6 +237,7 @@ $.Controller.extend('UI.Controllers.PHA',
 				});
 			},
 			'mouseout': function(event) {
+				self.hideAppInfo($(this));
 				$('#app_settings_carenets').find('.carenet').removeClass('highlight');
 			}
 		})
@@ -247,6 +251,8 @@ $.Controller.extend('UI.Controllers.PHA',
 			helper: 'clone',
 			containment: '#app_content',
 			start: function(event, ui) {
+				self.hideAppInfo(ui.helper);
+				
 				var app_id = $(this).model().app_id;
 				$('#app_settings_carenets').find('.carenet').each(function(i, elem) {
 					var app_arr = $(elem).model().apps;
@@ -540,6 +546,52 @@ $.Controller.extend('UI.Controllers.PHA',
 	
 	
 	/**
+	 *	Shows the app_info sub-div from an app
+	 */
+	showAppInfo: function(app_div) {
+		if (app_div && !app_div.hasClass('app_info_shown') && !app_div.hasClass('app_dragged')) {
+			var info = app_div.find('.app_info');
+			info.show();		// need to show it before resizing/realigning
+			
+			var textbox = info.find('.app_description');
+			
+			// if aspect ratio is below 3, widen the box
+			var w = textbox.innerWidth();
+			var h = textbox.innerHeight();
+			while (h > 0 && w / h < 3) {
+				textbox.css('width', 1.3 * w + 'px');
+				w = textbox.innerWidth();
+				h = textbox.innerHeight();
+			}
+			
+			// align
+			var top = -1 * (info.outerHeight() - 4);
+			var left = -1 * Math.round((info.outerWidth() - app_div.outerWidth()) / 2);
+			var trans_left = app_div.offset().left + left;
+			var trans_right = trans_left + info.outerWidth();
+			var min_left = 1* $('#app_content').offset().left + 2;
+			var max_right = $('#app_container').innerWidth();
+			if (trans_left < min_left) {
+				left += (min_left - trans_left);
+			}
+			else if (trans_right > max_right) {
+				left -= (trans_right - max_right);
+			}
+			info.css('top', top + 'px').css('left', left + 'px');
+			
+			// show
+			app_div.addClass('app_info_shown');
+		}
+	},
+	
+	hideAppInfo: function(app_div) {
+		if (app_div && app_div.hasClass('app')) {
+			app_div.find('.app_info').hide();
+			app_div.removeClass('app_info_shown');
+		}
+	},
+	
+	/**
 	 * Utilities
 	 */
 	setupCarenetName: function(carenet_name_view) {
@@ -589,13 +641,13 @@ $.Controller.extend('UI.Controllers.PHA',
 				var self_id = $(this).model().app_id;
 				$('#apps').find('.app').each(function(i) {
 					if ($(this).model().app_id == self_id) {
-						$(this).addClass('app_showinfo');
+						self.showAppInfo($(this));
 					}
 				});
 			})
 			.bind('mouseout', function(event) {
 				if (!$(this).hasClass('app_dragged')) {
-					$('#apps').find('.app').removeClass('app_showinfo');
+					$('#apps').find('.app').each(function (i, elem) { self.hideAppInfo($(elem)); });
 				}
 			})
 			
@@ -674,7 +726,7 @@ $.Controller.extend('UI.Controllers.PHA',
 					$('#app_settings_carenets').find('.carenet').each(function(i, elem) {
 						$(elem).css('opacity', 1);
 					});
-					$('#apps').find('.app').removeClass('app_showinfo');
+					$('#apps').find('.app').each(function (i, elem) { self.hideAppInfo($(elem)); });
 					
 					if (!view.hasClass('draggable_will_remove')) {
 						view.parentsUntil('.carenet').last().parent().removeClass('expanded');
