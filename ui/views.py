@@ -181,7 +181,7 @@ def login(request, status):
     try:
         res, content = tokens_get_from_server(request, username, password)
     except Exception as e:
-        params['ERROR'] = ErrorStr(e.value)                             # FIXME: no longer have e.value
+        params['ERROR'] = ErrorStr(e[1])
         return utils.render_template(LOGIN_PAGE, params)
     if res['status'] != '200':
         if '403' == res['status']:
@@ -879,7 +879,7 @@ def launch_app_complete(request, app_id):
             start_url = _interpolate_url_template(app_info.get('index'), params_dict)
     
     if not start_url:
-        error_message = ErrorStr('Error getting app info')
+        error_message = ErrorStr('Error getting app info: no start URL')
 
     # get SMART credentials for the request
     api = get_api(request)
