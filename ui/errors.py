@@ -34,6 +34,7 @@ class ErrorStr:
                                  'No such App': _("This App does not exist"),
                            'Permission Denied': _("You are not authorized"),
                                 'Socket Error': _("The server is currently unavailable. Please try again in a few minutes."),
+                          'Connection refused': _("The server is currently unavailable. Please try again in a few minutes."),
             'Socket Error: Connection refused': _("The server is currently unavailable. Please try again in a few minutes.")
     }
     
