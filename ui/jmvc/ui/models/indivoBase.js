@@ -7,10 +7,10 @@ $.Model.extend('UI.Models.IndivoBase',
 	
 	convert : {
 		date : function(raw){
+			// Indivo returns ISO 8601 representations with UTC timezone designator
 			var converted = null;
 			if (raw && raw !== "") {
-				// Indivo returns ISO 8601 representations with UTC timezone designator
-				converted = Date.parse(raw).setTimezone('Z'); // date.js requires manually setting this for now
+				converted = new Date(raw);
 			}
 			return converted;
 		}
