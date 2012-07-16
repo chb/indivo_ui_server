@@ -182,9 +182,12 @@ $.Controller.extend('UI.Controllers.AppList',
 	 */
 	"{enabledApps} remove": function( list, ev, removedApps ) {
 		// notify apps
+		self = this;
 		removedApps.each(function(index, app){
-			var managedAppInstance = APP_MANAGER.running_apps[app.MANAGER_uuid];
-			APP_MANAGER.destroy_app_instance(managedAppInstance);
+			if (self.appMap[app.id]) {
+				var managedAppInstance = APP_MANAGER.running_apps[app.MANAGER_uuid];
+				APP_MANAGER.destroy_app_instance(managedAppInstance);
+			}
 		});
 		// remove from display
 		removedApps.elements(this.element).remove();
