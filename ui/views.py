@@ -808,7 +808,6 @@ def launch_app(request, app_id):
         
     # read account records
     error_message = None
-    api = get_api(request)
     resp, content = api.record_list(account_email=account_id)
     status = resp['status']
     
