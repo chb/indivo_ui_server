@@ -802,6 +802,13 @@ def launch_app(request, app_id):
     if not account_id:
         return HttpResponseRedirect(login_url)
         
+    # logged in, check for existence of app
+    api = get_api(request)
+    resp, content = api.pha(pha_email=app_id)
+    status = resp['status']
+    if '404' == status:
+        return utils.render_template('ui/error', {'error_message': ErrorStr('No such App').str(), 'error_status': status})
+        
     # read account records
     error_message = None
     api = get_api(request)
@@ -877,9 +884,11 @@ def launch_app_complete(request, app_id):
         else:
             start_url = app_info.get('index')    
             start_url = _interpolate_url_template(app_info.get('index'), params_dict)
-    
-    if not start_url:
-        error_message = ErrorStr('Error getting app info: no start URL')
+            if not start_url:
+                error_message = ErrorStr('Error getting app info: no start URL')
+
+    if error_message is not None:
+        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
 
     # get SMART credentials for the request
     api = get_api(request)
@@ -898,9 +907,8 @@ def launch_app_complete(request, app_id):
         error_message = ErrorStr("Error getting account credentials")
     else:
         oauth_header = etree.XML(content).findtext("OAuthHeader")
-        
-    if not oauth_header:
-        error_message = ErrorStr("Error getting account credentials")
+        if not oauth_header:
+            error_message = ErrorStr("Error getting account credentials")
 
     if error_message is not None:
         return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
