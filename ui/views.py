@@ -285,7 +285,7 @@ def register(request):
             # display the secondary secret if there is one
             has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
             if has_secondary_secret:
-                return utils.render_template('ui/register', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'SECONDARY': account.get('secret'), 'MESSAGE': _('You have successfully registered.') + ' ' + _('At the link sent to your email address, enter the following activation code:')})
+                return utils.render_template('ui/register', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'SECONDARY': account.get('secret'), 'MESSAGE': _('You have successfully registered.') + ' ' + _('At the link sent to your email address, enter the following confirmation code:')})
             return HttpResponseRedirect('/accounts/%s/send_secret/sent' % account_id)
         return utils.render_template('ui/register', {'ERROR': ErrorStr((content or 'Setup failed')), 'SETTINGS': settings})
     return utils.render_template('ui/register', {'SETTINGS': settings})
@@ -333,7 +333,7 @@ def send_secret(request, account_id, status):
                     account = utils.parse_account_xml(account_xml)
                     has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
                     if has_secondary_secret:
-                        params['MESSAGE'] += '. ' + ('At the link sent to your email address, enter the following activation code:')
+                        params['MESSAGE'] += '. ' + ('At the link sent to your email address, enter the following confirmation code:')
                         params['SECONDARY'] = account.get('secret')
         else:
             params['MESSAGE'] = _('Use the link sent to your email address to proceed with account activation')

@@ -16,7 +16,7 @@ class ErrorStr:
                                     'disabled': _("This account has been disabled/locked."),
                              'Unknown account': _("This account does not exist on the server."),
                        'Registration disabled': _("Online registration is not available."),
-                                'Wrong secret': _("The activation code was wrong. Please try again."),
+                                'Wrong secret': _("The confirmation code was wrong. Please try again."),
                      'Wrong confirmation code': _("The confirmation code was wrong. Please try again."),
                                 'Setup failed': _("There was a problem setting up your account. Please try again."),
                           'account_init_error': _("There was a problem updating your data. Please try again. If you are unable to change your password please contact support."),
