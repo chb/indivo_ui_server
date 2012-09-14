@@ -13,80 +13,106 @@
 		{% endif %}
 	</head>
 	<body>
-		<div id="header">
-			<div id="header_logo_and_name">
-				{% if branding %}
-					<div id="header_logo_div">
-						<img id="header_logo" alt="header_logo" src='{{ branding.logo_image_src }}'/>
-					</div>
-				{% endif %}
-				<div id="header_site_name">
+		<div id="full_height">
+			
+			<!-- header with logo and account settings -->
+			<div id="header">
+				<div id="header_logo_and_name">
 					{% if branding %}
-						 {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
-					{% else %}
-						{% trans "Indivohealth" %}<span id="header_trademark">&trade;</span>
+						<div id="header_logo_div">
+							<img id="header_logo" alt="header_logo" src='{{ branding.logo_image_src }}'/>
+						</div>
 					{% endif %}
+					<span id="header_site_name">
+						{% if branding %}
+							 {{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+						{% else %}
+							{% trans "Indivohealth" %}<span id="header_trademark">&trade;</span>
+						{% endif %}
+					</span>
+					<span id="header_fullname"></span>
 				</div>
-				<div id="header_fullname"></div>
-			</div>
-			<div id="header_controls">
-				<a href="{% url ui.views.change_password %}">
-					<img class="header_icons" alt="settings" src="/jmvc/ui/resources/images/icons_16/package_settings.png" />
-					{% trans "Settings" %}
-				</a>
-				<a id="logout" href="{% url ui.views.logout %}">
-					<img class="header_icons" alt="logout" style="opacity: 0.7;" src="/jmvc/ui/resources/images/icons_16/goto.png" />
-					{% trans "Logout" %}
-				</a>
-			</div>
-		</div>
-		
-		<!-- container for alert messages -->
-		<div id="alerts"></div>
-		
-		<div id="record_tabs">
-			<span id="loading_records_hint">{% trans "Loading records..." %}</span>
-			{% if ALLOW_ADDING_RECORDS %}
-			<a id="add_record_tab" class="record_tab" href="javascript:void(0);"><img src="/jmvc/ui/resources/images/add_11.png" alt="+" /></a>
-			{% endif %}
-		</div>
-		
-		<div id="app_container">
-			<div id="app_selector">
-				<ul id="active_app_tabs">
-					<li id="healthfeed_li" data-controller="healthfeed" data-appType="internal">
-						<img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/healthfeed.png" alt="" />{% trans "Healthfeed" %}
-					</li>
-					<li id="inbox_li" data-controller="message" data-appType="internal">
-						<img class="app_tab_img" height="32px" width="32px" src="/jmvc/ui/resources/images/app_icons_32/inbox.png" alt="" />{% trans "Inbox" %}
-					</li>
-				</ul>
 				
-				<ul id="background_app_tabs" style="display: none"></ul>
-				
-				<ul id="record_owned_options">
-				{% if not HIDE_SHARING %}
-					<li id="carenet" data-controller="carenet" data-appType="internal">
-						<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/groupevent.png" alt="" />{% trans "Sharing" %}
-					</li>
-				{% endif %}
-					<li id="pha" data-controller="pha" data-appType="internal">
-						<img class="app_tab_img_small" src="/jmvc/ui/resources/images/icons_24/settings.png" alt="" />{% trans "App Settings" %}
-					</li>
-				</ul>
+				<!-- Settings & Logout -->
+				<div id="header_controls">
+					<a href="{% url ui.views.change_password %}">
+						<img class="header_icons" alt="settings" src="/jmvc/ui/resources/images/icons_16/package_settings.png" />
+						{% trans "Change Password" %}
+					</a>
+					<a id="logout" href="{% url ui.views.logout %}">
+						<img class="header_icons" alt="logout" style="opacity: 0.7;" src="/jmvc/ui/resources/images/icons_16/goto.png" />
+						{% trans "Logout" %}
+					</a>
+				</div>
 			</div>
 			
-			<div id="app_content" class="app_content_pane"></div>
+			<!-- container for alert messages -->
+			<div id="alerts"></div>
+			
+			<div id="container">
+				
+				<!-- the tab bar -->
+				<div id="tabs">
+					{% if not SETTINGS.HIDE_HEALTHFEED %}
+					<a id="healthfeed" class="main_tab" href="javascript:void(0);">
+						<img src="/jmvc/ui/resources/images/app_icons_32/healthfeed.png" alt="" />
+						{% trans "Healthfeed" %}
+					</a>
+					{% endif %}
+					{% if not SETTINGS.HIDE_INBOX %}
+					<a id="message" class="main_tab" href="javascript:void(0);">
+						<img src="/jmvc/ui/resources/images/app_icons_32/inbox.png" alt="" />
+						{% trans "Inbox" %}
+					</a>
+					{% endif %}
+					
+					<div id="record_tabs">
+						{% if SETTINGS.ALLOW_ADDING_RECORDS %}
+						<a id="add_record_tab" class="record_tab" href="javascript:void(0);"><img src="/jmvc/ui/resources/images/add_11.png" alt="+" /></a>
+						{% endif %}
+						<span id="loading_records_hint">{% trans "Loading records..." %}</span>
+					</div>
+				</div>
+				
+				<!-- the app selector -->
+				<div id="app_selector">
+					<ul id="active_app_tabs" style="display: none;"></ul>
+					<ul id="background_app_tabs" style="display: none"></ul>
+					
+					<ul id="record_owned_options">
+						{% if not SETTINGS.HIDE_SHARING %}
+						<li id="carenet" data-controller="carenet" data-appType="internal">
+							<img class="app_tab_img" src="/jmvc/ui/resources/images/icons_24/groupevent.png" alt="" />{% trans "Sharing" %}
+						</li>
+						{% endif %}
+						{% if not SETTINGS.HIDE_APP_SETTINGS %}
+						<li id="pha" data-controller="pha" data-appType="internal">
+							<img class="app_tab_img" src="/jmvc/ui/resources/images/icons_24/settings.png" alt="" />{% trans "App Settings" %}
+						</li>
+						{% endif %}
+					</ul>
+					
+					<!-- default behavior is to start into healthfeed, so the app selector is disabled in the beginning -->
+					<div id="app_selector_cover"> </div>
+				</div>
+				
+				<!-- main app content -->
+				<div id="app_container">
+					<div id="app_content" class="in_app_container"></div>
+					<iframe id="app_content_iframe" class="in_app_container" src="" style="display: none" frameBorder="no"></iframe>
+				</div>
+				
+				<!-- footer -->
+				{% if branding %}
+					{% include branding.footer_template %}
+				{% else %}
+					{% include 'ui/footer.html' %}
+				{% endif %}
+			</div>
+			
+			<!-- used for jquery tools overlay -->
+			<div class="overlay" id="overlay"><div class="wrap"></div></div>
 		</div>
-		
-		<!-- used for jquery tools overlay -->
-		<div class="overlay" id="overlay"><div class="wrap"></div></div>
-		
-		{% if branding %}
-			{% include branding.footer_template %}
-		{% else %}
-			{% include 'ui/footer.html' %}
-		{% endif %}
 	</body>
 	
 	<!-- development or production NOTE: steal path is at the top-level jmvc dir -->

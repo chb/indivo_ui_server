@@ -4,7 +4,7 @@ Views for Indivo JS UI
 """
 # pylint: disable=W0311, C0301
 # fixme: rm unused imports
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden, Http404, HttpRequest
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseServerError, Http404, HttpRequest
 from django.contrib.auth.models import User
 from django.core.exceptions import *
 from django.core.urlresolvers import reverse
@@ -114,14 +114,12 @@ def get_connect_credentials(request, account_id, app_email):
     credentials = store_connect_secret(request, content)
     return HttpResponse(simplejson.dumps(credentials), content_type="application/json")
 
-def index(request):
+def index(request):  #MERGE
     if tokens_p(request):
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
 
         return utils.render_template('ui/index', { 'ACCOUNT_ID': account_id,
-                                         'ALLOW_ADDING_RECORDS': settings.ALLOW_ADDING_RECORDS,
-                                           'HIDE_GET_MORE_APPS': settings.HIDE_GET_MORE_APPS,
-                                                 'HIDE_SHARING': settings.HIDE_SHARING })
+                                                    'SETTINGS': settings})
     
     return HttpResponseRedirect(reverse(login))
 
@@ -361,14 +359,17 @@ def account_init(request, account_id, primary_secret):
     account_xml = content or '<root/>'
     account = utils.parse_account_xml(account_xml)
     account_state = account.get('state')
-    has_primary_secret = (len(primary_secret) > 0)      # TODO: Get this information from the server (API missing as of now)
+    account_is_uninitialized = ('uninitialized' == account_state)		# TODO: Rewrite server to not set uninitialized upon password reset
+    has_auth_system = (len(account.get('auth_systems', [])) > 0)		# TODO: Try to avoid upon account-init rewrite
+    has_primary_secret = (len(primary_secret) > 0)      				# TODO: Get this information from the server (API missing as of now)
     secondary_secret = ''
     has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
+    can_autocreate_record = True if 'uninitialized' == account_state else False     # TODO: Better: check whether the account has no records
     
     # if the account is already active, show login IF at least one auth-system is attached
-    if 'uninitialized' != account_state:
+    if not account_is_uninitialized:
         if 'active' == account_state:
-            if len(account['auth_systems']) > 0:
+            if has_auth_system:
                 return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('Your account is now active, you may log in below'), 'SETTINGS': settings})
             else:
                 move_to_setup = True
@@ -403,9 +404,9 @@ def account_init(request, account_id, primary_secret):
         
         # on success also create the first record if we have a full_name and is enabled in settings
         if '200' == status:
-            if settings.REGISTRATION['autocreate_record'] and account['fullName'] and len(account['fullName']) > 0:
+            if can_autocreate_record and settings.REGISTRATION['autocreate_record'] and account.has_key('fullName') and len(account['fullName']) > 0:
                 full_name = account['fullName']
-		email = account['contactEmail']
+                email = account['contactEmail']
                 try:
                     split_index = full_name.index(' ')
                     given_name = full_name[0:split_index]
@@ -542,7 +543,7 @@ def forgot_password(request):
     
     if request.method == HTTP_METHOD_POST:
         email = request.POST.get('account_id')
-        
+        #MERGE dev_landing did more secondary secret handling
         api = get_api()
         # get account id from email (which we are assuming is contact email)
         resp, content = api.account_forgot_password(account_email=email)
@@ -553,6 +554,20 @@ def forgot_password(request):
             e = ET.fromstring(content or '<root/>')
             params['SECONDARY_SECRET'] = e.text
         
+        # password was reset, show secondary secret if needed
+        if '200' == status:
+            params['EMAIL_SENT'] = True
+            if settings.PASSWORD_RESET_REQUIRE_SECONDARY:
+                e = ET.fromstring(content or '<root/>')
+                if not e.text or 'None' == e.text:
+                    utils.log('Password reset requires a secondary secret, but this account currently does not have one!')
+                    # TODO: Tell the server to generate a secondary secret!
+                    # If you arrive here, account generation was not setup properly because it should have created a secondary secret
+                    # We return an arbitrary secondary secret as the server will accept any secondary secret in this case
+                    e.text = 290385
+                
+                params['SECONDARY_SECRET'] = e.text
+                
         # error resetting, try to find out why
         else:
             if '404' == status:
@@ -562,7 +577,7 @@ def forgot_password(request):
             params['ACCOUNT_ID'] = email
             if 'Account has not been initialized' == content:
                 params['UNINITIALIZED'] = True
-            
+    
     return utils.render_template('ui/forgot_password', params)
 
 
@@ -573,7 +588,10 @@ def reset_password(request, account_id, primary_secret):
     params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SETTINGS': settings}
     
     if HTTP_METHOD_POST == request.method:
-        secondary_secret = request.POST.get('conf1') + request.POST.get('conf2')
+        secondary_secret = request.POST.get('conf1', '') + request.POST.get('conf2', '')
+        check_params = {}
+        if settings.PASSWORD_RESET_REQUIRE_SECONDARY:
+            check_params = { 'secondary_secret': secondary_secret }
         
         # check the validity of the primary and secondary secrets
         api = get_api()
@@ -595,9 +613,12 @@ def reset_password(request, account_id, primary_secret):
                 pw2 = request.POST.get('pw2')
                 if pw1 == pw2:
                     resp, content = api.account_password_set(account_email=account_id, body={'password': pw1})
-                    
+                    #MERGE dev_landing scramble comment
                     # password was reset, log the user in
                     if '200' == resp['status']:
+                        # reset the primary secret to void the reset email
+                        api.call('PUT', '/accounts/%s/primary-secret' % account_id)
+                        
                         try:
                             try:
                                 username = account['auth_systems'][0]['username']      # TODO: I don't like this...
@@ -605,6 +626,9 @@ def reset_password(request, account_id, primary_secret):
                             except Exception as e:
                                 params['ERROR'] = ErrorStr(str(e))                     # We'll never see this
                             return HttpResponseRedirect(reverse(index))
+                        
+                        except Exception as e:
+                            params['ERROR'] = ErrorStr(str(e))
                         except IOError as e:
                             params['ERROR'] = ErrorStr(e.strerror)
                     else:
@@ -615,6 +639,11 @@ def reset_password(request, account_id, primary_secret):
                 params['ERROR'] = ErrorStr('Password too short')
         
         # wrong secrets (primary or secondary)
+        elif '403' == resp['status']:
+            if settings.PASSWORD_RESET_REQUIRE_SECONDARY:
+                params['ERROR'] = ErrorStr('Wrong confirmation code')
+            else:
+                params['ERROR'] = ErrorStr('Wrong secret')
         else:
             params['ERROR'] = ErrorStr(content or 'Wrong confirmation code')
     
@@ -1049,7 +1078,7 @@ def authorize(request):
     callback_url = request.REQUEST.get('oauth_callback')
     
     # process GETs (initially adding an app and a normal call for this app)
-    if request.method == HTTP_METHOD_GET and request.GET.has_key('oauth_token'):
+    if request.method == HTTP_METHOD_GET and request_token is not None:
         
         # claim request token and check return value
         resp, content = api.request_token_claim(reqtoken_id=request_token)

@@ -14,27 +14,10 @@ $.Controller.extend('UI.Controllers.MainController',
 /* @Static */
 { 
 	defaults: {
-		messageCheck: true,
+		messageCheck: false,
 		messageCheckDelay: 10
 	},
 	
-	/**
-	 * General record UI handling
-	 */
-	lockAppSelector: function() {
-		$('#app_selector').append('<div id="app_selector_cover"> </div>');
-	},
-	unlockAppSelector: function() {
-		$('#app_selector_cover').remove();
-	},
-	showNoRecordsHint: function() {
-		UI.Controllers.MainController.lockAppSelector();
-		$('#app_content_iframe').attr('src', 'about:blank').hide();
-		
-		// this will also be shown if adding records has been disabled, but signing up from the site automatically creates the first record,
-		// so this should not be a real issue. Better check here again, anyway.
-		$('#app_content').html('<div id="no_record_hint"><h2>{% trans "Start by creating a record for this account" %}</h2></div>').show();
-	},
 	
 	/**
 	 * poof animation
@@ -106,25 +89,22 @@ $.Controller.extend('UI.Controllers.MainController',
 			if(!m.read_at)
 				return m;
 		}).length;
-		// alter img src
-		var img = $('#inbox_li img');
-		if(n_unread > 0 && n_unread < 10) {
-			img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox_' + n_unread + '.png');
-		} else if(n_unread >= 10) {
-			img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox_9_plus.png')
-		} else {
-			img.attr('src', img.attr('src').match(/\/.*\//) + 'inbox.png')
+		
+		// indicate unread count
+		if (n_unread > 0) {
+			var badge = $('#message_unread_count');
+			if (!badge.is('*')) {
+				badge = $('<div/>', {'id': 'message_unread_count'});
+				$('#message').append(badge);
+			}
+			badge.text(n_unread);
 		}
-
-		// alert link text
-		var a = $('#inbox_li a');
-		if(n_unread > 0) {
-			a.text('Inbox (' + n_unread + ')')
-		} else {
-			a.text('Inbox')
+		
+		// no unread messages
+		else {
+			$('#message_unread_count').fadeOut('fast', function() { $(this).remove(); });
 		}
-
-		a.prepend(img)
+		
 		if (success) {
 			success();
 		}
@@ -148,11 +128,15 @@ $.Controller.extend('UI.Controllers.MainController',
 				// TODO: remove once we make sure the rest of the code uses error handlers
 				if (self.alertQueue.length < 5 ) {
 					// don't flood the user with alerts
-					self.alertQueue.push(new UI.Models.Alert({text:"Sorry, but something went wrong, Please try again later", level:"error"}));
+					//self.alertQueue.push(new UI.Models.Alert({text:"Sorry, but something went wrong, Please try again later", level:"error"}));
 				}
 			}
 		});
-
+		
+		// start into healthfeed or inbox
+		var launch_app = $('#healthfeed').is('*') ? $('#healthfeed') : $('#message');
+		launch_app.click();
+		
 		// setup periodic new message check 
 		(function inboxUpdater(){
 			if(self.messageCheck) {
@@ -169,5 +153,115 @@ $.Controller.extend('UI.Controllers.MainController',
 				setTimeout(inboxUpdater, self.messageCheckDelay * 1000);
 			}
 		})();
+	},
+	
+	
+	/**
+	 *	Called by app_list_controller if it doesn't know what to do
+	 */
+	displayDefaultPage: function() {
+		this.cleanAndShowAppDiv();
+		var record_controller = $('body').controllers('record')[0];
+		if (record_controller) {
+			record_controller.showRecordInfo();
+		}
+	},
+	
+	
+	/**
+	 *	Shows the given controller in #app_content
+	 *	@param {String} html An optional HTML string to display in #app_content
+	 */
+	cleanAndShowAppDiv: function(html) {
+		var app_content = $('#app_content');
+		this.clearControllers(app_content);
+		app_content.html(html ? html : '').show();
+		
+		$('#app_content_iframe').unbind('load').attr('src', 'about:blank').hide();
+	},
+	
+	/**
+	 *	Updates the interface so that once the iFrame URL is loaded, the controller gets to display content on #app_content_iframe
+	 */
+	loadURLInAppIFrame: function(url) {
+		this.cleanAndShowAppDiv("Loading...");			/// @todo show a nice loading screen
+		$('#app_content_iframe').load(function() {
+			$(this).show();
+			$("#app_content").html('').hide();
+		}).attr("src", url);
+	},
+	
+	/*
+	 * Clear out any previous Controllers that have been attached to given element
+	 * @param {Object} el element to remove Controllers from
+	 */
+	clearControllers: function(el) {
+		$.each($(el).controllers(), function(i, val) {
+			val.destroy();
+		});
+	},
+	
+	
+	/**
+	 *	Tints the interface in a given color (e.g. the record's color)
+	 */
+	tintInterface: function(color) {
+		var csscolor = $('#tabs a.selected').css('background-color');
+		var bgcolor = color ? color : (csscolor ? csscolor : 'rgb(250,250,250)');
+		
+		$('#app_selector .selected, #app_container').animate({
+			backgroundColor : bgcolor
+		}, 400);
+	},
+	
+	/**
+	 *	Deselects main tabs
+	 */
+	deselectMainTabs: function() {
+		$('#tabs a').removeClass('selected');
+	},
+	
+	/**
+	 *	Make main controller watch clicks onto Healthfeed and Inbox
+	 */
+	'.main_tab click': function(el, ev) {
+		var record = $(el).model();
+		
+		// unload the record
+		var record_controller = $('body').controllers('record')[0];
+		if (record_controller) {
+			record_controller.loadRecord(null);
+		}
+		else {
+			steal.dev.warn('RecordController was not found on body', $('body').controllers());
+		}
+		
+		// load correct controller
+		this.cleanAndShowAppDiv();
+		if ($('#app_content')['ui_' + el.attr('id')]) {
+			$('#app_content')['ui_' + el.attr('id')]({account:this.account, alertQueue:this.alertQueue}).show();
+		}
+		else {
+			steal.dev.warn("Error: There is no controller for " + el.attr('id'));
+		}
+		
+		// update tab and set background color
+		this.deselectMainTabs();
+		el.addClass('selected');
+		this.tintInterface();
+	},
+	
+	
+	/**
+	 *	Show hint on how to add a record.
+	 *	@todo Currently not being used as we start into Healthfeed. We could add a hint to the records tabbar if we have no records instead. [pp]
+	 */
+	showNoRecordsHint: function() {
+		$("#app_selector").controller().lock();
+		$('#app_content_iframe').attr('src', 'about:blank').hide();
+		
+		// this will also be shown if adding records has been disabled, but signing up from the site automatically creates the first record,
+		// so this should not be a real issue. Better check here again, anyway.
+		$('#app_content').html('<div id="no_record_hint"><h2>{% trans "Start by creating a record for this account" %}</h2></div>').show();
 	}
 });

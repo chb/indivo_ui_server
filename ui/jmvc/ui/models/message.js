@@ -50,4 +50,18 @@ UI.Models.IndivoBase.extend('UI.Models.Message',
 },
 /* @Prototype */
 {
+	getBody: function() {
+		// We replace any body tags here so that styles are preserved when the template possibly strips out any html/body/head tags
+		// TODO: is it possible to replace capture groups in a javascript RegExp?  If so, rewrite this to use a single replace
+		return this.body.replace('<body','<div').replace('</body','</div');
+	},
+	
+	archive: function( account, success, error ) {
+		return $.ajax({
+			url: this.Class.apiBase() + 'accounts/' + encodeURIComponent(account.id) + '/inbox/' + encodeURIComponent(this.id) + '/archive',
+			type: 'post',
+			success: success,
+			error: error
+		});
+	}
 })

@@ -22,7 +22,10 @@ TEMPLATE_DIRS = (
 
 DEBUG = True
 TEMPLATE_DEBUG = True
-HIDE_GET_MORE_APPS = False
+HIDE_HEALTHFEED = False
+HIDE_INBOX = False
+HIDE_GET_MORE_APPS = False				# currently unfunctional
+HIDE_APP_SETTINGS = False
 HIDE_SHARING = False
 CONSUMER_KEY='chrome'
 CONSUMER_SECRET='chrome'
@@ -39,6 +42,9 @@ REGISTRATION = {
 
 # allow user to add records?
 ALLOW_ADDING_RECORDS = False
+
+# handling of user secrets
+PASSWORD_RESET_REQUIRE_SECONDARY = True
 
 #  quick and dirty private labeling (optional)
 # BRANDING = {

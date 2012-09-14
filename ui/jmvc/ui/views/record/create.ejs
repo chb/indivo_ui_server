@@ -24,7 +24,7 @@
 				<img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" style="display:none;" />
 				<p class="moreinfo">
 					<!-- @todo Create a record_controller method to select the first (or last selected) record tab -->
-					<a href="javascript:;" onclick="$('#record_tabs .record_tab').not('#add_record_tab').first().click()">Cancel</a>
+					<a href="javascript:;" onclick="$('#healthfeed').is('*') ? $('#healthfeed').click() : $('#message').click()">Cancel</a>
 				</p>
 			</div>
 		</div>

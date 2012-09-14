@@ -1,5 +1,5 @@
 <% if (isBackgroundApp) { %>
-	<li <%= app %> id="<%= app.id %>" data-appType="background" ><img class="app_tab_img" src="<%= app.getImageSource() %>"/><%= app.name %><img class="app_tab_loading" src="jmvc/ui/resources/images/spinner-small.gif" /></li>
+	<li <%= app %> id="<%= app.id %>" data-appType="background" ><img class="app_tab_img" src="<%= app.getImageSource() %>"/><%= app.name %></li>
 <% } else { %>
-	<li <%= app %> id="<%= app.id %>" data-appType="external" data-url="<%= startURL %>"><img class="app_tab_img" src="<%= app.getImageSource() %>"/><%= app.name %><img class="app_tab_loading" src="jmvc/ui/resources/images/spinner-small.gif" /></li>
+	<li <%= app %> id="<%= app.id %>" data-appType="external" data-url="<%= startURL %>"><img class="app_tab_img" src="<%= app.getImageSource() %>"/><%= app.name %></li>
 <% } %>

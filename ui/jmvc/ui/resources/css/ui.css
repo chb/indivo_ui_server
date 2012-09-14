@@ -17,10 +17,10 @@ h1{font-size:138.5%;}h2{font-size:123.1%;}h3{font-size:108%;}h1,h2,h3{margin:1em
 */
 body{font:15px/1.6 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
 
-/*** General ***/
+
+/*** Layout ***/
 html, body { min-height: 100%; margin: 0; }
 body {
-	margin: 16px;
 	font-size: 15px;
 	line-height: 1.6;
 	background: rgb(254,252,247);
@@ -33,6 +33,38 @@ body {
 	/* min-width: 1000px */
 }
 
+#full_height {
+	position: absolute; top: 0; width: 100%; min-height: 100%;
+}
+
+#container {
+	position: absolute; top: 100px; left: 15px; right: 15px; bottom: 0;
+	min-width: 1008px !important; /* 1024 - 16 (browser chrome) */
+	min-height: 632px;
+	padding: 5px 0;
+	-moz-box-shadow: none; -webkit-box-shadow: none; box-shadow: none;
+}
+
+#app_container {
+	position: absolute; top: 39px; left: 17%; right: 15px; bottom: 130px;
+	padding: 15px 30px 30px;
+	border: 1px solid #ccc;
+	-moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px;
+	background: #fafafa;
+	-moz-box-shadow: 0px 1px 3px #aaa; -webkit-box-shadow: 0px 1px 3px #aaa; box-shadow: 0px 1px 3px #aaa;
+	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
+	-webkit-transition: left 0.2s; -moz-transition: left 0.2s; -o-transition: left 0.2s; transition: left 0.2s;
+}
+
+.in_app_container {
+	width: 100%; height: 98%;
+}
+#app_content {
+	overflow-x: hidden; overflow-y: auto;
+}
+
+
+/*** General Styles ***/
 select,input,button,textarea {
   font-family: "Helvetica Neue", Corbel, Helvetica, Tahoma, Verdana, sans-serif;
 }
@@ -102,7 +134,7 @@ tr.unread { font-weight: bold; }
 	width: 110px;	
 }
 
-.messages .attachment {
+.messages .attachment, th.archive {
 	width: 32px;	
 }
 
@@ -111,8 +143,9 @@ tr.unread { font-weight: bold; }
 }
 
 .message td {
+	line-height: 1.3;
 	overflow: hidden;
-	white-space: nowrap;
+	word-wrap: break-word;
 }
 
 .message .marker {
@@ -130,9 +163,16 @@ tr.unread { font-weight: bold; }
 
 .ui_message .paperclip {
 	float: right;
-	height: 20px;
-	width: 20px;
+	height: 24px;
+	width: 24px;
 }
+
+.icon.archive {
+	float: right;
+	height: 24px;
+	width: 24px;
+}
+
 table.one_message { margin-top: -64px; width: 100%; }
 table.one_message tbody td { border: none; padding: 0.125em .25em;}
 table.one_message tbody td:first-child { width: 5%; text-align: right; color: #aaa;}
@@ -218,13 +258,12 @@ blockquote.content { margin: 1em 0; }
 
 /*** Header ***/
 #header { 
-	width: 99%; /* app-selector's 17% + app-content's 79% width + 2* 1.5% horizontal padding */ height: 80px; /* 16px * 5 */
-	margin-bottom: 16px;
+	height: 80px; /* 16px * 5 */
 }
 
 #header_controls {
-	float: right; height: 28px;
-	margin: -16px -3px 0px 0px;	/* -3px = 1px left border of app-selector + 2* 1px border op app-content */
+	position: absolute; top: 0; right: 0; height: 28px;
+	margin-right: 30px;
 	padding: 8px 12px 0 12px;
 	text-transform: uppercase;
 	font-size: 0.86em;
@@ -240,9 +279,7 @@ blockquote.content { margin: 1em 0; }
 }
 
 #header_logo_and_name {
-	float: left;
-	width: 66%;
-	margin-left: 1px;
+	margin: 15px 250px 0 15px;
 }
 #header_logo_div {
   float: left;
@@ -258,11 +295,8 @@ blockquote.content { margin: 1em 0; }
 }
 #header_site_name {
   /* center on midline of logo: margin-top + margin-bottom + height must == header_logo height */
-  margin-top: 4px;
-  margin-bottom: 4px;
   height: 56px;
   margin-right: 5px;
-  float: left;
   font-family: "Gill Sans", "HelveticaNeue-Light", "Helvetica Neue Light", Corbel, Helvetica, Arial, sans-serif;
   font-weight: 300;
   letter-spacing: -0.7px;
@@ -274,7 +308,7 @@ blockquote.content { margin: 1em 0; }
   /* match baseline of #header_site_name */
   font-size: 20px
   float: left;
-  margin-top: 26px;
+  margin-top: 27px;
   margin-bottom: 0px;
   height: 36px;
 }
@@ -293,7 +327,8 @@ blockquote.content { margin: 1em 0; }
 }
 
 #footer {
-	margin: 48px 0 32px;
+	position: absolute; left: 0; right: 0; bottom: 0;
+	margin: 0 0 32px;
 	font-size: 0.85em;
 	text-align: center;
 }
@@ -308,20 +343,90 @@ blockquote.content { margin: 1em 0; }
 #copyright { color: #999; font-size: 0.8em; }
 
 
-/*** App Selector ***/
+/*** Tabs ***/
+#tabs {
+	position: absolute; left: 17%; top: 0; right: 15px; height: 32px;
+	padding: 8px 10px 0;
+	overflow: hidden; z-index: 1;
+	-webkit-transition: left 0.2s; -moz-transition: left 0.2s; -o-transition: left 0.2s; transition: left 0.2s;
+}
 
+.main_tab, .record_tab {
+	float: left; display: block; position: relative;
+	height: 22px; margin: 4px 0 0 8px; padding: 1px 12px 3px;
+	text-align: center;
+	border: 1px solid rgb(193,193,193); border-bottom-color: rgb(204,204,204);
+	-moz-border-radius: 5px 5px 0 0; -webkit-border-radius: 5px 5px 0 0; border-radius: 5px 5px 0 0;
+	background-color: rgba(255,255,255,0.75);
+	/* background-color will be overridden for record_tab in JS, but we still want to fake the lower shadow for inactive tabs, here we go: */
+    background-image:-webkit-linear-gradient(bottom, rgba(0,0,0,0.04), rgba(0,0,0,0) 3px);
+    background-image:-moz-linear-gradient(bottom, rgba(0,0,0,0.04), rgba(0,0,0,0) 3px);
+	-webkit-transition-property: none;	/* the animation in Safari and Chrome does not go as smoothly as in Firefox, let's disable it for now */
+	-moz-transition-property: margin-top, padding;
+	-o-transition-property: margin-top, padding;
+	transition-property: margin-top, padding;
+	-webkit-transition-duration: 0.1s; -o-transition-duration: 0.1s; -moz-transition-duration: 0.1s; transition-duration: 0.1s;
+}
+.main_tab:hover, .record_tab:hover {
+	margin-top: 0; padding-bottom: 7px;
+	border-bottom: 1px solid rgb(204,204,204); color: #212121;
+}
+.main_tab:first-child {
+	margin-left: 0;
+}
+.record_tab {
+	float: right;
+}
+
+.main_tab img {
+	width: 16px; height: 16px;
+	margin: 0 0.25em 0 -4px;
+	vertical-align: -10%;
+}
+
+#message_unread_count {
+	position: absolute; top: -7px; right: -7px;
+	min-width: 10px; height: 20px;
+	padding: 0 5px;
+	color: white; font-size: 15px; font-weight: bold; line-height: 20px;
+	-moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px;
+	background-color: rgb(200,0,0);
+	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.4); -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.4); box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+#tabs .selected {
+	margin-top: 0; padding: 5px 12px 3px;
+	font-weight: bold;
+	border-bottom-color: transparent;
+	background: rgb(250,250,250);
+	-moz-box-shadow: 0 1px 3px #ccc; -webkit-box-shadow: 0 1px 3px #ccc; box-shadow: 0 1px 3px #ccc;
+	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+#add_record_tab img {
+	vertical-align: -6%;
+}
+#add_record_tab.selected {
+	background-color: rgb(250,250,250);
+}
+
+
+
+/*** App Container and - Selector ***/
 #app_selector {
-	float: left; position: relative; width: 17%;
-	margin-top: 48px; padding: 7px 0;
+	position: absolute; top: 85px; left: -1px; width: 17%;
+	padding: 7px 0;
 	border: 1px dashed #ccc; border-right: none;
 	-moz-border-radius: 5px 0 0 5px; -webkit-border-radius: 5px 0 0 5px; border-radius: 5px 0 0 5px;
 	-moz-box-shadow: 0 0px 0 #fff; -webkit-box-shadow: 0 0px 0 #fff; box-shadow: 0 0px 0 #fff;
+	z-index: 1;
 }
 #app_selector ul {
 	margin-left: 10px; margin-right: -1px; overflow: hidden;
 }
 #app_selector li {
 	position: relative;
+	height: 32px; line-height: 32px;
 	margin: 5px 0; padding: 4px 4px 4px 10px;
 	list-style: none; cursor: pointer;
 	border: 1px solid transparent;
@@ -338,38 +443,19 @@ blockquote.content { margin: 1em 0; }
 }
 
 #app_selector_cover {
-	position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-	background-color: rgb(254,254,253); background-color: rgba(255,255,255,0.8);
+	position: absolute; top: 0; left: 0; right: 5px; bottom: 0;
+	background-color: rgb(254,252,247); background-color: rgba(254,252,247,0.8);
 }
 
-.app_tab_img { margin: 0 10px -7px 0; }
-.app_tab_img_small { margin: 0 10px -7px 0; padding: 2px 4px; }
-.app_tab_loading { display: none; margin: 0 10px -3px 20px;}
+.app_tab_img { width: 24px; margin: 0 12px 0 2px; vertical-align: middle; }
 
+#active_app_tabs {
+	margin-bottom: 1em;
+}
 #background_app_tabs {
-	margin-top: 2em;
+	margin-bottom: 1em;
 }
 #record_owned_options {
-  margin-top: 1em;
-  color: inherit !important;
-}
-
-
-#app_container {
-	width: 100%; min-width: 992px !important; /* 1024 - 16 (browser chrome) - 8 * 2 (body margin) */
-	padding: 5px 0;
-	-moz-box-shadow: none; -webkit-box-shadow: none; box-shadow: none;
-	overflow: hidden;
-}
-
-.app_content_pane {
-	float: left; width: 79%; min-height: 600px; min-width: 768px; /* not including padding, borders or margin. 768 + (15 * 2 (padding)) + (1 * 2) (border) = 800px total width*/
-	padding: 15px 1.5%;
-	border: 1px solid #ccc;
-	-moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px;
-	background: #fafafa;
-	-moz-box-shadow: 0px 1px 3px #aaa; -webkit-box-shadow: 0px 1px 3px #aaa; box-shadow: 0px 1px 3px #aaa;
-	-moz-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0px 1px 3px rgba(0,0,0,0.2); box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
 }
 
 .app_content_iframe {
@@ -379,11 +465,8 @@ blockquote.content { margin: 1em 0; }
 }
 
 /*** record tabs ***/
-
-#record_tabs {
-	float: right; position: relative; height: 32px;
-	margin: 0 22px -6px 0; padding: 2px 5px 0;
-	overflow: hidden;
+#loading_records_hint {
+	float: right; margin-right: 1em; line-height: 35px; color: rgb(190,188,185); color: rgba(0,0,0,0.25);
 }
 #loading_records_hint {
 	margin-right: 1em; line-height: 35px; color: rgb(190,188,185); color: rgba(0,0,0,0.25);
@@ -394,37 +477,6 @@ blockquote.content { margin: 1em 0; }
 #add_record_tab.selected {
 	background-color: rgb(250,250,250);
 }
-
-.record_tab {
-	float: right; display: block;
-	height: 22px; margin: 4px 0 0 12px; padding: 1px 12px 3px;
-	text-align: center;
-	border: 1px solid rgb(193,193,193); border-bottom-color: rgb(204,204,204);
-	-moz-border-radius: 5px 5px 0 0; -webkit-border-radius: 5px 5px 0 0; border-radius: 5px 5px 0 0;
-	/* background-color will be set in JS, but we still want to fake the lower shadow for inactive tabs, here we go: */
-    background-image:-webkit-linear-gradient(bottom, rgba(0,0,0,0.04), rgba(0,0,0,0) 3px);
-    background-image:-moz-linear-gradient(bottom, rgba(0,0,0,0.04), rgba(0,0,0,0) 3px);
-	-webkit-transition-property: none;	/* the animation in Safari and Chrome does not go as smoothly as in Firefox, let's disable it for now */
-	-moz-transition-property: margin-top, padding;
-	-o-transition-property: margin-top, padding;
-	transition-property: margin-top, padding;
-	-webkit-transition-duration: 0.1s; -o-transition-duration: 0.1s; -moz-transition-duration: 0.1s; transition-duration: 0.1s;
-}
-.record_tab:hover {
-	margin-top: 0; padding-bottom: 7px;
-	border-bottom: 1px solid rgb(204,204,204); color: #212121;
-}
-#record_tabs .selected {
-	margin-top: 0; padding: 5px 12px 3px;
-	font-weight: bold;
-	border-bottom-color: transparent;
-	background-image: none;
-	-moz-box-shadow: 0 1px 3px #ccc; -webkit-box-shadow: 0 1px 3px #ccc; box-shadow: 0 1px 3px #ccc;
-	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.2); -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-/* this hides the jquery ui tabs generated panels */
-#record_tabs div { display: none; }
 
 #no_record_hint {
 	position: relative; padding: 3em;
@@ -907,3 +959,36 @@ h4 img { vertical-align: -5%; margin-right: 0.75em; }
 
 .ui-tabs .ui-tabs-panel { padding: 1em 1.4em; display: block; border-width: 0; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
+
+
+/**
+ * 	Styles for undoing resets. Used for displaying html messages
+ */
+
+/* Strong and em */
+.undoreset strong, .undoreset th { font-weight: bold; }
+.undoreset em, .undoreset address, .undoreset caption, .undoreset cite { font-style: italic; }
+/* Table */
+.undoreset table { display: table; border-spacing: 2px; border-collapse: separate; }
+.undoreset tr { display: table-row; vertical-align: inherit; }
+.undoreset td { display: table-cell; border-spacing: 2px; padding: 2px; vertical-align: inherit; text-align: inherit; padding: 1px; border-collapse: none; }
+.undoreset th { display: table-cell; vertical-align: inherit; font-weight: bold; padding: 1px; border-collapse: none; }
+/* Block Items */
+.undoreset p { display: block; margin: 1em 0; }
+.undoreset blockquote { display: block; margin: 1em 40px; }
+.undoreset address { display: block; font-style: italic; }
+.undoreset center { display: block; text-align: center; }
+/* Headers */
+.undoreset h1 { display: block; font-size: 2em; font-weight: bold; margin: .67em 0; }
+.undoreset h2 { display: block; font-size: 1.5em; font-weight: bold; margin: .83em 0; }
+.undoreset h3 { display: block; font-size: 1.17em; font-weight: bold; margin: 1em 0; }
+.undoreset h4 { display: block; font-weight: bold; margin: 1.33em 0; }
+.undoreset h5 { display: block; font-size: 0.83em; font-weight: bold; margin: 1.67em 0; }
+.undoreset h6 { display: block; font-size: 0.67em; font-weight: bold; margin: 2.33em 0; }
+/* Lists */
+.undoreset ul { display: block; list-style-type: disc; margin: 1em 0; padding-left: 40px; }
+.undoreset ol { display: block; list-style-type: decimal; margin: 1em 0; padding-left: 40px; }
+.undoreset li { display: list-item; }
+/* Pre */
+.undoreset pre, .undoreset code { display: block; font-family: Courier New; white-space: pre; margin: 1em 0; }
+

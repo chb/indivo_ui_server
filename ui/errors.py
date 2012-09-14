@@ -13,6 +13,7 @@ class ErrorStr:
                               'Login required': _("You need to login first"),
                     'Name or password missing': _("Either the username or password is missing. Please try again."),
                        'Incorrect credentials': _("Incorrect username or password. Please try again."),
+               'Failed to claim request token': _("Failed to claim request token"),
                                     'disabled': _("This account has been disabled/locked."),
                              'Unknown account': _("This account does not exist on the server."),
                        'Registration disabled': _("Online registration is not available."),

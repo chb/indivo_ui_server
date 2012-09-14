@@ -90,6 +90,20 @@ UI.Models.IndivoBase.extend('UI.Models.Account',
 		}
 	},
 	
+	get_record_labels: function(success, error) {
+		var self = this;
+			if(!this.records) {
+				this.get_records(function() {
+					return self.get_record_labels(success, error);
+				});
+			} else {
+				success($.map( this.records, function(record, index){ 
+					return record.label
+					})
+				);
+			}
+	},
+	
 	has_record: function(record_id) {
 		return (this.records.get(record_id).length > 0) ? true : false; 
 	},

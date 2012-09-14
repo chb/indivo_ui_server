@@ -17,7 +17,7 @@ $.Controller.extend('UI.Controllers.Message',
 		this.messages = [];
 		this.message = {};
 		this.account = this.options.account;
-
+		this.alertQueue = this.options.alertQueue;
 		this.showMessageList();
 	},
 	
@@ -30,10 +30,13 @@ $.Controller.extend('UI.Controllers.Message',
 			UI.Controllers.MainController.update_inbox_tab(messages); 
 			self.messages = messages;
 			// manually pass messages to view
-			self.element.html($.View('//ui/views/message/show.ejs', {
-				'messages': messages,
-				'account': self.account 
-			}))
+			self.account.get_record_labels(function(labels) {
+				self.element.html($.View('//ui/views/message/show.ejs', {
+					'messages': messages,
+					'account': self.account,
+					'labels': labels  
+				}));
+			});
 		});
 	},
 	
@@ -54,6 +57,7 @@ $.Controller.extend('UI.Controllers.Message',
 			}))
 		});
 	},
+	
 	".message click": function(el, ev) {
 		this.showMessage({
 			message_id : el.model().id
@@ -63,6 +67,31 @@ $.Controller.extend('UI.Controllers.Message',
 		this.showMessageList();
 	},
 	
+	".archive click": function(el, ev) {
+		self = this;
+		messageElement = $(el.closest('.message'));
+		message = messageElement.model();
+		message.archive(self.account,
+			// success 
+			function(data, textStatus, jqXHR) {
+				// remove message from table, and refresh even/odd classes 
+				tableElement = messageElement.closest('table');
+				messageElement.fadeOut("slow", function() {
+					messageElement.remove()
+					tableElement.find('tr').filter(":even").addClass("even").removeClass("odd");
+					tableElement.find('tr').filter(":odd").addClass("odd").removeClass("even");
+				});
+			},
+			// error 
+			function() {
+				self.alertQueue.push(new UI.Models.Alert({
+					text : "Sorry, but we were not able to delete your message. Please try again later",
+					level : "error"
+				}));
+		});
+		return false;
+	},
+
 	".attachment_accept click": function(el, ev) {
 		if(!confirm('Are you sure you would like to accept this attachment within your record?')) {
 			return;

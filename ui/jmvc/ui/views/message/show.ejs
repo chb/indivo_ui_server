@@ -1,6 +1,13 @@
 {% load i18n %}
 <h2>{% trans "Inbox" %}</h2>
-
+<p>Displaying messages for: 
+	<% if (labels.length <=2) { %>
+		<%= labels.join(' and ') %>
+	<% } else { %>
+		<% var lastLabel = labels.pop() %> 
+		<%= labels.join(', ') %> and <%= lastLabel %>
+	<% } %>
+</p>
 <% if (messages.length == 0) { %>
 
   <em>{% trans "no messages" %}</em>
@@ -14,7 +21,10 @@
       <th class="about">{% trans "About" %}</th>
       <th>{% trans "Subject" %}</th>
       <th class="date">{% trans "Date" %}</th>
-      <th class="attachment"</th>
+      <th class="attachment">
+      	<img class="icon paperclip" src="/jmvc/ui/resources/images/paperclip.png" alt="has attachment" title="has attachment">
+      </th>
+      <th class="archive"></th>
     </tr>
   </thead>
   <tbody>
@@ -32,6 +42,9 @@
         	<% if (messages[i].attachments && messages[i].attachments.length > 0) { %>
         		<img class="icon paperclip" src="/jmvc/ui/resources/images/paperclip.png" alt="attachment" title="attachment">
         	<% } %>
+        </td>
+        <td>
+        	<img class="icon archive" src="/jmvc/ui/resources/images/delete.png" alt="delete" title="delete message">
         </td>
       </tr>
       <% } %>

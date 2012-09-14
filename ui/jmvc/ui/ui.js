@@ -67,9 +67,9 @@ steal(
 					$('#header_fullname').text(' for ' + account.fullName);
 					$('title').text($('title').text() + ' for ' + account.fullName);
 					// init controllers once Account is loaded
-					$("body").ui_main({account:account, alertQueue:UI.ALERT_QUEUE});
-					$("body").ui_record({account:account, alertQueue:UI.ALERT_QUEUE});
 					$("#app_selector").ui_app_list({account:account, enabledApps:UI.ENABLED_APPS});
+					$("body").ui_record({account:account, alertQueue:UI.ALERT_QUEUE});
+					$("body").ui_main({account:account, alertQueue:UI.ALERT_QUEUE});
 				}
 				else {
 					UI.ALERT_QUEUE.push(new UI.Models.Alert({text:"could not load account", level:"error"}));  //TODO: move to common messages file?

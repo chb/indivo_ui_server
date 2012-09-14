@@ -26,7 +26,7 @@ p { margin: 0; }
 	width: 65%; font-size: 20px;
 }
 .table_form input[type="text"] { width: 98%; }
-.table_form button[type="submit"] { min-width: 34%; font-size: 18px; margin-bottom: 10px; }
+.table_form button { font-size: 18px; margin: 0 10px 10px 0; }
 
 .row { display: table-row; }
 a.row { display: block; font-size: 1.2em; }
@@ -44,6 +44,11 @@ a.row { display: block; font-size: 1.2em; }
 	border: 2px solid rgb(159,200,0); -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
 	background-color: rgb(249,249,234); background-color: rgba(159,200,0,0.05);
 }
+.login_hint {
+	margin: 30px auto 15px; padding: 0.6em 1em; font-size: 20px; text-align: center;
+	border: 2px solid rgb(255,190,0); -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
+	background-color: rgb(254,244,220); background-color: rgba(255,190,0,0.1);
+}
 .login_error {
 	margin: 30px auto 15px; padding: 0.6em 1em; font-size: 20px; text-align: center;
 	border: 2px solid rgb(200,50,0); -webkit-border-radius: 8px; -moz-border-radius: 8px; border-radius: 8px;
@@ -51,6 +56,9 @@ a.row { display: block; font-size: 1.2em; }
 }
 .login_error .moreinfo { margin-top: 1em; font-size: 14px; }
 .main_action_button { margin-top: 1.5em; }
+#conf_submit { min-width: 34%; };
+
+.centered_text { margin-top: 2.5em; text-align: center; }
 .red { color: rgb(200,50,0); }
 .green { color: rgb(121,160,0); }
 .faded { color: rgb(178,178,178); color: rgba(0,0,0,0.3); }
