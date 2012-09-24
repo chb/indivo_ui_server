@@ -202,12 +202,12 @@ $.Controller.extend('UI.Controllers.Record',
 			$('#record_name').html(name);
 		}
 		
-		// main demographics
+		// main demographics view
 		if (demographics) {
 			demographics.dob = record.dob();
 			demographics.age = record.age();
 		}
-		console.log(demographics);
+		//console.log(demographics);
 		$('#demographics_area').empty().append($.View('//ui/views/record/demographics', {'demographics': demographics}));
 	},
 	
@@ -236,68 +236,117 @@ $.Controller.extend('UI.Controllers.Record',
 		var demographics = 'demographics' in record ? record.demographics : null;
 		
 		// load the form
-		var form = $.View('//ui/views/record/demographics_form');
+		var form = $.View('//ui/views/record/demographics_form', {'demographics': demographics});
 		ui_main.tintInterface();
 		ui_main.cleanAndShowAppDiv(form);
-		
-		// load values
-		if (demographics) {
-			console.log('SHOULD NOW LOAD', demographics);
-		}
-		
-		// focus
-		$('#givenName').focus();
 	},
 	
 	/**
 	 * Did submit the create record form - create a record!
 	 * @todo The cancel link does not cancel an active call on a slow network
 	 */
-	'#demographics_form submit': function(el, ev) {
+	'#demographics_form submit': function(element, event) {
 		var record = this.account.activeRecord;
 		if (!record) {
 			steal.dev.warn('#demographics_form submit', 'Can not save demographics, no activeRecord is set!');
-			el.find('.error_area').first().text('An error occurred, please try again or contact support');
+			element.find('.error_area').first().text('An error occurred, please try again or contact support').show();
 			return;
 		}
 		
-		el.find('.error_area').first().hide().text('');
-		el.find('.loader').first().show();
+		element.find('.error_area').first().hide().text('');
+		element.find('.loader').first().show();
 		$('#update_demographics_submit').attr('disabled', 'disabled');
 		
 		// collect data (where's that "form_values" method of jQuery?)
+		var d_email = element.find('input[name="email"]').val();
+		var d_ethnicity = element.find('input[name="ethnicity"]').val();
+		var d_race = element.find('input[name="race"]').val();
+		var d_lang = element.find('input[name="preferred_language"]').val();
+		
+		var n_prefix = element.find('input[name="prefix"]').val();
+		var n_suffix = element.find('input[name="suffix"]').val();
+		var n_middle = element.find('input[name="middleName"]').val();
+		
+		var fon1 = '';
+		var number1 = element.find('input[name="tel_1_number"]').val();
+		if (number1) {
+			fon1 = '<Telephone>';
+			fon1 += '<type>' + element.find('select[name="tel_1_type"]').val() + '</type>';
+			fon1 += '<number>' + number1 + '</number>';
+			fon1 += '<preferred>' + (element.find('input[name="tel_1_preferred_p"]').prop('checked')) + '</preferred>';
+			fon1 += '</Telephone>';
+		}
+		
+		var fon2 = ''
+		var number2 = element.find('input[name="tel_2_number"]').val();
+		if (number2) {
+			fon2 = '<Telephone>';
+			fon2 += '<type>' + element.find('select[name="tel_2_type"]').val() + '</type>';
+			fon2 += '<number>' + number2 + '</number>';
+			fon2 += '<preferred>' + (element.find('input[name="tel_2_preferred_p"]').prop('checked')) + '</preferred>';
+			fon2 += '</Telephone>';
+		}
+		
+		var address = '';
+		var a_street = element.find('input[name="adr_street"]').val();
+		var a_city = element.find('input[name="adr_city"]').val();
+		var a_postalcode = element.find('input[name="adr_postalcode"]').val();
+		var a_region = element.find('input[name="adr_region"]').val();
+		var a_country = element.find('input[name="adr_country"]').val();
+		if (a_street || a_city || a_postalcode || a_region || a_country) {
+			address = '<Address>';
+			address += a_country ? '<country>' + a_country + '</country>' : '';
+			address += a_city ? '<city>' + a_city + '</city>' : '';
+			address += a_postalcode ? '<postalCode>' + a_postalcode + '</postalCode>' : '';
+			address += a_region ? '<region>' + a_region + '</region>' : '';
+			address += a_street ? '<street>' + a_street + '</street>' : '';
+			address += '</Address>';
+		}
+		
+		// create the demographics XML
 		var demographics = '<Demographics xmlns="http://indivo.org/vocab/xml/documents#">'
-                                    +'<dateOfBirth>1939-11-15</dateOfBirth>'
-                                    +'<gender>female</gender>'
-                                    +'<email>' + el.find('input[name="email"]').val() + '</email>'
+                                    +'<dateOfBirth>' + element.find('input[name="bday"]').val() + '</dateOfBirth>'
+                                    +'<gender>' + element.find('select[name="gender"]').val() + '</gender>'
+                                    +(d_email ? '<email>' + d_email + '</email>' : '')
+                                    +(d_ethnicity ? '<ethnicity>' + d_ethnicity + '</ethnicity>' : '')
+                                    +(d_lang ? '<preferredLanguage>' + d_lang + '</preferredLanguage>' : '')
+                                    +(d_race ? '<race>' + d_race + '</race>' : '')
                                     +'<Name>'
-                                        +'<familyName>' + el.find('input[name="familyName"]').val() + '</familyName>'
-                                        +'<givenName>' + el.find('input[name="givenName"]').val() + '</givenName>'
+                                        +'<familyName>' + element.find('input[name="familyName"]').val() + '</familyName>'
+                                        +'<givenName>' + element.find('input[name="givenName"]').val() + '</givenName>'
+                                        +(n_middle ? '<middleName>' + n_middle + '</middleName>' : '')
+                                        +(n_prefix ? '<prefix>' + n_prefix + '</prefix>' : '')
+                                        +(n_suffix ? '<suffix>' + n_suffix + '</suffix>' : '')
                                     +'</Name>'
+                                    +fon1
+                                    +fon2
+                                    +address
                                 +'</Demographics>';
 		
+		// PUT it!
+		var self = this;
 		record.put_demographics(demographics,
 			
 			// success callback
 			function(form, data, textStatus, xhr) {
-				console.log('SUCCESS', 'do something!');
+				self.account.activeRecord.demographics = null;		// force re-fetching the thing
+				self.showRecordInfo();
 			},
 			
 			// error callback
-			this.callback('didNotCreateNewRecord2', el)
+			function(xhr, textStatus, error) {
+				var error = 'responseText' in xhr ? xhr.responseText : textStatus;
+				element.find('.error_area').first().show().text(error);
+				element.find('.loader').first().hide();
+				$('#update_demographics_submit').removeAttr('disabled');
+			}
 		);
 		return false;
 	},
-	didCreateNewRecord2: function(form, data, textStatus, xhr) {
-		console.log('SUCCESS', 'do something!');
-	},
-	didNotCreateNewRecord2: function(form, errXhr) {
-		steal.dev.warn('Error handling not really implemented', errXhr);
-		form.find('.error_area').first().text('Error');
-		form.find('.loader').first().hide();
-		$('#update_demographics_submit').removeAttr('disabled');
-	},
 	
+	'#update_demographics_cancel click': function(element, event) {
+		this.showRecordInfo();
+	},
 	
 	/**
 	 * Show the form to create a new record

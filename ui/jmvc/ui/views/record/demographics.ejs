@@ -1,7 +1,7 @@
-<%
-if (demographics) {
+{% load i18n %}
+<% if (demographics) {
 	%>
-	<p class="details">This is your current personal information</p>
+	<p class="details">{% trans "This is your current personal information" %}</p>
 	<%
 	// birthday
 	if (demographics.bday) { %>
@@ -9,9 +9,9 @@ if (demographics) {
 		<div class="demographics_item_block">
 		<%
 		var nice_dob = demographics.dob ? demographics.dob.toLocaleDateString() : demographics.bday;
-		var nice_age = demographics.age !== null ? ((1 == age) ? '1 year' : age + ' years') : '';
+		var nice_age = demographics.age !== null ? ((1 == age) ? '{% trans "1 year" %}' : age + ' {% trans "years" %}') : '';
 		%>
-		<span class="">Born </span><b><%= nice_dob %></b>
+		<span class="">{% trans "Born" %} </span><b><%= nice_dob %></b>
 		<% if (nice_age) { %>
 			(<%= nice_age %> old)
 		<% } %>
@@ -19,10 +19,16 @@ if (demographics) {
 	<% }
 	
 	// race and ethnicity
-	if (demographics.race || demographics.ethnicity) { %>
+	if (demographics.race || demographics.ethnicity || demographics.preferred_language) { %>
 		<div class="demographics_item_block">
-			<%= demographics.race || 'unknown race' %>,
-			<%= demographics.ethnicity || 'unknown ethnicity' %>
+			<% if (demographics.race || demographics.ethnicity) { %>
+				<%= demographics.race || 'unknown race' %>,
+				<%= demographics.ethnicity || 'unknown ethnicity' %><br />
+			<% }
+			if (demographics.preferred_language) { %>
+				{% trans "Preferred language:" %}
+				<b><%= demographics.preferred_language %></b>
+			<% } %>
 		</div>
 	<% }
 	
@@ -42,62 +48,52 @@ if (demographics) {
 			<a href="mailto:<%= demographics.email %>"><%= demographics.email %></a><br />
 		<% }
 		if (demographics.tel_1_number) {
-			var pref_class = demographics.tel_1_preferred ? 'preferred_phone' : '';
-			var type = demographics.tel_1_type ? ' (' + demographics.tel_1_type + ')' : ''; %>
-			<span class="<%= pref_class %>"><%= demographics.tel_1_number %><%= type %><span><br />
+			var pref_class = demographics.tel_1_preferred_p ? 'preferred_phone' : ''; %>
+			<%= demographics.tel_1_type ? demographics.tel_1_type + ': ' : '' %>
+			<span class="<%= pref_class %>"><%= demographics.tel_1_number %></span><br />
 		<% }
 		if (demographics.tel_2_number) {
-			var pref_class = demographics.tel_2_preferred ? 'preferred_phone' : '';
-			var type = demographics.tel_2_type ? ' (' + demographics.tel_2_type + ')' : ''; %>
-			<span class="<%= pref_class %>"><%= demographics.tel_2_number %><%= type %><span><br />
+			var pref_class = demographics.tel_2_preferred_p ? 'preferred_phone' : ''; %>
+			<%= demographics.tel_2_type ? demographics.tel_2_type + ': ' : '' %>
+			<span class="<%= pref_class %>"><%= demographics.tel_2_number %></span><br />
 		<% } %>
 		</div>
-	<% }
+	<% } %>
 	
-	// addresses and contact information
-	var parts = new Array();
-	if (demographics.adr_street) {
-		parts.push(demographics.adr_street);
-	}
-	if (demographics.adr_city || demographics.adr_region || demographics.adr_postalcode) {
-		var city = new Array();
-		if (demographics.adr_city) {
-			if (demographics.adr_region) {
-				city.push(demographics.adr_city + ', ');
-			}
-			else {
-				city.push(demographics.adr_city);
-			}
-		}
-		if (demographics.adr_region) {
-			city.push(demographics.adr_region);
-		}
-		if (demographics.adr_postalcode) {
-			city.push(demographics.adr_postalcode);
-		}
+	<div class="demographics_item_block">
+	<% if (demographics.adr_street || demographics.adr_city || demographics.adr_region || demographics.adr_postalcode || demographics.adr_country) {
 		
-		if (city.length > 0) {
-			parts.push(city.join(' '));
-		}
+		// addresses and contact information
+		if (demographics.adr_street) { %>
+			<%= demographics.adr_street %><br />
+		<% }
+		if (demographics.adr_city) { %>
+			<%= demographics.adr_city %>
+		<% }
+		if (demographics.adr_region) {
+			if (demographics.adr_city) { %>
+				, 
+			<% } %>
+			<%= demographics.adr_region %>
+		<% }
+		if (demographics.adr_postalcode) { %>
+			<%= demographics.adr_postalcode %>
+		<% } %>
+		<br />
+		<% if (demographics.adr_country) { %>
+			<b><%= demographics.adr_country %></b>
+		<% }
 	}
-	if (demographics.adr_country) {
-		parts.push(demographics.adr_country);
-	}
-	
-	if (parts.length > 0) {
-		var address = parts.join('<br />'); %>
-		<div class="demographics_item_block"><%= address %></div>
-	<% }
-	else {
-		%><div class="demographics_item_block"><span class="details">no address on file</span></div><%
-	} %>
+	else { %>
+	<span class="details">{% trans "no address on file" %}</span>
+	<% } %>
 	</div>
-	<%
-}
+	</div>
+<% }
 else { %>
-	<p class="details">Your personal information has not yet been stored</p>
+	<p class="details">{% trans "Your personal information has not yet been stored" %}</p>
 <% }
 %>
 <p style="margin-top:2em;">
-	<button id="show_demographics">Update Information</button>
+	<button id="show_demographics">{% trans "Update Information" %}</button>
 </p>
