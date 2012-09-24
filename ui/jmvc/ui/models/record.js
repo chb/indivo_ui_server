@@ -176,5 +176,41 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 			steal.dev.warn('The demographics have not yet been fetched, returning the label');
 		}
 		return this.label ? this.label : 'Unknown';
+	},
+	
+	/**
+	 * Returns the birthday as a date object (if demographics have been fetched)
+	 */
+	dob: function() {
+		if (!this.demographics || !'bday' in this.demographics) {
+			return null;
+		}
+		
+		var dob_parts = this.demographics.bday.split(/\D+/);
+		var dob = new Date();
+		dob.setYear(dob_parts[0]);
+		dob.setMonth(dob_parts[1] - 1);
+		dob.setDate(dob_parts[2]);
+		
+		return dob;
+	},
+	
+	/**
+	 * Returns the current age in years (if demographics have been fetched)
+	 */
+	age: function() {
+		if (!this.demographics || !'bday' in this.demographics) {
+			return 0;
+		}
+		
+		var dob = this.dob();
+		var today = new Date();
+		
+		age = today.getFullYear() - dob.getFullYear();
+		var month = today.getMonth() - dob.getMonth();
+		if (month < 0 || (month === 0 && today.getDate() < dob.getDate())) {
+			age--;
+		}
+		return age;
 	}
 })

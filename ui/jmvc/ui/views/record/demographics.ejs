@@ -1,0 +1,103 @@
+<%
+if (demographics) {
+	%>
+	<p class="details">This is your current personal information</p>
+	<%
+	// birthday
+	if (demographics.bday) { %>
+		<div class="demographics_item_row">
+		<div class="demographics_item_block">
+		<%
+		var nice_dob = demographics.dob ? demographics.dob.toLocaleDateString() : demographics.bday;
+		var nice_age = demographics.age !== null ? ((1 == age) ? '1 year' : age + ' years') : '';
+		%>
+		<span class="">Born </span><b><%= nice_dob %></b>
+		<% if (nice_age) { %>
+			(<%= nice_age %> old)
+		<% } %>
+		</div>
+	<% }
+	
+	// race and ethnicity
+	if (demographics.race || demographics.ethnicity) { %>
+		<div class="demographics_item_block">
+			<%= demographics.race || 'unknown race' %>,
+			<%= demographics.ethnicity || 'unknown ethnicity' %>
+		</div>
+	<% }
+	
+	if (demographics.bday) { %>
+		</div>
+		<hr class="dotted" />
+	<% }
+	%>
+	<div class="demographics_item_row">
+	<%
+	
+	// email and phone
+	if (demographics.email || demographics.tel_1_number || demographics.tel_2_number) { %>
+		<div class="demographics_item_block">
+		<%
+		if (demographics.email) { %>
+			<a href="mailto:<%= demographics.email %>"><%= demographics.email %></a><br />
+		<% }
+		if (demographics.tel_1_number) {
+			var pref_class = demographics.tel_1_preferred ? 'preferred_phone' : '';
+			var type = demographics.tel_1_type ? ' (' + demographics.tel_1_type + ')' : ''; %>
+			<span class="<%= pref_class %>"><%= demographics.tel_1_number %><%= type %><span><br />
+		<% }
+		if (demographics.tel_2_number) {
+			var pref_class = demographics.tel_2_preferred ? 'preferred_phone' : '';
+			var type = demographics.tel_2_type ? ' (' + demographics.tel_2_type + ')' : ''; %>
+			<span class="<%= pref_class %>"><%= demographics.tel_2_number %><%= type %><span><br />
+		<% } %>
+		</div>
+	<% }
+	
+	// addresses and contact information
+	var parts = new Array();
+	if (demographics.adr_street) {
+		parts.push(demographics.adr_street);
+	}
+	if (demographics.adr_city || demographics.adr_region || demographics.adr_postalcode) {
+		var city = new Array();
+		if (demographics.adr_city) {
+			if (demographics.adr_region) {
+				city.push(demographics.adr_city + ', ');
+			}
+			else {
+				city.push(demographics.adr_city);
+			}
+		}
+		if (demographics.adr_region) {
+			city.push(demographics.adr_region);
+		}
+		if (demographics.adr_postalcode) {
+			city.push(demographics.adr_postalcode);
+		}
+		
+		if (city.length > 0) {
+			parts.push(city.join(' '));
+		}
+	}
+	if (demographics.adr_country) {
+		parts.push(demographics.adr_country);
+	}
+	
+	if (parts.length > 0) {
+		var address = parts.join('<br />'); %>
+		<div class="demographics_item_block"><%= address %></div>
+	<% }
+	else {
+		%><div class="demographics_item_block"><span class="details">no address on file</span></div><%
+	} %>
+	</div>
+	<%
+}
+else { %>
+	<p class="details">Your personal information has not yet been stored</p>
+<% }
+%>
+<p style="margin-top:2em;">
+	<button id="show_demographics">Update Information</button>
+</p>

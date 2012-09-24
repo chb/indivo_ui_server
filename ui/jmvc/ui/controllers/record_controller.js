@@ -153,17 +153,7 @@ $.Controller.extend('UI.Controllers.Record',
 		
 		// ** show demographics
 		if (record.demographics) {
-			console.log(record.demographics);
-			
-			var area = $('#demographics_area');
-			area.empty();
-			area.append('<p class="details">This is your current personal information</p>');
-			
-			// name and address
-			area.append($('<p/>').html(record.formattedName()));
-			var address = $.View('//ui/views/record/address', {'demographics': record.demographics});
-			var adr = $('<p/>').html(address);
-			area.append(adr);
+			this.fillDemographicsArea();
 		}
 		
 		// ** load demographics first and call us again when we're all good
@@ -173,15 +163,13 @@ $.Controller.extend('UI.Controllers.Record',
 				
 				// success callback
 				function(data, textStatus, xhr) {
-					self.showRecordInfo();
+					self.fillDemographicsArea();
 				},
 				
 				// error callback
 				function(xhr, textStatus, error) {
 					if ('status' in xhr && 404 == xhr.status) {
-						var form = '<p class="details">Your personal information is not yet stored in Indivo.</p>';
-						var button = $('<button/>').text('Add Information').click(function() { self.showDemographicsForm(); });
-						$('#demographics_area').html(form).append(button);
+						self.fillDemographicsArea();
 					}
 					else {
 						var info = '<p>There was an error loading your personal information:</p>';
@@ -193,6 +181,39 @@ $.Controller.extend('UI.Controllers.Record',
 		}
 	},
 	
+	/**
+	 * Fills information from the demographics document into the demographics template
+	 * @return a jQuery object generated from demographics template and -data
+	 * @attention This assumes the div #demographics_area is in the DOM
+	 */
+	fillDemographicsArea: function() {
+		var record = this.account.activeRecord;
+		if (!record) {
+			steal.dev.warn('filledDemographicsView()', 'Can not show demographics page, no active record is set!');
+			return;
+		}
+		
+		var demographics = record ? record.demographics : null;
+		
+		// show the full name
+		if (demographics) {
+			var gender_sign = ('male' == demographics.gender ? ", ♂" : ('female' == demographics.gender ? ", ♀" : ''));
+			var name = record.formattedName() + gender_sign;
+			$('#record_name').html(name);
+		}
+		
+		// main demographics
+		if (demographics) {
+			demographics.dob = record.dob();
+			demographics.age = record.age();
+		}
+		console.log(demographics);
+		$('#demographics_area').empty().append($.View('//ui/views/record/demographics', {'demographics': demographics}));
+	},
+	
+	'#show_demographics click': function(element, event) {
+		this.showDemographicsForm();
+	},
 	
 	/**
 	 * Show the form to update the demographics.
