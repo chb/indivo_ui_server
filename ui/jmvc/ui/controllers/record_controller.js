@@ -147,10 +147,136 @@ $.Controller.extend('UI.Controllers.Record',
 			return;
 		}
 		
-		var page = $.View('//ui/views/record/info', {'record': this.account.activeRecord});
+		var page = $.View('//ui/views/record/info', {'record': record});
 		ui_main.tintInterface();
 		ui_main.cleanAndShowAppDiv(page);
+		
+		// ** show demographics
+		if (record.demographics) {
+			console.log(record.demographics);
+			
+			var area = $('#demographics_area');
+			area.empty();
+			area.append('<p class="details">This is your current personal information</p>');
+			
+			// name and address
+			area.append($('<p/>').html(record.formattedName()));
+			var address = $.View('//ui/views/record/address', {'demographics': record.demographics});
+			var adr = $('<p/>').html(address);
+			area.append(adr);
+		}
+		
+		// ** load demographics first and call us again when we're all good
+		else {
+			var self = this;
+			record.get_demographics(
+				
+				// success callback
+				function(data, textStatus, xhr) {
+					self.showRecordInfo();
+				},
+				
+				// error callback
+				function(xhr, textStatus, error) {
+					if ('status' in xhr && 404 == xhr.status) {
+						var form = '<p class="details">Your personal information is not yet stored in Indivo.</p>';
+						var button = $('<button/>').text('Add Information').click(function() { self.showDemographicsForm(); });
+						$('#demographics_area').html(form).append(button);
+					}
+					else {
+						var info = '<p>There was an error loading your personal information:</p>';
+						info += '<p>' + (xhr && 'status' in xhr ? xhr.status + ': ' : '') + error + '</p>';
+						$('#demographics_area').html(info);
+					}
+				}
+			);
+		}
 	},
+	
+	
+	/**
+	 * Show the form to update the demographics.
+	 * It will automatically insert the current record's values if the demographics
+	 * document has been fetched, so be sure to get that first!
+	 */
+	showDemographicsForm: function() {
+		var record = this.account.activeRecord;
+		if (!record) {
+			steal.dev.warn('showDemographicsForm()', 'Can not show demographics form, no activeRecord is set!');
+			return;
+		}
+		
+		var ui_main = $('body').controllers('main')[0];
+		if (!ui_main) {
+			steal.dev.warn('There is no main controller attached to body');
+			return;
+		}
+		
+		var demographics = 'demographics' in record ? record.demographics : null;
+		
+		// load the form
+		var form = $.View('//ui/views/record/demographics_form');
+		ui_main.tintInterface();
+		ui_main.cleanAndShowAppDiv(form);
+		
+		// load values
+		if (demographics) {
+			console.log('SHOULD NOW LOAD', demographics);
+		}
+		
+		// focus
+		$('#givenName').focus();
+	},
+	
+	/**
+	 * Did submit the create record form - create a record!
+	 * @todo The cancel link does not cancel an active call on a slow network
+	 */
+	'#demographics_form submit': function(el, ev) {
+		var record = this.account.activeRecord;
+		if (!record) {
+			steal.dev.warn('#demographics_form submit', 'Can not save demographics, no activeRecord is set!');
+			el.find('.error_area').first().text('An error occurred, please try again or contact support');
+			return;
+		}
+		
+		el.find('.error_area').first().hide().text('');
+		el.find('.loader').first().show();
+		$('#update_demographics_submit').attr('disabled', 'disabled');
+		
+		// collect data (where's that "form_values" method of jQuery?)
+		var demographics = '<Demographics xmlns="http://indivo.org/vocab/xml/documents#">'
+                                    +'<dateOfBirth>1939-11-15</dateOfBirth>'
+                                    +'<gender>female</gender>'
+                                    +'<email>' + el.find('input[name="email"]').val() + '</email>'
+                                    +'<Name>'
+                                        +'<familyName>' + el.find('input[name="familyName"]').val() + '</familyName>'
+                                        +'<givenName>' + el.find('input[name="givenName"]').val() + '</givenName>'
+                                    +'</Name>'
+                                +'</Demographics>';
+		
+		record.put_demographics(demographics,
+			
+			// success callback
+			function(form, data, textStatus, xhr) {
+				console.log('SUCCESS', 'do something!');
+			},
+			
+			// error callback
+			this.callback('didNotCreateNewRecord2', el)
+		);
+		return false;
+	},
+	didCreateNewRecord2: function(form, data, textStatus, xhr) {
+		console.log('SUCCESS', 'do something!');
+	},
+	didNotCreateNewRecord2: function(form, errXhr) {
+		steal.dev.warn('Error handling not really implemented', errXhr);
+		form.find('.error_area').first().text('Error');
+		form.find('.loader').first().hide();
+		$('#update_demographics_submit').removeAttr('disabled');
+	},
+	
 	
 	/**
 	 * Show the form to create a new record

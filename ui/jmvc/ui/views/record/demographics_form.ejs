@@ -1,0 +1,32 @@
+{% load i18n %}
+<h2>{% trans "Your personal information" %}</h2>
+<form id="demographics_form" class="table_form" method="post" action="" onsubmit="return false;">
+	<div class="table_row">
+		<div class="table_cell"><label for="email">Given Name:</label></div>
+		<div class="table_cell">
+			<input type="text" id="givenName" name="givenName" value="" tabindex="1" />
+		</div>
+	</div>
+	<div class="table_row">
+		<div class="table_cell"><label for="email">Family Name:</label></div>
+		<div class="table_cell">
+			<input type="text" id="familyName" name="familyName" value="" tabindex="2" />
+		</div>
+	</div>
+	<div class="table_row">
+		<div class="table_cell"><label for="email">Email Address:</label></div>
+		<div class="table_cell">
+			<input type="text" id="email" name="email" value="" tabindex="3" />
+			
+			<div class="main_action_button">
+				<div class="error_area" style="display:none;"></div>
+				<button id="update_demographics_submit" type="submit" tabindex="4">Update</button>
+				<img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" style="display:none;" />
+				<p class="moreinfo">
+					<!-- @todo Create a record_controller method to select the first (or last selected) record tab -->
+					<a href="javascript:;" onclick="$('#healthfeed').is('*') ? $('#healthfeed').click() : $('#message').click()">Cancel</a>
+				</p>
+			</div>
+		</div>
+	</div>
+</form>

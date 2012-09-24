@@ -1,0 +1,19 @@
+<%
+if (demographics) {
+	var parts = new Array();
+	if (demographics.adr_street) {
+		parts.push(demographics.adr_street);
+	}
+	
+	if (parts.length > 0) {
+		var address = parts.join('<br />');
+		%><%= address %><%
+	}
+	else {
+		%><span class="details">no address on file</span><%
+	}
+}
+else { %>
+	no address on file
+<% }
+%>
