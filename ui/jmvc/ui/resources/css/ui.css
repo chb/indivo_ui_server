@@ -563,7 +563,9 @@ a.table_row { display: block; font-size: 1.2em; }
 #demographics_form input { width: auto; }
 #demographics_form .demo_table { margin: 1em 0; }
 .demo_table th, .demo_table td { border: none; }
-
+.demo_table .birthday_cell div { display: inline-block; text-align: center; }
+.demo_table .birthday_cell input { text-align: right; }
+.demo_table .small_faded { font-size: 0.85em; color: #666; }
 
 /***
  * Sharing Settings

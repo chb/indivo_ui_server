@@ -250,6 +250,8 @@ $.Controller.extend('UI.Controllers.Record',
 		if (!record) {
 			steal.dev.warn('#demographics_form submit', 'Can not save demographics, no activeRecord is set!');
 			element.find('.error_area').first().text('An error occurred, please try again or contact support').show();
+			element.find('.loader').first().hide();
+			$('#update_demographics_submit').removeAttr('disabled');
 			return;
 		}
 		
@@ -267,6 +269,33 @@ $.Controller.extend('UI.Controllers.Record',
 		var n_suffix = element.find('input[name="suffix"]').val();
 		var n_middle = element.find('input[name="middleName"]').val();
 		
+		// birthday (at least year must be present)
+		var bday_year = element.find('input[name="bday_year"]').val();
+		var bday_month = element.find('input[name="bday_month"]').val();
+		var bday_date = element.find('input[name="bday_date"]').val();
+		var dob_str = '';
+		if (bday_year > 0) {
+			if (bday_year < 1000) {
+				bday_year += 1900;
+			}
+			var dob = new Date();
+			dob.setYear(bday_year);
+			dob.setMonth(Math.max(1, bday_month - 1));
+			dob.setDate(Math.max(1, bday_date));
+			
+			dob_str = dob.getFullYear() + '-' + ('0' + (dob.getMonth()+1)).slice (-2) + '-' + ('0' + dob.getDate()).slice (-2);
+			console.log(dob, dob_str);
+		}
+		
+		// abort if birthday is not present, we need that!
+		else {
+			element.find('.error_area').first().text("Please provide a valid birthday").show();
+			element.find('.loader').first().hide();
+			$('#update_demographics_submit').removeAttr('disabled');
+			return;
+		}
+		
+		// phones
 		var fon1 = '';
 		var number1 = element.find('input[name="tel_1_number"]').val();
 		if (number1) {
@@ -287,6 +316,7 @@ $.Controller.extend('UI.Controllers.Record',
 			fon2 += '</Telephone>';
 		}
 		
+		// address
 		var address = '';
 		var a_street = element.find('input[name="adr_street"]').val();
 		var a_city = element.find('input[name="adr_city"]').val();
@@ -305,7 +335,7 @@ $.Controller.extend('UI.Controllers.Record',
 		
 		// create the demographics XML
 		var demographics = '<Demographics xmlns="http://indivo.org/vocab/xml/documents#">'
-                                    +'<dateOfBirth>' + element.find('input[name="bday"]').val() + '</dateOfBirth>'
+                                    +'<dateOfBirth>' + dob_str + '</dateOfBirth>'
                                     +'<gender>' + element.find('select[name="gender"]').val() + '</gender>'
                                     +(d_email ? '<email>' + d_email + '</email>' : '')
                                     +(d_ethnicity ? '<ethnicity>' + d_ethnicity + '</ethnicity>' : '')
