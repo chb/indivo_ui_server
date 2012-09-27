@@ -965,18 +965,14 @@ def indivo_api_call_get(request, relative_path):
     method = request.method
 
     # Pull in the GET / POST data
-    options = {}
     query_dict = copy.copy(request.GET)
-    if query_dict:
-        options['parameters'] = query_dict
-
     post_dict = copy.copy(request.POST)
     post_data = post_dict or request.raw_post_data
     
     # Parse the Authorization headers for a connect token, if available
-    oauth_request = OauthRequest.from_request('GET', settings.INDIVO_UI_SERVER_BASE, headers= request.META)
+    oauth_request = OauthRequest.from_request('GET', settings.INDIVO_UI_SERVER_BASE, headers=request.META)
     if oauth_request:
-        connect_token = oauth_request['connect_token'] or  None
+        connect_token = oauth_request['connect_token'] or None
         connect_secret = retrieve_connect_secret(request, connect_token)
     else:
         connect_token = connect_secret = None
@@ -994,7 +990,7 @@ def indivo_api_call_get(request, relative_path):
         
     # Make the call, and return the response
     if method == 'GET':
-        resp, content = api.get(relative_path, **(query_dict or {}))
+        resp, content = api.get(relative_path, body=query_dict, **(query_dict or {}))       # the body=query_dict is needed to actually have GET params forwarded to the server (pp, 9/24/2012)
     elif method == 'POST':
         # TODO: content type for post?
         resp, content = api.post(relative_path, body=post_data, **(query_dict or {}))

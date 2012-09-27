@@ -47,20 +47,71 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 			dataType: 'xml',
 			success: callback,
 			error: error
-		})
+		});
 	}
 	
 },
 /* @Prototype */
 {
+	demographics: null,
+	
 	baseURL: function() {
 		return this.Class.apiBase() + 'records/' + encodeURIComponent(this.id);	
 	},
 	
+	/**
+	 * Fetches the record's demographics
+	 * @param {success} callback function upon success
+	 * @param {error} callback function upon failure
+	 */
+	get_demographics: function(success, error) {
+		var self = this;
+		$.ajax({
+			url: this.baseURL() + '/demographics',
+			data: {'response_format': 'application/json'},
+			type: 'get',
+			success: function(data, textStatus, jqXHR) {
+				self.demographics = data.length > 0 ? data[0] : null;
+				if (success) {
+					success(data, textStatus, jqXHR);
+				}
+			},
+			error: error
+		});
+	},
+	
+	/**
+	 * Updates the record's demographics to the supplied XML value
+	 * @param {demographics} A demographics document
+	 * @param {success} callback function upon success
+	 * @param {error} callback function upon failure
+	 */
+	put_demographics: function(demographics, success, error) {
+		if (!demographics) {
+			if (error) {
+				error(null, 'error', 'Bad Request');
+			}
+			steal.dev.warn('You must supply XML to this call');
+			return;
+		}
+		
+		$.ajax({
+			type: 'put',
+			url: this.baseURL() + '/demographics',
+			data: demographics,
+			dataType: 'xml',
+			success: success,
+			error: error
+		});
+	},
+	
+	
 	//TODO: why is document_id here? (TF)
 	get_carenets: function(document_id, success, error) {
 		var url = '/carenets/';
-		if (document_id != null) url = '/documents/' + document_id + '/carenets/';
+		if (document_id != null) {
+			url = '/documents/' + document_id + '/carenets/';
+		}
 
 		return $.ajax({
 			url: this.baseURL() + url,
@@ -90,5 +141,76 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 			success: success,
 			error: error
 		});
+	},
+	
+	
+	// Utilities
+	
+	/**
+	 * Composes a nice display name from all name parts
+	 */
+	formattedName: function() {
+		if (this.demographics) {
+			var names = new Array();
+			if (this.demographics.name_prefix) {
+				names.push(this.demographics.name_prefix);
+			}
+			if (this.demographics.name_given) {
+				names.push(this.demographics.name_given);
+			}
+			if (this.demographics.name_middle) {
+				names.push(this.demographics.name_middle);		// is this an array?
+			}
+			if (this.demographics.name_family) {
+				names.push(this.demographics.name_family);
+			}
+			if (this.demographics.name_suffix) {
+				names.push(this.demographics.name_suffix);		// add a comma before this?
+			}
+			
+			if (names.length > 0) {
+				return names.join(' ');
+			}
+		}
+		else {
+			steal.dev.warn('The demographics have not yet been fetched, returning the label');
+		}
+		return this.label ? this.label : 'Unknown';
+	},
+	
+	/**
+	 * Returns the birthday as a date object (if demographics have been fetched)
+	 */
+	dob: function() {
+		if (!this.demographics || !'bday' in this.demographics) {
+			return null;
+		}
+		
+		var dob_parts = this.demographics.bday.split(/\D+/);
+		var dob = new Date();
+		dob.setYear(dob_parts[0]);
+		dob.setMonth(dob_parts[1] - 1);
+		dob.setDate(dob_parts[2]);
+		
+		return dob;
+	},
+	
+	/**
+	 * Returns the current age in years (if demographics have been fetched)
+	 */
+	age: function() {
+		if (!this.demographics || !'bday' in this.demographics) {
+			return 0;
+		}
+		
+		var dob = this.dob();
+		var today = new Date();
+		
+		age = today.getFullYear() - dob.getFullYear();
+		var month = today.getMonth() - dob.getMonth();
+		if (month < 0 || (month === 0 && today.getDate() < dob.getDate())) {
+			age--;
+		}
+		return age;
 	}
 })
