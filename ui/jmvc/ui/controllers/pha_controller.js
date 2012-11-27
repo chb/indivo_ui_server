@@ -271,6 +271,9 @@ $.Controller.extend('UI.Controllers.PHA',
 		.find('input[name="enable_app"]').click(function(event) {
 			var checkbox = $(this);
 			var app = checkbox.model();
+            
+            // Trigger mouseout event to close the app description bubble. 
+            checkbox.trigger("mouseout");
 			
 			// enable
 			if (checkbox.prop('checked')) {
@@ -468,6 +471,7 @@ $.Controller.extend('UI.Controllers.PHA',
 		else {
 			checkbox.prop('checked', false).removeAttr('disabled');
 		}
+        return false;
 	},
 	doNotEnableApp: function(app, checkbox, xhr, textStatus, error) {
 		//TODO: if we are coming from a successful ajax request, the xhr.status is not filled out accurately (always 200). Once this is fixed in the client, add in better handling
