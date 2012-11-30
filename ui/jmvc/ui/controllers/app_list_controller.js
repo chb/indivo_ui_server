@@ -323,7 +323,7 @@ $.Controller.extend('UI.Controllers.AppList',
 		// ...and try to re-select previous app, show record info otherwise
 		if (this.account.activeRecord) {
 			var old_app = $('#' + selected_id);
-			if (old_app.is('*')) {
+			if (old_app.is('*') && !this.account.activeRecord.isCarenet()) {
 				old_app.click();
 			}
 			else {
