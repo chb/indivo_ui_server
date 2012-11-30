@@ -1,0 +1,170 @@
+{% load i18n %}
+<% if (!demographics) {
+	demographics = new Object();
+} %>
+<h2>{% trans "Your personal information" %}</h2>
+<hr />
+<form id="demographics_form" method="post" action="" onsubmit="return false;">
+	<div>
+		<input type="text" name="prefix" placeholder="{% trans "Prefix" %}" value="<%= demographics.name_prefix %>" size="10" tabindex="1" />
+		<input type="text" name="givenName" placeholder="{% trans "Given Name" %}" value="<%= demographics.name_given %>" size="20" tabindex="2" />
+		<input type="text" name="middleName" placeholder="{% trans "Middle Name" %}" value="<%= demographics.name_middle %>" size="20" tabindex="3" />
+		<input type="text" name="familyName" placeholder="{% trans "Family Name" %}" value="<%= demographics.name_family %>" size="20" tabindex="4" />
+		<input type="text" name="suffix" placeholder="{% trans "Suffix" %}" value="<%= demographics.name_suffix %>" size="10" tabindex="5" />
+	</div>
+	
+	<table class="demo_table">
+	
+		<!-- Gender, ethnicity, race -->
+		<tr>
+			<td>{% trans "Gender" %}:</td>
+			<td colspan="3">
+				<select name="gender" tabindex="6">
+					<option value="female"<% if ('female' == demographics.gender) { %> selected="selected"<% } %>>{% trans "Female" %}</option>
+					<option value="male"<% if ('male' == demographics.gender) { %> selected="selected"<% } %>>{% trans "Male" %}</option>
+					<!-- We should give people the option to not specify their gender, for personal or medical reasons, but that's currently not supported by the schema -->
+					<!--option value=""<% if (!demographics.gender) { %> selected="selected"<% } %>>{% trans "Not Specified / Other" %}</option-->
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>{% trans "Birthday" %}: *</td>
+			<td colspan="3" class="birthday_cell">
+				<div>
+					<input type="text" name="bday_date" value="<%= demographics.dob ? demographics.dob.getDate() : '' %>" placeholder="{% trans "dd" %}" tabindex="7" size="3" /><br />
+					<span class="small_faded">{% trans "day" %}</span>
+				</div>
+				<div>
+					<input type="text" name="bday_month" value="<%= demographics.dob ? demographics.dob.getMonth()+1 : '' %>" placeholder="{% trans "mm" %}" tabindex="8" size="3" /><br />
+					<span class="small_faded">{% trans "month" %}</span>
+				</div>
+				<div>
+					<input type="text" name="bday_year" value="<%= demographics.dob ? demographics.dob.getFullYear() : '' %>" placeholder="{% trans "yyyy" %}" tabindex="9" size="5" /><br />
+					<span class="small_faded">{% trans "year" %}</span>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>{% trans "Ethnicity" %}:</td>
+			<td colspan="3"><input type="text" name="ethnicity" value="<%= demographics.ethnicity %>" tabindex="10" /></td>
+		</tr>
+		<tr>
+			<td>{% trans "Race" %}:</td>
+			<td colspan="3"><input type="text" name="race" value="<%= demographics.race %>" tabindex="11" /></td>
+		</tr>
+		<tr>
+			<td>{% trans "Language" %}:</td>
+			<td colspan="3">
+				<input type="text" name="preferred_language" value="<%= demographics.preferred_language %>" tabindex="12" />
+				<span class="small_faded">{% trans "your preferred language" %}</span>
+			</td>
+		</tr>
+		
+		<tr>
+			<td colspan="4"><hr /></td>
+		</tr>
+		
+		<!-- Email and Phones -->
+		<tr>
+			<td><label for="email">{% trans "Email" %}:</label></td>
+			<td colspan="3">
+				<input type="text" id="email" name="email" value="<%= demographics.email %>" size="30" tabindex="13" />
+			</td>
+		</tr>
+		<tr>
+			<td><label for="tel_1_number">{% trans "Phone 1" %}:</label></td>
+			<td>
+				<input type="text" id="tel_1_number" name="tel_1_number" value="<%= demographics.tel_1_number %>" size="30" tabindex="14" />
+			</td>
+			<td>
+				<select id="gender" name="tel_1_type" tabindex="15">
+					<option value="h"<% if ('h' == demographics.tel_1_type) { %> selected="selected"<% } %>>{% trans "Home" %}</option>
+					<option value="w"<% if ('w' == demographics.tel_1_type) { %> selected="selected"<% } %>>{% trans "Work" %}</option>
+					<option value="c"<% if ('c' == demographics.tel_1_type) { %> selected="selected"<% } %>>{% trans "Cell" %}</option>
+				</select>
+			</td>
+			<td>
+				<input type="checkbox" id="tel_1_preferred_p" name="tel_1_preferred_p" value="1" tabindex="16"<% if (demographics.tel_1_preferred_p) { %> checked="checked"<% } %> />
+				<label for="tel_1_preferred_p">{% trans "Preferred" %}</label>
+			</td>
+		</tr>
+		<tr>
+			<td><label for="tel_1_number">{% trans "Phone 2" %}:</label></td>
+			<td>
+				<input type="text" id="tel_2_number" name="tel_2_number" value="<%= demographics.tel_2_number %>" size="30" tabindex="17" />
+			</td>
+			<td>
+				<select id="gender" name="tel_2_type" tabindex="18">
+					<option value="h"<% if ('h' == demographics.tel_2_type) { %> selected="selected"<% } %>>{% trans "Home" %}</option>
+					<option value="w"<% if ('w' == demographics.tel_2_type) { %> selected="selected"<% } %>>{% trans "Work" %}</option>
+					<option value="c"<% if ('c' == demographics.tel_2_type) { %> selected="selected"<% } %>>{% trans "Cell" %}</option>
+				</select>
+			</td>
+			<td>
+				<input type="checkbox" id="tel_2_preferred_p" name="tel_2_preferred_p" value="1" tabindex="19"<% if (demographics.tel_2_preferred_p) { %> checked="checked"<% } %> />
+				<label for="tel_2_preferred_p">{% trans "Preferred" %}</label>
+			</td>
+		</tr>
+		
+		<tr>
+			<td colspan="4"><hr /></td>
+		</tr>
+		
+		<!-- Address -->
+		<tr>
+			<td><label for="adr_street">{% trans "Street" %}:</label></td>
+			<td colspan="3">
+				<input type="text" id="adr_street" name="adr_street" value="<%= demographics.adr_street %>" size="40" tabindex="20" />
+			</td>
+		</tr>
+		<tr>
+			<td><label for="adr_city">{% trans "City" %}:</label></td>
+			<td colspan="3">
+				<input type="text" id="adr_city" name="adr_city" value="<%= demographics.adr_city %>" size="20" tabindex="21" />
+			</td>
+		</tr>
+		<tr>
+			<td><label for="adr_postalcode">{% trans "ZIP Code" %}:</label></td>
+			<td colspan="3">
+				<input type="text" id="adr_postalcode" name="adr_postalcode" value="<%= demographics.adr_postalcode %>" size="10" tabindex="22" />
+			</td>
+		</tr>
+		<tr>
+			<td><label for="adr_region">{% trans "State" %}:</label></td>
+			<td colspan="3">
+				<input type="text" id="adr_region" name="adr_region" value="<%= demographics.adr_region %>" size="20" tabindex="23" />
+			</td>
+		</tr>
+		<tr>
+			<td><label for="adr_country">{% trans "Country" %}:</label></td>
+			<td colspan="3">
+				<input type="text" id="adr_country" name="adr_country" value="<%= demographics.adr_country %>" size="20" tabindex="24" />
+			</td>
+		</tr>
+		
+		<tr>
+			<td colspan="4" style="height:2em;"></td>
+		</tr>
+		
+		<!-- Error area -->
+		<tr>
+			<td colspan="4"><div class="error_area" style="display:none;"></td>
+		</tr>
+		
+		<!-- Submit -->
+		<tr class="main_action_button">
+			<td>
+				<button id="update_demographics_cancel" type="button" style="font-size:0.85em;">Cancel</button>
+			</td>
+			<td colspan="3">
+				<button id="update_demographics_submit" type="submit" tabindex="25">Update</button>
+				<img class="loader" src="jmvc/ui/resources/images/spinner-small.gif" style="display:none;" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="4" class="small faded">
+				{% trans "* Birthday is a required field" %}
+			</td>
+		</tr>
+	</table>
+</form>

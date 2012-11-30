@@ -1,0 +1,101 @@
+{% load i18n %}
+<% if (demographics) {
+	%>
+	<p class="details">{% trans "This is your current personal information" %}</p>
+	<%
+	// birthday
+	if (demographics.bday) { %>
+		<div class="demographics_item_row">
+		<div class="demographics_item_block">
+		<%
+		var nice_dob = demographics.dob ? demographics.dob.toLocaleDateString() : demographics.bday;
+		var nice_age = demographics.age !== null ? ((1 == age) ? '{% trans "1 year" %}' : age + ' {% trans "years" %}') : '';
+		%>
+		<span class="">{% trans "Born" %} </span><b><%= nice_dob %></b>
+		<% if (nice_age) { %>
+			(<%= nice_age %> old)
+		<% } %>
+		</div>
+	<% }
+	
+	// race and ethnicity
+	if (demographics.race || demographics.ethnicity || demographics.preferred_language) { %>
+		<div class="demographics_item_block">
+			<% if (demographics.race || demographics.ethnicity) { %>
+				<%= demographics.race || 'unknown race' %>,
+				<%= demographics.ethnicity || 'unknown ethnicity' %><br />
+			<% }
+			if (demographics.preferred_language) { %>
+				{% trans "Preferred language:" %}
+				<b><%= demographics.preferred_language %></b>
+			<% } %>
+		</div>
+	<% }
+	
+	if (demographics.bday) { %>
+		</div>
+		<hr class="dotted" />
+	<% }
+	%>
+	<div class="demographics_item_row">
+	<%
+	
+	// email and phone
+	if (demographics.email || demographics.tel_1_number || demographics.tel_2_number) { %>
+		<div class="demographics_item_block">
+		<%
+		if (demographics.email) { %>
+			<a href="mailto:<%= demographics.email %>"><%= demographics.email %></a><br />
+		<% }
+		if (demographics.tel_1_number) {
+			var pref_class = demographics.tel_1_preferred_p ? 'preferred_phone' : ''; %>
+			<%= demographics.tel_1_type ? demographics.tel_1_type + ': ' : '' %>
+			<span class="<%= pref_class %>"><%= demographics.tel_1_number %></span><br />
+		<% }
+		if (demographics.tel_2_number) {
+			var pref_class = demographics.tel_2_preferred_p ? 'preferred_phone' : ''; %>
+			<%= demographics.tel_2_type ? demographics.tel_2_type + ': ' : '' %>
+			<span class="<%= pref_class %>"><%= demographics.tel_2_number %></span><br />
+		<% } %>
+		</div>
+	<% } %>
+	
+	<div class="demographics_item_block">
+	<% if (demographics.adr_street || demographics.adr_city || demographics.adr_region || demographics.adr_postalcode || demographics.adr_country) {
+		
+		// addresses and contact information
+		if (demographics.adr_street) { %>
+			<%= demographics.adr_street %><br />
+		<% }
+		if (demographics.adr_city) { %>
+			<%= demographics.adr_city %>
+		<% }
+		if (demographics.adr_region) {
+			if (demographics.adr_city) { %>
+				, 
+			<% } %>
+			<%= demographics.adr_region %>
+		<% }
+		if (demographics.adr_postalcode) { %>
+			<%= demographics.adr_postalcode %>
+		<% } %>
+		<br />
+		<% if (demographics.adr_country) { %>
+			<b><%= demographics.adr_country %></b>
+		<% }
+	}
+	else { %>
+	<span class="details">{% trans "no address on file" %}</span>
+	<% } %>
+	</div>
+	</div>
+<% }
+else { %>
+	<p class="details">{% trans "Your personal information has not yet been stored" %}</p>
+<% }
+%>
+<% if (!carenet) { %>
+<p style="margin-top:2em;">
+	<button id="show_demographics">{% trans "Update Information" %}</button>
+</p>
+<% } %>
