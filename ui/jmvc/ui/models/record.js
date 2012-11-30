@@ -12,13 +12,18 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 	model: function(data) {
 		// custom converter for this model
 		data = $(data);
-		return new this({
-			'id': data.attr("id"),
+		var obj = new this({
+			'record_id': data.attr("id"),
 			'label': data.attr("label"),
 			'carenet_id': data.attr("carenet_id"),
 			'carenet_label': data.attr("carenet_label"),
 			'shared': data.attr("shared")
-		});	
+		});
+        obj.id = obj.record_id;
+        if (obj.carenet_id != undefined) {
+            obj.id = obj.carenet_id
+        }
+        return obj;
 	},
 	
 	findOne: function(id, success, error) {
@@ -56,8 +61,15 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 	demographics: null,
 	
 	baseURL: function() {
+        if (this.isCarenet()) {
+            return this.Class.apiBase() + 'carenets/' + encodeURIComponent(this.id);
+        }
 		return this.Class.apiBase() + 'records/' + encodeURIComponent(this.id);	
 	},
+
+    isCarenet: function() {
+        return this.carenet_id != undefined;
+    },
 	
 	/**
 	 * Fetches the record's demographics

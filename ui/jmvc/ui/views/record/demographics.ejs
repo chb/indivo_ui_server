@@ -94,6 +94,8 @@ else { %>
 	<p class="details">{% trans "Your personal information has not yet been stored" %}</p>
 <% }
 %>
+<% if (!carenet) { %>
 <p style="margin-top:2em;">
 	<button id="show_demographics">{% trans "Update Information" %}</button>
 </p>
+<% } %>
