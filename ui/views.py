@@ -617,7 +617,7 @@ def reset_password(request, account_id, primary_secret):
                     # password was reset, log the user in
                     if '200' == resp['status']:
                         # reset the primary secret to void the reset email
-                        api.call('PUT', '/accounts/%s/primary-secret' % account_id)
+                        api.put('/accounts/%s/primary-secret' % account_id)
                         
                         try:
                             try:
