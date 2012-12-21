@@ -118,7 +118,7 @@
 	<!-- development or production NOTE: steal path is at the top-level jmvc dir -->
 	<script compress="true" type="text/javascript" src="/jmvc/steal/steal.js"></script>
 	<script type="text/javascript">
-		var ACCOUNT_ID = "{{ ACCOUNT_ID }}";
+		var ACCOUNT_ID = "{{ ACCOUNT_ID|safe }}";
 		steal('ui');
 	</script>
 </html>
