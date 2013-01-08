@@ -208,7 +208,7 @@ $.Controller.extend('UI.Controllers.Record',
 			demographics.age = record.age();
 		}
 		//console.log(demographics);
-		$('#demographics_area').empty().append($.View('//ui/views/record/demographics', {'demographics': demographics}));
+		$('#demographics_area').empty().append($.View('//ui/views/record/demographics', {'record': record, 'demographics': demographics}));
 	},
 	
 	'#show_demographics click': function(element, event) {
