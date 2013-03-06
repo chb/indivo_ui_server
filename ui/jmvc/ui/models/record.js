@@ -108,10 +108,11 @@ UI.Models.IndivoBase.extend('UI.Models.Record',
 		}
 		
 		$.ajax({
-			type: 'put',
+			type: 'PUT',
 			url: this.baseURL() + '/demographics',
 			data: demographics,
 			dataType: 'xml',
+			contentType: 'application/xml',
 			success: success,
 			error: error
 		});

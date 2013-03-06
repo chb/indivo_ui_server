@@ -987,15 +987,17 @@ def indivo_api_call_get(request, relative_path):
         api.update_token(oauth_token)
     else:
         api = get_api(request)
-        
+
+    # Read out content-type from the request.  Apache uses HTTP_CONTENT_TYPE
+    content_type = request.META.get('CONTENT_TYPE') or request.META.get('HTTP_CONTENT_TYPE')
+
     # Make the call, and return the response
     if method == 'GET':
         resp, content = api.get(relative_path, body=query_dict, **(query_dict or {}))       # the body=query_dict is needed to actually have GET params forwarded to the server (pp, 9/24/2012)
     elif method == 'POST':
-        # TODO: content type for post?
-        resp, content = api.post(relative_path, body=post_data, **(query_dict or {}))
+        resp, content = api.post(relative_path, body=post_data, content_type=content_type, **(query_dict or {}))
     elif method == 'PUT':
-        resp, content = api.put(relative_path, body=post_data, **(query_dict or {}))
+        resp, content = api.put(relative_path, body=post_data, content_type=content_type, **(query_dict or {}))
     elif method == 'DELETE':
         resp, content = api.delete(relative_path, **(query_dict or {}))
     
