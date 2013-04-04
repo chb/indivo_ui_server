@@ -724,7 +724,7 @@ def _record_create(account_id, demographics):
         tree = ET.fromstring(content or '<Record/>')
         if tree is not None:
             record_id = tree.attrib.get('id')
-            res, content = api.record_set_owner(record_id=record_id, body=account_id)
+            res, content = api.record_set_owner(record_id=record_id, body=account_id, content_type='text/plain')
             status = res['status']
             if '200' == status:
                 record = {'record_id': record_id, 'label': tree.attrib.get('label')}
