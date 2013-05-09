@@ -693,7 +693,7 @@ def record_create(request):
     
     # POST, try to create a record
     if HTTP_METHOD_POST == request.method:
-        ret = _record_create(account_id, request.raw_post_data)
+        ret = _record_create(account_id, request.body)
         if 200 == ret.status_code:
             if after_create_url:
                 return HttpResponseRedirect(after_create_url)
@@ -967,7 +967,7 @@ def indivo_api_call_get(request, relative_path):
     # Pull in the GET / POST data
     query_dict = copy.copy(request.GET)
     post_dict = copy.copy(request.POST)
-    post_data = post_dict or request.raw_post_data
+    post_data = post_dict or request.body
     
     # Parse the Authorization headers for a connect token, if available
     oauth_request = OauthRequest.from_request('GET', settings.INDIVO_UI_SERVER_BASE, headers=request.META)
