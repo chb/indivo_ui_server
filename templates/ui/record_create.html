@@ -30,7 +30,7 @@
 		{% trans "Adding records has been disabled by the administrator" %}
 	</div>
 	{% else %}
-	<form id="record_create_form" class="table_form" method="post" action="/records/">
+	<form id="record_create_form" class="table_form" method="post" action="/records/">{% csrf_token %}
 		{% if AFTER_CREATE_URL %}
 		<input type="hidden" name="after_create_url" value="{{ AFTER_CREATE_URL }}" />
 		{% endif %}

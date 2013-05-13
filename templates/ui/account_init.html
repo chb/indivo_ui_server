@@ -25,7 +25,7 @@
 
 {% block main %}
 	<!-- Confirmation Code Form -->
-	<form id="init_form" class="table_form" method="post" action="/accounts/{{ ACCOUNT_ID }}/init/{{ PRIMARY_SECRET }}">
+	<form id="init_form" class="table_form" method="post" action="/accounts/{{ ACCOUNT_ID }}/init/{{ PRIMARY_SECRET }}">{% csrf_token %}
 		<div class="row">
 			<div class="cell">
 				{% trans "Confirmation code:" %}

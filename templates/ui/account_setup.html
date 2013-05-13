@@ -85,7 +85,7 @@
 
 {% block main %}
 	<!-- Main Form -->
-	<form id="setup_form" class="table_form" method="post" action="/accounts/{{ ACCOUNT_ID }}/setup/{{ PRIMARY_SECRET }}">
+	<form id="setup_form" class="table_form" method="post" action="/accounts/{{ ACCOUNT_ID }}/setup/{{ PRIMARY_SECRET }}">{% csrf_token %}
 		<input type="hidden" name="secondary_secret" value="{{ SECONDARY_SECRET }}" />
 		<div class="row">
 			<div class="cell">{% trans "Username" %}:</div>
