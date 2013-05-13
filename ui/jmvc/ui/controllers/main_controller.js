@@ -118,7 +118,22 @@ $.Controller.extend('UI.Controllers.MainController',
 		this.messageCheck = this.options.messageCheck;
 		this.messageCheckDelay = this.options.messageCheckDelay;
 		this.alertQueue = this.options.alertQueue;
-		
+
+		function csrfSafeMethod(method) {
+			// these HTTP methods do not require CSRF protection
+			return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+		}
+
+		$.ajaxSetup({
+			crossDomain: false, // obviates need for sameOrigin test
+			beforeSend: function(xhr, settings) {
+				if (!csrfSafeMethod(settings.type)) {
+					var csrftoken = $.cookie('csrftoken')
+					xhr.setRequestHeader("X-CSRFToken", csrftoken);
+				}
+			}
+		});
+
 		$('body').ajaxComplete(function(e, xhr, settings) {
 			if(xhr.status === 401) {
 				// logout user if we receive any unauthorized responses

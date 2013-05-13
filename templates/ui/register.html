@@ -37,7 +37,7 @@
 		<a href="/accounts/{{ ACCOUNT_ID }}/send_secret">{% trans "Received no activation email?" %}</a>
 	</p>
 	{% else %}{% if SETTINGS.REGISTRATION.enable %}
-	<form id="signup_form" class="table_form" method="post" action="/register">
+	<form id="signup_form" class="table_form" method="post" action="/register">{% csrf_token %}
 		<div class="row">
 			<div class="cell">{% trans "Your Name:" %}</div>
 			<div class="cell">
