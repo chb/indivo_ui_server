@@ -70,6 +70,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 INSTALLED_APPS = (
@@ -82,3 +83,8 @@ INSTALLED_APPS = (
 # use file based sessions for now - fixme: security?
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 SESSION_FILE_PATH = SERVER_ROOT_DIR + "/sessions"
+
+# Use the following when not in development, and adjust accordingly:
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# ALLOWED_HOSTS = ['www.yoursite.com']
