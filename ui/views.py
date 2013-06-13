@@ -877,7 +877,7 @@ def launch_app_complete(request, app_id):
         record_id = request.POST.get('record_id', '')
         carenet_id = ''
         api = get_api(request)
-        if record_id:
+        if record_id and not settings.DISABLE_APP_SETTINGS:
             resp, content = api.record_pha_enable(record_id=record_id, pha_email=app_id)
             status = resp['status']
             if status != '200':
@@ -922,6 +922,8 @@ def launch_app_complete(request, app_id):
     if status == '403':
         if carenet_id:
             error_message = ErrorStr("This app is not enabled to be run in the selected carenet.")
+        elif settings.DISABLE_APP_SETTINGS:
+            error_message = ErrorStr("This app is not available")
         elif record_id:
             return utils.render_template(request, 'ui/authorize_record_launch_app',
                                          {'CALLBACK_URL': '/apps/%s/complete/'%app_id,
