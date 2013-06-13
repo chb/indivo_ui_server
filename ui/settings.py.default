@@ -25,7 +25,6 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 HIDE_HEALTHFEED = False
 HIDE_INBOX = False
-HIDE_GET_MORE_APPS = False				# currently unfunctional
 HIDE_APP_SETTINGS = False
 HIDE_SHARING = False
 CONSUMER_KEY='chrome'
