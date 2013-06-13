@@ -176,7 +176,7 @@ def login(request, status):
     try:
         res, content = tokens_get_from_server(request, username, password)
     except Exception as e:
-        params['ERROR'] = ErrorStr(e[1])
+        params['ERROR'] = ErrorStr(str(e))
         return utils.render_template(request, LOGIN_PAGE, params)
     if res['status'] != '200':
         if '403' == res['status']:
@@ -521,7 +521,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
             # everything's OK, log this person in, hard redirect to change location
             resp, content = tokens_get_from_server(request, username, password)
             if resp['status'] != '200':
-                return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr(e.strerror), 'RETURN_URL': request.POST.get('return_url', '/'), 'SETTINGS': settings})
+                return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr(content or 'Error Creating Indivo Session'), 'RETURN_URL': request.POST.get('return_url', '/'), 'SETTINGS': settings})
             return HttpResponseRedirect('/')
         elif '400' == resp['status']:
             params['ERROR'] = ErrorStr('Username already taken')
