@@ -6,7 +6,7 @@
 
 {% block main %}
 	<!-- Authorization Form -->
-	<form method="post" action="{{CALLBACK_URL}}">
+	<form method="post" action="{{CALLBACK_URL}}">{% csrf_token %}
 		<input type="hidden" name="record_id" value="{{RECORD_ID}}" />		
 		<div class="login_message">
 			{{TITLE}}

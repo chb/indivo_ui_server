@@ -28,7 +28,7 @@
 
 {% block main %}
 	<!-- Login Form -->
-	<form id="login_form" class="table_form" method="post" action="/login">
+	<form id="login_form" class="table_form" method="post" action="/login">{% csrf_token %}
 		<input type="hidden" name="return_url" value="{{RETURN_URL}}" />
 		<div class="row">
 			<div class="cell">{% trans "Username:" %}</div>

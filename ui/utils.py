@@ -7,7 +7,7 @@ ben.adida@childrens.harvard.edu
 
 
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.template import Context, loader
+from django.template import RequestContext, loader
 from django.conf import settings
 from django import http
 
@@ -51,19 +51,19 @@ def send_mail(subject, body, sender, recipient):
     else:
         logging.debug("send_mail to set to false, would have sent email to %s" % recipient)
 
-def render_template_raw(template_name, vars, type="html"):
+def render_template_raw(request, template_name, vars, type="html"):
     t_obj = loader.get_template('%s.%s' % (template_name, type))
-    c_obj = Context(vars)
+    c_obj = RequestContext(request, vars)
     return t_obj.render(c_obj)
 
-def render_template(template_name, vars, type="html"):
+def render_template(request, template_name, vars, type="html"):
     # if hasattr(settings, 'BRANDING') \
     #    and isinstance(settings.BRANDING, types.DictType) \
     #    and len(settings.BRANDING) > 0:
     
     if hasattr(settings, 'BRANDING'):
         vars['branding'] = settings.BRANDING
-    content = render_template_raw(template_name, vars, type)
+    content = render_template_raw(request, template_name, vars, type)
     
     if type == "html":
         mimetype = "text/html"

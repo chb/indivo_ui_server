@@ -118,7 +118,7 @@ def index(request):  #MERGE
     if tokens_p(request):
         account_id = urllib.unquote(request.session['oauth_token_set']['account_id'])
 
-        return utils.render_template('ui/index', { 'ACCOUNT_ID': account_id,
+        return utils.render_template(request, 'ui/index', { 'ACCOUNT_ID': account_id,
                                                     'SETTINGS': settings})
     
     return HttpResponseRedirect(reverse(login))
@@ -158,7 +158,7 @@ def login(request, status):
     
     # process form vars
     if request.method == HTTP_METHOD_GET:
-        return utils.render_template(LOGIN_PAGE, params)
+        return utils.render_template(request, LOGIN_PAGE, params)
     
     if request.method == HTTP_METHOD_POST:
         if request.POST.has_key(FORM_USERNAME) and request.POST.has_key(FORM_PASSWORD):
@@ -167,7 +167,7 @@ def login(request, status):
         else:
             # Also checked initially in js
             params['ERROR'] = ErrorStr('Name or password missing')
-            return utils.render_template(LOGIN_PAGE, params)
+            return utils.render_template(request, LOGIN_PAGE, params)
     else:
         utils.log('error: bad http request method in login. redirecting to /')
         return HttpResponseRedirect('/')
@@ -176,8 +176,8 @@ def login(request, status):
     try:
         res, content = tokens_get_from_server(request, username, password)
     except Exception as e:
-        params['ERROR'] = ErrorStr(e[1])
-        return utils.render_template(LOGIN_PAGE, params)
+        params['ERROR'] = ErrorStr(str(e))
+        return utils.render_template(request, LOGIN_PAGE, params)
     if res['status'] != '200':
         if '403' == res['status']:
             params['ERROR'] = ErrorStr('Incorrect credentials')         # a 403 could also mean logging in to a disabled account!
@@ -185,7 +185,7 @@ def login(request, status):
             params['ERROR'] = ErrorStr('Name or password missing')      # checked before; highly unlikely to ever arrive here
         else:
             params['ERROR'] = ErrorStr(content)
-        return utils.render_template(LOGIN_PAGE, params)
+        return utils.render_template(request, LOGIN_PAGE, params)
     # we will now return to return_url and can thus delete the stored return url
     if request.session.has_key('login_return_url'):
         del request.session['login_return_url']
@@ -249,7 +249,7 @@ def change_password(request):
         account_id = urllib.unquote(token.get('account_id') if token else '')
         params['ACCOUNT_ID'] = account_id
     
-    return utils.render_template('ui/change_password', params)
+    return utils.render_template(request, 'ui/change_password', params)
 
 
 def register(request):
@@ -259,7 +259,7 @@ def register(request):
     """
     if HTTP_METHOD_POST == request.method:
         if not settings.REGISTRATION.get('enable', False):
-            return utils.render_template('ui/error', {'error_message': ErrorStr('Registration disabled'), 'error_status': 403})
+            return utils.render_template(request, 'ui/error', {'error_message': ErrorStr('Registration disabled'), 'error_status': 403})
         
         # create the account
         post = request.POST
@@ -278,15 +278,15 @@ def register(request):
             account = utils.parse_account_xml(account_xml)
             account_id = account.get('id')
             if not set_primary:
-                return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('You have successfully registered.') + ' ' + _('After an administrator has approved your account you may login.'), 'SETTINGS': settings})
+                return utils.render_template(request, LOGIN_PAGE, {'MESSAGE': _('You have successfully registered.') + ' ' + _('After an administrator has approved your account you may login.'), 'SETTINGS': settings})
             
             # display the secondary secret if there is one
             has_secondary_secret = (None != account.get('secret') and len(account.get('secret')) > 0)
             if has_secondary_secret:
-                return utils.render_template('ui/register', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'SECONDARY': account.get('secret'), 'MESSAGE': _('You have successfully registered.') + ' ' + _('At the link sent to your email address, enter the following confirmation code:')})
+                return utils.render_template(request, 'ui/register', {'SETTINGS': settings, 'ACCOUNT_ID': account_id, 'SECONDARY': account.get('secret'), 'MESSAGE': _('You have successfully registered.') + ' ' + _('At the link sent to your email address, enter the following confirmation code:')})
             return HttpResponseRedirect('/accounts/%s/send_secret/sent' % account_id)
-        return utils.render_template('ui/register', {'ERROR': ErrorStr((content or 'Setup failed')), 'SETTINGS': settings})
-    return utils.render_template('ui/register', {'SETTINGS': settings})
+        return utils.render_template(request, 'ui/register', {'ERROR': ErrorStr((content or 'Setup failed')), 'SETTINGS': settings})
+    return utils.render_template(request, 'ui/register', {'SETTINGS': settings})
 
 
 def send_secret(request, account_id, status):
@@ -336,7 +336,7 @@ def send_secret(request, account_id, status):
         else:
             params['MESSAGE'] = _('Use the link sent to your email address to proceed with account activation')
     
-    return utils.render_template('ui/send_secret', params)
+    return utils.render_template(request, 'ui/send_secret', params)
 
 
 def account_init(request, account_id, primary_secret):
@@ -352,9 +352,9 @@ def account_init(request, account_id, primary_secret):
     resp, content = api.account_info(account_email=account_id)
     status = resp['status']
     if '404' == status:
-        return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
+        return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
     if '200' != status:
-        return utils.render_template('ui/error', {'error_status': status, 'error_message': ErrorStr(content or 'Server Error')})
+        return utils.render_template(request, 'ui/error', {'error_status': status, 'error_message': ErrorStr(content or 'Server Error')})
     
     account_xml = content or '<root/>'
     account = utils.parse_account_xml(account_xml)
@@ -370,11 +370,11 @@ def account_init(request, account_id, primary_secret):
     if not account_is_uninitialized:
         if 'active' == account_state:
             if has_auth_system:
-                return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('Your account is now active, you may log in below'), 'SETTINGS': settings})
+                return utils.render_template(request, LOGIN_PAGE, {'MESSAGE': _('Your account is now active, you may log in below'), 'SETTINGS': settings})
             else:
                 move_to_setup = True
         else:
-            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('This account is %s' % account_state), 'SETTINGS': settings})
+            return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr('This account is %s' % account_state), 'SETTINGS': settings})
     
     # bail out if the primary secret is wrong
     if has_primary_secret:
@@ -428,12 +428,12 @@ def account_init(request, account_id, primary_secret):
                     utils.log("account_init(): Error creating a record after initializing the account, failing silently. The error was: %s" % res.content)
             move_to_setup = True
         elif '404' == status:
-            return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
+            return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
         elif '403' == status:
-            return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Wrong confirmation code')})
+            return utils.render_template(request, 'ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Wrong confirmation code')})
         else:
             utils.log("account_init(): Error initializing an account: %s" % content)
-            return utils.render_template('ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Setup failed')})
+            return utils.render_template(request, 'ui/account_init', {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'ERROR': ErrorStr('Setup failed')})
     
     # proceed to setup if we have the correct secondary secret
     params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SETTINGS': settings}
@@ -446,7 +446,7 @@ def account_init(request, account_id, primary_secret):
             params['ERROR'] = ErrorStr('Wrong confirmation code')
         else:
             params['ERROR'] = content or 'Server Error'
-    return utils.render_template('ui/account_init', params)
+    return utils.render_template(request, 'ui/account_init', params)
 
 
 def account_setup(request, account_id, primary_secret, secondary_secret):
@@ -459,9 +459,9 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
     resp, content = api.account_info(account_email=account_id)
     status = resp['status']
     if '404' == status:
-        return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
+        return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr('Unknown account')})
     if '200' != status:
-        return utils.render_template('ui/error', {'error_status': status, 'error_message': ErrorStr(content or 'Server Error')})
+        return utils.render_template(request, 'ui/error', {'error_status': status, 'error_message': ErrorStr(content or 'Server Error')})
     
     account_xml = content or '<root/>'
     account = utils.parse_account_xml(account_xml)
@@ -472,9 +472,9 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
     # if the account is already active, show login IF at least one auth-system is attached
     if 'active' == account_state:
         if len(account['auth_systems']) > 0:
-            return utils.render_template(LOGIN_PAGE, {'MESSAGE': _('Your account is now active, you may log in below'), 'SETTINGS': settings})
+            return utils.render_template(request, LOGIN_PAGE, {'MESSAGE': _('Your account is now active, you may log in below'), 'SETTINGS': settings})
     elif 'uninitialized' != account_state:
-        return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr('This account is %s' % account_state), 'SETTINGS': settings})
+        return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr('This account is %s' % account_state), 'SETTINGS': settings})
     
     # received POST data, try to setup
     params = {'ACCOUNT_ID': account_id, 'PRIMARY_SECRET': primary_secret, 'SECONDARY_SECRET': secondary_secret, 'SETTINGS': settings}
@@ -494,7 +494,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
             resp, content = api.account_check_secrets(account_email=account_id, primary_secret=primary_secret, body={'secondary_secret': secondary_secret})
             if '200' != resp['status']:
                 params['ERROR'] = ErrorStr('Wrong confirmation code')
-                return utils.render_template('ui/account_init', params)
+                return utils.render_template(request, 'ui/account_init', params)
         
         # verify passwords
         error = None
@@ -506,7 +506,7 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
             error = ErrorStr("Passwords do not match")
         if error is not None:
             params['ERROR'] = error
-            return utils.render_template('ui/account_setup', params)
+            return utils.render_template(request, 'ui/account_setup', params)
         
         # secrets are ok, passwords check out: Attach the login credentials to the account
         resp, content = api.account_authsystem_add(
@@ -521,18 +521,18 @@ def account_setup(request, account_id, primary_secret, secondary_secret):
             # everything's OK, log this person in, hard redirect to change location
             resp, content = tokens_get_from_server(request, username, password)
             if resp['status'] != '200':
-                return utils.render_template(LOGIN_PAGE, {'ERROR': ErrorStr(e.strerror), 'RETURN_URL': request.POST.get('return_url', '/'), 'SETTINGS': settings})
+                return utils.render_template(request, LOGIN_PAGE, {'ERROR': ErrorStr(content or 'Error Creating Indivo Session'), 'RETURN_URL': request.POST.get('return_url', '/'), 'SETTINGS': settings})
             return HttpResponseRedirect('/')
         elif '400' == resp['status']:
             params['ERROR'] = ErrorStr('Username already taken')
-            return utils.render_template('ui/account_setup', params)
+            return utils.render_template(request, 'ui/account_setup', params)
         params['ERROR'] = ErrorStr('account_init_error')
-        return utils.render_template('ui/account_setup', params)
+        return utils.render_template(request, 'ui/account_setup', params)
     
     # got no secondary_secret, go back to init step which will show a prompt for the secondary secret
     if has_secondary_secret and not secondary_secret:
         return HttpResponseRedirect('/accounts/%s/init/%s' % (account_id, primary_secret))
-    return utils.render_template('ui/account_setup', params)
+    return utils.render_template(request, 'ui/account_setup', params)
 
 
 def forgot_password(request):
@@ -578,7 +578,7 @@ def forgot_password(request):
             if 'Account has not been initialized' == content:
                 params['UNINITIALIZED'] = True
     
-    return utils.render_template('ui/forgot_password', params)
+    return utils.render_template(request, 'ui/forgot_password', params)
 
 
 def reset_password(request, account_id, primary_secret):
@@ -647,7 +647,7 @@ def reset_password(request, account_id, primary_secret):
         else:
             params['ERROR'] = ErrorStr(content or 'Wrong confirmation code')
     
-    return utils.render_template('ui/reset_password', params)
+    return utils.render_template(request, 'ui/reset_password', params)
 
 
 def account_name(request, account_id):
@@ -693,7 +693,7 @@ def record_create(request):
     
     # POST, try to create a record
     if HTTP_METHOD_POST == request.method:
-        ret = _record_create(account_id, request.raw_post_data)
+        ret = _record_create(account_id, request.body)
         if 200 == ret.status_code:
             if after_create_url:
                 return HttpResponseRedirect(after_create_url)
@@ -708,7 +708,7 @@ def record_create(request):
     elif HTTP_METHOD_GET != request.method:
         return HttpResponseBadRequest()
     
-    return utils.render_template('ui/record_create', params)
+    return utils.render_template(request, 'ui/record_create', params)
 
 
 def _record_create(account_id, demographics):
@@ -833,7 +833,7 @@ def launch_app(request, app_id):
     resp, content = api.pha(pha_email=app_id)
     status = resp['status']
     if '404' == status:
-        return utils.render_template('ui/error', {'error_message': ErrorStr('No such App').str(), 'error_status': status})
+        return utils.render_template(request, 'ui/error', {'error_message': ErrorStr('No such App').str(), 'error_status': status})
         
     # read account records
     error_message = None
@@ -847,7 +847,7 @@ def launch_app(request, app_id):
     elif '200' != status:
         error_message = ErrorStr(content or 'Error getting account records').str()
     if error_message:
-        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+        return utils.render_template(request, 'ui/error', {'error_message': error_message, 'error_status': status})
     
     # parse records XML
     records_xml = content or '<root/>'
@@ -857,7 +857,7 @@ def launch_app(request, app_id):
         rec_dict = { 'record_id': rec_id, 'carenet_id' : '' }           # TODO: Carenets are not yet supported
         records.append([rec_id, rec_label])
 
-    return utils.render_template('ui/record_select', {'SETTINGS': settings, 'APP_ID': app_id, 'RECORD_LIST': records})
+    return utils.render_template(request, 'ui/record_select', {'SETTINGS': settings, 'APP_ID': app_id, 'RECORD_LIST': records})
 
 
 def launch_app_complete(request, app_id):
@@ -877,12 +877,12 @@ def launch_app_complete(request, app_id):
         record_id = request.POST.get('record_id', '')
         carenet_id = ''
         api = get_api(request)
-        if record_id:
+        if record_id and not settings.DISABLE_APP_SETTINGS:
             resp, content = api.record_pha_enable(record_id=record_id, pha_email=app_id)
             status = resp['status']
             if status != '200':
                 error_message = ErrorStr("Error enabling the app")
-                return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+                return utils.render_template(request, 'ui/error', {'error_message': error_message, 'error_status': status})
             
     if request.method == 'GET':
         record_id = request.GET.get('record_id', '')
@@ -913,7 +913,7 @@ def launch_app_complete(request, app_id):
                 error_message = ErrorStr('Error getting app info: no start URL')
 
     if error_message is not None:
-        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+        return utils.render_template(request, 'ui/error', {'error_message': error_message, 'error_status': status})
 
     # get SMART credentials for the request
     api = get_api(request)
@@ -922,8 +922,10 @@ def launch_app_complete(request, app_id):
     if status == '403':
         if carenet_id:
             error_message = ErrorStr("This app is not enabled to be run in the selected carenet.")
+        elif settings.DISABLE_APP_SETTINGS:
+            error_message = ErrorStr("This app is not available")
         elif record_id:
-            return utils.render_template('ui/authorize_record_launch_app',
+            return utils.render_template(request, 'ui/authorize_record_launch_app',
                                          {'CALLBACK_URL': '/apps/%s/complete/'%app_id,
                                           'RECORD_ID': record_id,
                                           'TITLE': _('Authorize "{{name}}"?').replace('{{name}}', app_info['name'])
@@ -936,7 +938,7 @@ def launch_app_complete(request, app_id):
             error_message = ErrorStr("Error getting account credentials")
 
     if error_message is not None:
-        return utils.render_template('ui/error', {'error_message': error_message, 'error_status': status})
+        return utils.render_template(request, 'ui/error', {'error_message': error_message, 'error_status': status})
 
     # append the credentials and redirect
     querystring_sep = '&' if '?' in start_url else '?'
@@ -967,7 +969,7 @@ def indivo_api_call_get(request, relative_path):
     # Pull in the GET / POST data
     query_dict = copy.copy(request.GET)
     post_dict = copy.copy(request.POST)
-    post_data = post_dict or request.raw_post_data
+    post_data = post_dict or request.body
     
     # Parse the Authorization headers for a connect token, if available
     oauth_request = OauthRequest.from_request('GET', settings.INDIVO_UI_SERVER_BASE, headers=request.META)
@@ -1082,12 +1084,12 @@ def authorize(request):
         resp, content = api.request_token_claim(reqtoken_id=request_token)
 # TODO: check into case of no response.  Does this make sense now?
 #        if not resp or not resp.response: 
-#            return utils.render_template('ui/error', {'error_message': 'no response to claim_request_token'})
+#            return utils.render_template(request, 'ui/error', {'error_message': 'no response to claim_request_token'})
         
         response_status = resp['status']
         if response_status != '200':
             response_message = content or 'bad response to claim_request_token'
-            return utils.render_template('ui/error', {'error_status': response_status, 'error_message': ErrorStr(response_message)})
+            return utils.render_template(request, 'ui/error', {'error_status': response_status, 'error_message': ErrorStr(response_message)})
         
         # get info on the request token
         resp, app_info = api.request_token_info(reqtoken_id=request_token)
@@ -1127,7 +1129,7 @@ def authorize(request):
             
             # render a template if we have a callback and thus assume the request does not come from chrome UI
             request.session['oauth_callback'] = callback_url
-            return utils.render_template('ui/authorize_record', {'REQUEST_TOKEN': request_token,
+            return utils.render_template(request, 'ui/authorize_record', {'REQUEST_TOKEN': request_token,
                                                                       'CALLBACK_URL': callback_url,
                                                                          'RECORD_ID': record_id,
                                                                              'TITLE': title})
@@ -1138,7 +1140,7 @@ def authorize(request):
             return _approve_and_redirect(request, request_token, record_id, carenet_id)
             
         else:
-            return utils.render_template('ui/error', {'error_message': 'bad value for kind parameter'})
+            return utils.render_template(request, 'ui/error', {'error_message': 'bad value for kind parameter'})
     
     
     # process POST -- authorize the given token for the given record_id

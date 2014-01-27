@@ -6,7 +6,7 @@
 
 {% block main %}
 	<!-- Authorization Form -->
-	<form method="post" action="/oauth/authorize">
+	<form method="post" action="/oauth/authorize">{% csrf_token %}
 		<input type="hidden" name="oauth_token" value="{{REQUEST_TOKEN}}" />
 		<input type="hidden" name="oauth_callback" value="{{CALLBACK_URL}}" />
 		<input type="hidden" name="record_id" value="{{RECORD_ID}}" />

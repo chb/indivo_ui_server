@@ -25,6 +25,7 @@ steal(
 	"./resources/js/date.js",
 	"./resources/js/utils.js",
 	"./resources/js/app-manager.js",
+	"./resources/js/jquery.cookie.js",
 	"./resources/css/bootstrap-custom.css",
 	// Models
 	'./models/account',

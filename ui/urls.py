@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns
 from django.conf import settings
 from ui.views import *
 from ui.utils import MethodDispatcher
