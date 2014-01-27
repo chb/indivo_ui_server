@@ -17,9 +17,9 @@
 		{% block title_prefix %}{% endblock %}
 		{% block title %}
 		{% if branding %}
-			{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+			{{ branding.pretty_name_prepend|safe }} {{ branding.pretty_name|safe }}
 		{% else %}
-			{% trans "Indivohealth" %}
+			{% trans "Indivo&trade;" %}
 		{% endif %}
 		{% endblock %}
 		{% block title_suffix %}{% endblock %}
@@ -41,9 +41,9 @@
 				<span class="welcome_prefix">{% block welcome_prefix %}{% endblock %}</span>
 				{% block welcome %}
 					{% if branding %}
-						{{ branding.pretty_name_prepend }} {{ branding.pretty_name }}
+						{{ branding.pretty_name_prepend|safe }} {{ branding.pretty_name|safe }}
 					{% else %}
-						{% trans "Indivohealth" %}<span id="front_site_trademark">&trade;</span>
+						{% trans "Indivo" %}<span id="front_site_trademark">&trade;</span>
 					{% endif %}
 				{% endblock %}
 				{% block welcome_suffix %}{% endblock %}

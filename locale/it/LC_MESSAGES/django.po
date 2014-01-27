@@ -166,7 +166,7 @@ msgstr ""
 #: templates/ui/forgot_password_3.html:23
 #: templates/ui/forgot_password_4.html:48 templates/ui/index.html:25
 #: templates/ui/index.html.py:40 templates/ui/login.html:50
-msgid "Indivohealth"
+msgid "Indivo"
 msgstr ""
 
 #: templates/ui/change_password.html:63
@@ -225,7 +225,7 @@ msgid ""
 msgstr ""
 
 #: templates/ui/footer_gpp.html:24
-msgid "Powered by the INDIVO Personally Controlled Health Record"
+msgid "Powered by the Indivo&trade; Personally Controlled Health Record"
 msgstr ""
 
 #: templates/ui/forgot_password.html:11 templates/ui/forgot_password_2.html:11
@@ -318,7 +318,7 @@ msgid "App Settings"
 msgstr ""
 
 #: templates/ui/login.html:16
-msgid "IndivoHealth Login"
+msgid "Indivo&trade; Login"
 msgstr ""
 
 #: templates/ui/login.html:28
@@ -368,7 +368,7 @@ msgstr ""
 #: ui/jmvc/ui/views/carenet/show.ejs:4
 msgid ""
 "\n"
-"Your Indivo record contains care networks. A care network is a\n"
+"Your Indivo&trade; record contains care networks. A care network is a\n"
 "place for you to share some of your health information with a\n"
 "subset of individuals you select. For example, the \"Family\" care\n"
 "network is where you might invite your loved ones to view most of\n"

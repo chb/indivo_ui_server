@@ -48,8 +48,8 @@ PASSWORD_RESET_REQUIRE_SECONDARY = True
 
 #  quick and dirty private labeling (optional)
 #BRANDING = {
-#   'short_name': 'indivo',
-#   'pretty_name': 'IndivoHealth&trade;',
+#   'short_name': 'Indivo&trade;',
+#   'pretty_name': 'Indivo&trade;',
 #   'pretty_name_prepend': '',
 #   'header_template': 'ui/header.html',
 #   'footer_template': 'ui/footer_sandbox.html',
