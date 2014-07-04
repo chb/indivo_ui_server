@@ -38,4 +38,4 @@ def _verify_surl(request):
 
 def document_access(request):
   _verify_surl(request)
-  return utils.render_template('widgets/document_access', copy.copy(request.GET))
+  return utils.render_template(request, 'widgets/document_access', copy.copy(request.GET))
