@@ -3,8 +3,11 @@
 # 2. through hardcoded URL routes in the file ref'd by ROOT_URLCONF
 
 SERVER_ROOT_DIR = '/web/indivo_ui_server'
-INDIVO_SERVER_LOCATION = 'http://localhost:8000'
 INDIVO_UI_SERVER_BASE = 'http://localhost:80'
+INDIVO_SERVER_LOCATION = 'http://localhost:8000'
+CONSUMER_KEY='chrome'
+CONSUMER_SECRET='chrome'
+SECRET_KEY = 'REPLACEMENOW'
 
 # we need to put absolute paths here for the UI server's template AND
 # each app's /jmvc/ directory otherwise the UI server will not load the jmvc
@@ -27,8 +30,6 @@ HIDE_HEALTHFEED = False
 HIDE_INBOX = False
 DISABLE_APP_SETTINGS = False
 HIDE_SHARING = False
-CONSUMER_KEY='chrome'
-CONSUMER_SECRET='chrome'
 ROOT_URLCONF = 'urls'
 
 # allow to signup via web?
@@ -41,7 +42,7 @@ REGISTRATION = {
 }
 
 # allow user to add records?
-ALLOW_ADDING_RECORDS = False
+ALLOW_ADDING_RECORDS = True
 
 # handling of user secrets
 PASSWORD_RESET_REQUIRE_SECONDARY = True
@@ -62,7 +63,7 @@ SESSION_COOKIE_NAME = "indivo_ui_sessionid"
 LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 USE_I18N = True
-SECRET_KEY = 'REPLACEMENOW'
+
 # don't forget comma here. just love the python tuple!
 TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',)
 MIDDLEWARE_CLASSES = (

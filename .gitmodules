@@ -3,7 +3,7 @@
 	url = git://github.com/chb/indivo_client_py.git
 [submodule "ui/jmvc/steal"]
 	path = ui/jmvc/steal
-	url = https://github.com/bitovi/steal.git
+	url = https://github.com/bitovi/legacy-steal.git
 [submodule "ui/jmvc/funcunit"]
 	path = ui/jmvc/funcunit
 	url = https://github.com/bitovi/funcunit.git

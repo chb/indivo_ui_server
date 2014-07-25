@@ -6,3 +6,6 @@ settings.py
 ui/jmvc/ui/docs*
 *#
 *.DS_Store
+
+env
+
