@@ -5,8 +5,6 @@ Ben Adida
 ben.adida@childrens.harvard.edu
 """
 
-
-from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext, loader
 from django.conf import settings
 from django import http
@@ -36,6 +34,12 @@ class MethodDispatcher(object):
         if view_func:
             return view_func(request, *args, **kwargs)
         return http.HttpResponseNotAllowed(self.methods.keys())
+
+class HttpResponseRedirect(http.HttpResponseRedirect):
+    allowed_schemes = ['http', 'https', 'ftp', 'indivo-framework']
+
+    def __init__(self, redirect_to):
+        super(HttpResponseRedirect, self).__init__(redirect_to)
 
 def is_valid_email(email):
     return True if email_re.match(email) else False
@@ -72,7 +76,7 @@ def render_template(request, template_name, vars, type="html"):
     else:
         mimetype = 'text/plain'
     
-    return HttpResponse(content, mimetype=mimetype)
+    return http.HttpResponse(content, mimetype=mimetype)
 
 
 def parse_account_xml(xml):

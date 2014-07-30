@@ -4,7 +4,7 @@ Views for Indivo JS UI
 """
 # pylint: disable=W0311, C0301
 # fixme: rm unused imports
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseServerError, Http404, HttpRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseServerError, Http404, HttpRequest
 from django.contrib.auth.models import User
 from django.core.exceptions import *
 from django.core.urlresolvers import reverse
@@ -24,6 +24,7 @@ from lxml import etree
 import urllib, re, copy
 
 import utils
+from utils import HttpResponseRedirect
 import urlparse
 from errors import ErrorStr
 
