@@ -1,17 +1,21 @@
 
 Indivo UI Server
 ================
-The Indivo UI Server is a reference implementation of an Indivo X UI app, which uses
-the Indivo API to present users with an interface in which to login and run user apps.
-For more information about the Indivo X Personally Controlled Health Record Platform,
-see <http://indivohealth.org>, or the technical documentation at 
-<http://docs.indivohealth.org>
 
-Installation instructions for all of Indivo X are at <http://wiki.chip.org/indivo>
+The Indivo UI Server is a reference implementation of an Indivo X UI app, which uses the Indivo API to present users with an interface in which to login and run user apps.
+For more information about the Indivo X Personally Controlled Health Record Platform, see <http://indivohealth.org>, or the technical documentation at 
+<http://docs.indivohealth.org>.
+
+We have install instructions for [Ubuntu][ubuntu], [RHEL 5][rhel5] and [OS X][osx].
+
+[ubuntu]: http://docs.indivohealth.org/en/2.0/howtos/install-ubuntu.html
+[rhel5]: http://docs.indivohealth.org/en/2.0/howtos/install-rhel5.html
+[osx]: http://docs.indivohealth.org/en/2.0/howtos/install-osx.html
+
 
 Licensing
 ---------
-Copyright (C) 2012 Children's Hospital Boston. All rights reserved.
+Copyright (C) 2014 Children's Hospital Boston. All rights reserved.
 
 This program is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation, 
@@ -28,53 +32,46 @@ repository, and at http://www.gnu.org/licenses/.
 Dependencies
 ------------
 
-  $ cat .gitmodules
+The UI server depends on a couple of third party modules, as defined in `.gitmodules`:
 
-and
-
-  $ git-submodule
-  
-to see status and versions.
+    $ cat .gitmodules
 
 Depends on `indivo_client_py` to interface with the Indivo backend server.
-
-Also depends on _parts_ of the javascriptMVC framework _but not the whole thing_!
+Also depends on _parts_ of the legacy version of the JavascriptMVC framework _but not the whole thing_!
 
 We use: "`steal`", "`jquerymx`", and "`funcunit`".
 
     [submodule "ui/jmvc/steal"]
       path = ui/jmvc/steal
-      url = http://github.com/jupiterjs/steal.git
+      url = http://github.com/bitovi/legacy-steal.git
     [submodule "ui/jmvc/funcunit"]
       path = ui/jmvc/funcunit
-      url = http://github.com/jupiterjs/funcunit.git
+      url = http://github.com/bitovi/funcunit.git
     [submodule "ui/jmvc/jquery"]
         path = ui/jmvc/jquery
         url = http://github.com/jupiterjs/jquerymx.git
 
 
-Installing Indivo UI Server
----------------------------
+Configuring Indivo UI Server
+----------------------------
 
-1. Copy settings.py.default to settings.py, and update a few key parameters
+Copy `settings.py.default` to `settings.py`, and update a few key parameters:
 
-2. Set `SERVER_ROOT_DIR` to the complete path to the location where you've
+1. Set `SERVER_ROOT_DIR` to the complete path to the location where you've
 installed `indivo_ui_server`, e.g. `/web/indivo_ui_server`
 
-3. Set `INDIVO_SERVER_LOCATION`, `CONSUMER_KEY`, `CONSUMER_SECRET` appropriately to
+2. Set `INDIVO_SERVER_LOCATION`, `CONSUMER_KEY`, `CONSUMER_SECRET` appropriately to
 match the Indivo Server's location and chrome credentials (check
 `utils/indivo_data.xml` BEFORE you `syncdb` on the server end).
 
-4. Set `SECRET_KEY` to a unique value, and don't share it with anybody
-
+3. Set `SECRET_KEY` to a unique value, and don't share it with anybody.
 
 
 Included Apps
 -------------
 
-Allergies, labs, medications, problems are included and in various
-states of usability. The Problems app can input data while the
-others are read-only.
+Allergies, labs, medications, problems are included and in various states of usability.
+The Problems app can input data while the others are read-only.
 
 
 App Size Conventions (IMPORTANT!)
@@ -126,7 +123,7 @@ in the correct order. This requires:
 
 - A non-login protected page that loads the UI's entire set of JS files
 
-First, you ui.js file **MUST** include all the plugins, resources,
+First, your `ui.js` file **MUST** include all the plugins, resources,
 models, and controllers that you want to compress including any
 additional libraries you have added.
 
