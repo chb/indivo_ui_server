@@ -3,7 +3,6 @@ Widget Views for Indivo JS UI
 """
 
 # todo: rm unused
-from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpRequest
 from django.contrib.auth.models import User
 from django.core.exceptions import *
 from django.core.urlresolvers import reverse
